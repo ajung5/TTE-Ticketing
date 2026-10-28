@@ -40,7 +40,7 @@
             <section class="card"><h2>WhatsApp Tindak Lanjut</h2>
                 <p class="small muted">Pesan otomatis menyesuaikan layanan dan identitas verifikator. Kirim secara manual setelah memeriksa isinya.</p>
                 @php($followupNotification = $ticket->whatsappNotifications->firstWhere('event_type', 'followup'))
-                <form target="_blank" method="post" action="{{ route('tickets.whatsapp.followup', $ticket) }}">@csrf<button class="btn btn-wa full" type="submit">Buka WhatsApp Tindak Lanjut</button></form>
+                <form target="tte_whatsapp_web" method="post" action="{{ route('tickets.whatsapp.followup', $ticket) }}">@csrf<button class="btn btn-wa full" type="submit">Buka WhatsApp Tindak Lanjut</button></form>
                 @if($followupNotification?->opened_at)
                     <p class="muted small mt">Tautan WhatsApp dibuka: {{ $followupNotification->opened_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</p>
                     @if($followupNotification->confirmed_at)
@@ -56,7 +56,7 @@
             <section class="card"><h2>Notifikasi WhatsApp</h2><p class="small muted">Pesan dibuat otomatis sesuai layanan dan verifikator. Pengiriman tetap manual.</p>
                 <div class="message-preview">{{ $waMessage }}</div>
                 @php($notification = $ticket->whatsappNotifications->firstWhere('event_type', 'completed'))
-                <form target="_blank" method="post" action="{{ route('tickets.whatsapp', $ticket) }}">@csrf<button class="btn btn-wa full" type="submit">Buka WhatsApp dengan Pesan</button></form>
+                <form target="tte_whatsapp_web" method="post" action="{{ route('tickets.whatsapp', $ticket) }}">@csrf<button class="btn btn-wa full" type="submit">Buka WhatsApp dengan Pesan</button></form>
                 @if($notification?->opened_at)
                     <p class="muted small mt">WhatsApp dibuka: {{ $notification->opened_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</p>
                     @if($notification->confirmed_at)

@@ -50,6 +50,6 @@ class WhatsAppMessage
 
     public function url(Ticket $ticket, string $message): string
     {
-        return 'https://wa.me/'.$ticket->no_wa.'?text='.rawurlencode($message);
+        return 'https://web.whatsapp.com/send?phone='.$ticket->no_wa.'&text='.rawurlencode($message);
     }
 }
