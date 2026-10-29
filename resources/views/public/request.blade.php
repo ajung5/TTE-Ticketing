@@ -66,10 +66,6 @@
                         <label for="jabatan">Jabatan *<input id="jabatan" name="jabatan" maxlength="180" required
                                 value="{{ old('jabatan') }}" placeholder="Jabatan saat ini"></label>
                     </div>
-                    <label for="keterangan">Keterangan Tambahan (opsional)
-                        <textarea name="keterangan" id="keterangan" rows="3" maxlength="2000"
-                            placeholder="Jelaskan kebutuhan atau kendala. Jangan masukkan OTP, password, atau passphrase.">{{ old('keterangan') }}</textarea>
-                    </label>
                     <div class="consent-section">
                         <h2>Persetujuan Pemrosesan Data</h2>
                         <p class="small muted">Data identitas, kontak, dan tanda tangan persetujuan akan diproses untuk
@@ -99,18 +95,6 @@
                         →</button>
                 </form>
             </section>
-            <aside class="stack public-aside">
-                <section class="card">
-                    <div class="eyebrow">ALUR LAYANAN</div>
-                    <h2>Setelah Formulir Dikirim</h2>
-                    <ol class="public-steps">
-                        <li>Masukkan NIK, sistem mencocokkan email dinas.</li>
-                        <li>Lengkapi data, persetujuan, dan tanda tangan.</li>
-                        <li>Permohonan menerima nomor tiket.</li>
-                        <li>Verifikator memeriksa identitas dan nomor WhatsApp pada AMS BSrE.</li>
-                    </ol>
-                </section>
-            </aside>
         </div>
     </div>
     <div class="directory-modal" id="email-help-modal" hidden role="dialog" aria-modal="true"
