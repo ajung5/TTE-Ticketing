@@ -9,20 +9,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
-class ZohoWebhookController extends Controller
-{
-    public function store(Request $request)
-    {
+class ZohoWebhookController extends Controller {
+    public function store(Request $request) {
         $secret = config('tte.zoho_webhook_secret');
-        if (! is_string($secret) || strlen($secret) < 24) {
+        if (!is_string($secret) || strlen($secret) < 24) {
             return response()->json(['message' => 'Integrasi belum dikonfigurasi.'], 503);
         }
-        if (! hash_equals($secret, (string) $request->header('X-Zoho-Webhook-Secret', ''))) {
+        if (!hash_equals($secret, (string) $request->header('X-Zoho-Webhook-Secret', ''))) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         // Hanya menerima JSON. Map label field Zoho ke key ini pada pengaturan webhook.
-        if (! $request->isJson()) {
+        if (!$request->isJson()) {
             return response()->json(['message' => 'Content-Type harus application/json'], 415);
         }
         $data = $request->validate([
@@ -35,13 +33,13 @@ class ZohoWebhookController extends Controller
             'opd' => ['nullable', 'string', 'max:180'],
             'jabatan' => ['nullable', 'string', 'max:180'],
             'email' => ['nullable', 'email', 'max:180'],
-            'keterangan' => ['nullable', 'string', 'max:2000'],
+            'keterangan' => ['nullable', 'string', 'max:2000']
         ]);
         $phone = preg_replace('/\D+/', '', $data['no_wa']);
         if (Str::startsWith($phone, '0')) {
-            $phone = '62'.substr($phone, 1);
+            $phone = '62' . substr($phone, 1);
         }
-        if (! preg_match('/^62[0-9]{8,13}$/', $phone)) {
+        if (!preg_match('/^62[0-9]{8,13}$/', $phone)) {
             return response()->json(['message' => 'Nomor WhatsApp tidak valid (Indonesia).'], 422);
         }
 
@@ -67,15 +65,21 @@ class ZohoWebhookController extends Controller
                     'email' => $data['email'] ?? null,
                     'keterangan' => $data['keterangan'] ?? null,
                     'status' => 'Open',
-                    'source' => 'zoho',
+                    'source' => 'zoho'
                 ]);
-                $ticket->update(['ticket_number' => 'TTE-'.now('Asia/Jakarta')->format('Ymd').'-'.str_pad((string) $ticket->id, 6, '0', STR_PAD_LEFT)]);
+                $ticket->update([
+                    'ticket_number' =>
+                        'TTE-' .
+                        now('Asia/Jakarta')->format('Ymd') .
+                        '-' .
+                        str_pad((string) $ticket->id, 6, '0', STR_PAD_LEFT)
+                ]);
                 return $ticket;
             });
         } catch (QueryException $e) {
             // Kondisi bersamaan: unique external_submission_id menjamin idempoten.
             $existing = Ticket::where('external_submission_id', $externalId)->first();
-            if (! $existing) {
+            if (!$existing) {
                 throw $e;
             }
             $this->log($externalId, 'duplicate', $digest);
@@ -86,13 +90,13 @@ class ZohoWebhookController extends Controller
         return response()->json(['ticket_number' => $ticket->ticket_number, 'duplicate' => false], 201);
     }
 
-    private function log(string $externalId, string $outcome, string $digest): void
-    {
+    private function log(string $externalId, string $outcome, string $digest): void {
         DB::table('webhook_events')->insert([
             'external_submission_id' => $externalId,
             'outcome' => $outcome,
             'payload_sha256' => $digest,
-            'created_at' => now(), 'updated_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now()
         ]);
     }
 }

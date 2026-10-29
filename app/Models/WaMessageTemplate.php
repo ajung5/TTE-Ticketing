@@ -4,20 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WaMessageTemplate extends Model
-{
+class WaMessageTemplate extends Model {
     protected $fillable = ['service_code', 'event_type', 'body', 'updated_by'];
 
     public const SERVICES = [
         'Reset Passphrase' => 'Reset Passphrase',
         'Pembaruan' => 'Pembaruan Sertifikat Elektronik',
-        'Pendaftaran' => 'Pendaftaran TTE Baru',
+        'Pendaftaran' => 'Pendaftaran TTE Baru'
     ];
 
     public const EVENTS = [
         'unverified' => 'Nomor WA belum terverifikasi',
         'followup' => 'Tindak lanjut',
-        'completed' => 'Selesai',
+        'completed' => 'Selesai'
     ];
 
     public const VARIABLE_DESCRIPTIONS = [
@@ -34,13 +33,23 @@ class WaMessageTemplate extends Model
         '{status_verifikasi_wa}' => 'Status pemeriksaan nomor pada AMS BSrE',
         '{nama_verifikator}' => 'Nama petugas',
         '{inisial_verifikator}' => 'Inisial petugas',
-        '{nama_instansi}' => 'Nama instansi/layanan',
+        '{nama_instansi}' => 'Nama instansi/layanan'
     ];
 
     public const PLACEHOLDERS = [
-        '{nama_pemohon}', '{nomor_tiket}', '{layanan}', '{email}', '{nik}',
-        '{nip}', '{nomor_wa}', '{jabatan}', '{opd}', '{keterangan}',
-        '{status_verifikasi_wa}', '{nama_verifikator}', '{inisial_verifikator}',
-        '{nama_instansi}',
+        '{nama_pemohon}',
+        '{nomor_tiket}',
+        '{layanan}',
+        '{email}',
+        '{nik}',
+        '{nip}',
+        '{nomor_wa}',
+        '{jabatan}',
+        '{opd}',
+        '{keterangan}',
+        '{status_verifikasi_wa}',
+        '{nama_verifikator}',
+        '{inisial_verifikator}',
+        '{nama_instansi}'
     ];
 }

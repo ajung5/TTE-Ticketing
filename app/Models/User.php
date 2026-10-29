@@ -11,25 +11,21 @@ use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'password', 'role', 'initials'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
-{
+class User extends Authenticatable {
     use HasFactory, Notifiable;
 
-    public function isAdmin(): bool
-    {
+    public function isAdmin(): bool {
         return $this->role === 'admin';
     }
 
-    public function isVerifier(): bool
-    {
+    public function isVerifier(): bool {
         return $this->role === 'verifier';
     }
 
-    protected function casts(): array
-    {
+    protected function casts(): array {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password' => 'hashed'
         ];
     }
 }

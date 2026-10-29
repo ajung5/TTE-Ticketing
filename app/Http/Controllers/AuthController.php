@@ -9,26 +9,24 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
-class AuthController extends Controller
-{
-    public function form()
-    {
+class AuthController extends Controller {
+    public function form() {
         return view('auth.login');
     }
 
-    public function login(Request $request)
-    {
+    public function login(Request $request) {
         $credentials = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string']]);
-        if (! Auth::attempt($credentials)) {
-            return back()->withErrors(['email' => 'Email atau password tidak sesuai.'])->onlyInput('email');
+        if (!Auth::attempt($credentials)) {
+            return back()
+                ->withErrors(['email' => 'Email atau password tidak sesuai.'])
+                ->onlyInput('email');
         }
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));
     }
 
-    public function logout(Request $request)
-    {
+    public function logout(Request $request) {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -36,36 +34,36 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
-    public function profile(Request $request)
-    {
+    public function profile(Request $request) {
         return view('auth.profile', ['user' => $request->user()]);
     }
 
-    public function changePassword(Request $request)
-    {
+    public function changePassword(Request $request) {
         $data = $request->validate([
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()],
+            'password' => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()]
         ]);
-        $request->user()->forceFill([
-            'password' => Hash::make($data['password']),
-            'remember_token' => Str::random(60),
-        ])->save();
+        $request
+            ->user()
+            ->forceFill([
+                'password' => Hash::make($data['password']),
+                'remember_token' => Str::random(60)
+            ])
+            ->save();
         $request->session()->regenerate();
 
         return back()->with('success', 'Password Anda telah diperbarui.');
     }
 
-    public function resetForm(Request $request, string $token)
-    {
+    public function resetForm(Request $request, string $token) {
         return view('auth.reset-password', ['token' => $token, 'email' => $request->query('email', '')]);
     }
 
-    public function reset(Request $request)
-    {
+    public function reset(Request $request) {
         $data = $request->validate([
-            'token' => ['required', 'string'], 'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()],
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()]
         ]);
         $status = Password::reset($data, function ($user, $password) {
             $user->forceFill(['password' => Hash::make($password), 'remember_token' => Str::random(60)])->save();
