@@ -8,19 +8,17 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('seeds twelve default WhatsApp templates through the migrations', function () {
-    expect(WaMessageTemplate::count())->toBe(12);
-    foreach (['Reset Passphrase', 'Pembaruan', 'Pendaftaran'] as $service) {
-        foreach (['unverified', 'followup', 'inbox_reminder', 'completed'] as $event) {
-            $this->assertDatabaseHas('wa_message_templates', ['service_code' => $service, 'event_type' => $event]);
-        }
+it('shows six active presets and preserves historical templates', function () {
+    expect(WaMessageTemplate::EVENTS)->toHaveCount(6);
+    foreach (WaMessageTemplate::TEMPLATE_SERVICE_CODES as $event => $service) {
+        $this->assertDatabaseHas('wa_message_templates', ['service_code' => $service, 'event_type' => $event]);
     }
 });
 
 it('only lets admins view and update message presets', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $verifier = User::factory()->create(['role' => 'verifier']);
-    $template = WaMessageTemplate::firstOrFail();
+    $template = WaMessageTemplate::where('service_code','*')->where('event_type','unverified')->firstOrFail();
     $body = 'Yth. {nama_pemohon}, tiket {nomor_tiket} ditangani oleh {nama_verifikator}. Silakan pantau email resmi.';
 
     $this->get(route('admin.templates.index'))->assertRedirect(route('login'));
@@ -43,7 +41,7 @@ it('only lets admins view and update message presets', function () {
 
 it('rejects unknown or missing required placeholders', function () {
     $admin = User::factory()->create(['role' => 'admin']);
-    $template = WaMessageTemplate::firstOrFail();
+    $template = WaMessageTemplate::where('service_code','*')->where('event_type','unverified')->firstOrFail();
     $this->actingAs($admin)
         ->put(route('admin.templates.update', $template), [
             'body' => 'Nama {nama_pemohon}, nomor {nomor_tiket}. Pesan panjang tanpa nama verifikator.'
@@ -58,7 +56,7 @@ it('rejects unknown or missing required placeholders', function () {
 
 it('renders the admin preset using ticket and verifier data', function () {
     $verifier = User::factory()->create(['role' => 'verifier', 'name' => 'Petugas Uji', 'initials' => 'PU']);
-    $template = WaMessageTemplate::where('service_code', 'Pembaruan')->where('event_type', 'completed')->firstOrFail();
+    $template = WaMessageTemplate::where('service_code', '*')->where('event_type', 'completed')->firstOrFail();
     $template->update([
         'body' =>
             'Halo {nama_pemohon}; tiket {nomor_tiket}; {layanan}; petugas {nama_verifikator} ({inisial_verifikator}); {nama_instansi}.'

@@ -36,14 +36,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/tickets/{ticket}/claim', [TicketController::class, 'claim'])->name('tickets.claim');
     Route::post('/tickets/{ticket}/release', [TicketController::class, 'release'])->name('tickets.release');
     Route::post('/tickets/{ticket}/verify-whatsapp', [TicketController::class, 'verifyWhatsApp'])->name('tickets.verify-whatsapp');
-    Route::post('/tickets/{ticket}/whatsapp-unverified', [TicketController::class, 'openUnverifiedWhatsApp'])->name('tickets.whatsapp.unverified');
-    Route::post('/tickets/{ticket}/whatsapp-unverified-confirm', [TicketController::class, 'confirmUnverifiedWhatsApp'])->name('tickets.whatsapp.unverified.confirm');
+    Route::post('/tickets/{ticket}/whatsapp-layanan', [TicketController::class, 'openServiceWhatsApp'])->name('tickets.whatsapp.service');
+    Route::post('/tickets/{ticket}/whatsapp-layanan-confirm', [TicketController::class, 'confirmServiceWhatsApp'])->name('tickets.whatsapp.service.confirm');
     Route::post('/tickets/{ticket}/note', [TicketController::class, 'note'])->name('tickets.note');
     Route::post('/tickets/{ticket}/complete', [TicketController::class, 'complete'])->name('tickets.complete');
-    Route::post('/tickets/{ticket}/whatsapp-followup', [TicketController::class, 'openFollowUpWhatsApp'])->name('tickets.whatsapp.followup');
-    Route::post('/tickets/{ticket}/whatsapp-followup-confirm', [TicketController::class, 'confirmFollowUpWhatsApp'])->name('tickets.whatsapp.followup.confirm');
-    Route::post('/tickets/{ticket}/whatsapp-inbox', [TicketController::class, 'openInboxReminderWhatsApp'])->name('tickets.whatsapp.inbox');
-    Route::post('/tickets/{ticket}/whatsapp-inbox-confirm', [TicketController::class, 'confirmInboxReminderWhatsApp'])->name('tickets.whatsapp.inbox.confirm');
     Route::post('/tickets/{ticket}/whatsapp', [TicketController::class, 'openWhatsApp'])->name('tickets.whatsapp');
     Route::post('/tickets/{ticket}/whatsapp-confirm', [TicketController::class, 'confirmWhatsApp'])->name('tickets.whatsapp.confirm');
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');

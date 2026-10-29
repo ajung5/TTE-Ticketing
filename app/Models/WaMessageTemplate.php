@@ -13,11 +13,23 @@ class WaMessageTemplate extends Model {
         'Pendaftaran' => 'Pendaftaran TTE Baru'
     ];
 
+    // Enam jenis notifikasi yang aktif. Template umum memakai service_code '*'.
     public const EVENTS = [
-        'unverified' => 'Nomor WA belum terverifikasi',
-        'followup' => 'Tindak lanjut',
-        'inbox_reminder' => 'Pengingat cek inbox email',
-        'completed' => 'Selesai'
+        'unverified' => 'Nomor WA Belum Terverifikasi',
+        'reset' => 'Reset Passphrase',
+        'renewal' => 'Pembaruan Sertifikat',
+        'registration' => 'Pendaftaran Diproses',
+        'completed' => 'Selesai + Survei',
+        'unregistered' => 'User Belum Terdaftar',
+    ];
+
+    public const TEMPLATE_SERVICE_CODES = [
+        'unverified' => '*',
+        'reset' => 'Reset Passphrase',
+        'renewal' => 'Pembaruan',
+        'registration' => 'Pendaftaran',
+        'completed' => '*',
+        'unregistered' => '*',
     ];
 
     public const VARIABLE_DESCRIPTIONS = [

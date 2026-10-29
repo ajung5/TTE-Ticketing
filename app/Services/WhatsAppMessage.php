@@ -7,21 +7,16 @@ use App\Models\WaMessageTemplate;
 use Illuminate\Support\Facades\URL;
 
 class WhatsAppMessage {
-    public function forUnverifiedTicket(Ticket $ticket): string {
-        return $this->render($ticket, 'unverified');
-    }
-
-    public function forFollowUpTicket(Ticket $ticket): string {
-        return $this->render($ticket, 'followup');
-    }
-
-    public function forInboxReminderTicket(Ticket $ticket): string {
-        return $this->render($ticket, 'inbox_reminder');
+    public function forServiceTicket(Ticket $ticket, string $event): string {
+        if (!array_key_exists($event, WaMessageTemplate::TEMPLATE_SERVICE_CODES) || $event === 'completed') {
+            throw new \InvalidArgumentException('Jenis notifikasi tidak valid.');
+        }
+        return $this->render($ticket, $event);
     }
 
     public function forCompletedTicket(Ticket $ticket): string {
         $message = $this->render($ticket, 'completed');
-        // Legacy/admin template without {survey_url} must still include a survey invitation.
+        // Tautan survei harus ada walaupun preset admin lama tidak memuat {survey_url}.
         if (!str_contains($message, '/survei/'.$ticket->getKey().'?')) {
             $message .= "\n\nSurvei Kepuasan Layanan (30 hari):\n".$this->surveyUrl($ticket);
         }
@@ -37,25 +32,26 @@ class WhatsAppMessage {
     }
 
     private function render(Ticket $ticket, string $event): string {
+        $serviceCode = WaMessageTemplate::TEMPLATE_SERVICE_CODES[$event];
         $template = WaMessageTemplate::query()
-            ->where('service_code', $ticket->layanan)
+            ->where('service_code', $serviceCode)
             ->where('event_type', $event)
             ->first();
 
-        if (!$template) {
-            // Fallback ketika jenis layanan belum memiliki template (misalnya data legacy).
-            $templateBody =
-                "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan {layanan} dengan nomor tiket {nomor_tiket} " .
-                "sedang ditangani oleh layanan TTE.\n\nPetugas: {nama_verifikator} ({inisial_verifikator})\n\n{nama_instansi}";
-        } else {
-            $templateBody = $template->body;
-        }
-
+        $fallback = [
+            'unverified' => "Yth. Bapak/Ibu {nama_pemohon},\n\nNomor WA Anda belum terverifikasi pada AMS BSrE. Mohon lakukan verifikasi sebelum layanan dilanjutkan.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
+            'unregistered' => "Yth. Bapak/Ibu {nama_pemohon},\n\nBerdasarkan pemeriksaan AMS BSrE, sertifikat elektronik aktif belum ditemukan untuk NIK Anda. Silakan hubungi petugas untuk tindak lanjut.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
+            'reset' => "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Reset Passphrase nomor tiket {nomor_tiket} telah diproses. Silakan periksa Inbox/Spam pada email dinas {email} untuk instruksi resmi BSrE.\nPetugas: {nama_verifikator}",
+            'renewal' => "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Pembaruan Sertifikat Elektronik nomor tiket {nomor_tiket} telah diproses. Silakan periksa Inbox/Spam email dinas {email} untuk informasi pembaruan BSrE.\nPetugas: {nama_verifikator}",
+            'registration' => "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Pendaftaran TTE nomor tiket {nomor_tiket} telah diproses. Mohon tunggu informasi tahapan berikutnya.\nPetugas: {nama_verifikator}",
+            'completed' => "Yth. Bapak/Ibu {nama_pemohon},\n\nPenanganan permohonan {layanan} nomor tiket {nomor_tiket} telah selesai. Mohon mengisi survei kepuasan melalui {survey_url}.\nPetugas: {nama_verifikator}",
+        ];
+        $templateBody = $template?->body ?? $fallback[$event];
         $verifier = $ticket->claimant;
 
         return strtr($templateBody, [
             '{nama_pemohon}' => (string) $ticket->nama_user,
-            '{nomor_tiket}' => (string) ($ticket->ticket_number ?? '#' . $ticket->id),
+            '{nomor_tiket}' => (string) ($ticket->ticket_number ?? '#'.$ticket->id),
             '{layanan}' => $ticket->service_label,
             '{nama_verifikator}' => (string) ($verifier?->name ?? 'Tim Verifikator TTE'),
             '{inisial_verifikator}' => (string) ($verifier?->initials ?: '-'),
@@ -68,7 +64,7 @@ class WhatsAppMessage {
             '{jabatan}' => (string) ($ticket->jabatan ?: '-'),
             '{keterangan}' => (string) ($ticket->keterangan ?: '-'),
             '{status_verifikasi_wa}' => $ticket->wa_verification_label,
-            '{survey_url}' => $event === 'completed' ? $this->surveyUrl($ticket) : '-'
+            '{survey_url}' => $event === 'completed' ? $this->surveyUrl($ticket) : '-',
         ]);
     }
 

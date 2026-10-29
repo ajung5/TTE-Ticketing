@@ -52,16 +52,18 @@ it('prevents other verifiers from completing a claimed ticket', function () {
         ->assertForbidden();
 });
 
-it('requires a resolution note and records completion', function () {
+it('allows completion without a resolution note after AMS check and notification', function () {
     $user = User::factory()->create(['role' => 'verifier']);
     $ticket = newTteTicket(['status' => 'In Progress', 'claimed_by' => $user->id]);
-    $this->actingAs($user)
-        ->post(route('tickets.complete', $ticket), ['resolution_note' => 'Pendek'])
-        ->assertSessionHasErrors();
-    $this->actingAs($user)
-        ->post(route('tickets.complete', $ticket), ['resolution_note' => 'Pekerjaan telah diselesaikan dan dicek.'])
-        ->assertRedirect();
+    $this->actingAs($user)->post(route('tickets.complete', $ticket))->assertStatus(409);
+    $this->actingAs($user)->post(route('tickets.verify-whatsapp', $ticket), [
+        'certificate_status' => 'active', 'wa_verification_status' => 'verified',
+    ])->assertRedirect();
+    $this->actingAs($user)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
+    $this->actingAs($user)->post(route('tickets.whatsapp.service.confirm', $ticket))->assertRedirect();
+    $this->actingAs($user)->post(route('tickets.complete', $ticket))->assertRedirect();
     expect($ticket->fresh()->status)->toBe('Done');
+    expect($ticket->fresh()->resolution_note)->toBeNull();
     $this->assertDatabaseHas('ticket_activities', ['ticket_id' => $ticket->id, 'action' => 'completed']);
 });
 
@@ -118,8 +120,6 @@ it('does not mark a WhatsApp message sent until manually confirmed', function ()
         'completed_at' => now(),
         'resolution_note' => 'Proses selesai'
     ]);
-    $this->actingAs($verifier)->post(route('tickets.whatsapp.inbox', $ticket))->assertRedirect();
-    $this->actingAs($verifier)->post(route('tickets.whatsapp.inbox.confirm', $ticket))->assertRedirect();
     $this->actingAs($verifier)->post(route('tickets.whatsapp', $ticket))->assertRedirect();
     $this->assertDatabaseHas('wa_notifications', [
         'ticket_id' => $ticket->id,
@@ -191,27 +191,11 @@ it('requires webhook content type JSON', function () {
     )->assertStatus(415);
 });
 
-it('offers a follow-up WhatsApp only after recording an actual follow-up', function () {
-    $verifier = User::factory()->create(['role' => 'verifier', 'initials' => 'AC']);
-    $ticket = newTteTicket([
-        'status' => 'In Progress',
-        'claimed_by' => $verifier->id,
-        'ticket_number' => 'TTE-TEST-000003'
-    ]);
-    $this->actingAs($verifier)->post(route('tickets.whatsapp.followup', $ticket))->assertStatus(409);
-    $this->actingAs($verifier)
-        ->post(route('tickets.note', $ticket), ['note' => 'Identitas pemohon diverifikasi dengan SOP.'])
-        ->assertRedirect();
-    $this->actingAs($verifier)->post(route('tickets.whatsapp.followup', $ticket))->assertRedirect();
-    $this->assertDatabaseHas('wa_notifications', [
-        'ticket_id' => $ticket->id,
-        'event_type' => 'followup',
-        'confirmed_at' => null
-    ]);
-    $this->actingAs($verifier)->post(route('tickets.whatsapp.followup.confirm', $ticket))->assertRedirect();
-    $this->assertDatabaseMissing('wa_notifications', [
-        'ticket_id' => $ticket->id,
-        'event_type' => 'followup',
-        'confirmed_at' => null
-    ]);
+it('treats notes as optional without creating extra WhatsApp notification types', function () {
+    $verifier = User::factory()->create(['role' => 'verifier']);
+    $ticket = newTteTicket(['status' => 'In Progress', 'claimed_by' => $verifier->id]);
+    $this->actingAs($verifier)->post(route('tickets.note', $ticket), [])->assertRedirect();
+    $this->assertDatabaseMissing('ticket_activities', ['ticket_id' => $ticket->id, 'action' => 'note']);
+    $this->actingAs($verifier)->post(route('tickets.note', $ticket), ['note' => 'Pemeriksaan berlangsung'])->assertRedirect();
+    $this->assertDatabaseHas('ticket_activities', ['ticket_id' => $ticket->id, 'action' => 'note']);
 });
