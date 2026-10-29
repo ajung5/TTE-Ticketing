@@ -24,6 +24,8 @@
                     @if (auth()->user()->isAdmin())
                         <a class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                             href="{{ route('admin.dashboard') }}"><span class="nav-symbol">▦</span> Statistik Layanan</a>
+                        <a class="nav-item {{ request()->routeIs('admin.surveys.*') ? 'active' : '' }}"
+                            href="{{ route('admin.surveys.index') }}"><span class="nav-symbol">▤</span> Hasil Survei</a>
                         <a class="nav-item {{ request()->routeIs('admin.templates.*') ? 'active' : '' }}"
                             href="{{ route('admin.templates.index') }}"><span class="nav-symbol">✉</span> Preset
                             WhatsApp</a>
