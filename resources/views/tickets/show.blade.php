@@ -38,8 +38,14 @@
                     </div>
                     <div>
                         <div class="field-name">NIK</div>
-                        <div class="field-value">{{ $ticket->masked_nik }} <span class="small muted">(tersamarkan)</span>
-                        </div>
+                        @if ($ticket->claimed_by !== null && $ticket->claimed_by === auth()->id())
+                            <div class="field-value">{{ $ticket->nik ?: '-' }}</div>
+                        @else
+                            <div class="field-value">{{ $ticket->masked_nik }}</div>
+                            @if ($ticket->status === 'Open' && $ticket->nik)
+                                <div class="small muted">Ambil tiket untuk melihat NIK lengkap.</div>
+                            @endif
+                        @endif
                     </div>
                     <div>
                         <div class="field-name">NIP</div>
@@ -97,7 +103,7 @@
                     @forelse($ticket->activities as $entry)
                         <div class="timeline-item">
                             <div>
-                                <strong>{{ match ($entry->action) {'claimed' => 'Tiket diambil','released' => 'Tiket dilepas','note' => 'Catatan tindak lanjut','completed' => 'Tiket diselesaikan','wa_confirmed' => 'WhatsApp penyelesaian dikonfirmasi','wa_followup_confirmed' => 'WhatsApp tindak lanjut dikonfirmasi','wa_verified' => 'Nomor WA terverifikasi di AMS','wa_unverified' => 'Nomor WA belum terverifikasi di AMS','wa_unverified_confirmed' => 'Informasi WA belum terverifikasi dikonfirmasi',default => $entry->action} }}</strong>
+                                <strong>{{ match ($entry->action) {'claimed' => 'Tiket diambil','released' => 'Tiket dilepas','note' => 'Catatan tindak lanjut','completed' => 'Tiket diselesaikan','wa_confirmed' => 'WhatsApp penyelesaian dikonfirmasi','wa_inbox_confirmed' => 'Pengingat cek inbox email dikonfirmasi','wa_followup_confirmed' => 'WhatsApp tindak lanjut dikonfirmasi','wa_verified' => 'Nomor WA terverifikasi di AMS','wa_unverified' => 'Nomor WA belum terverifikasi di AMS','wa_unverified_confirmed' => 'Informasi WA belum terverifikasi dikonfirmasi',default => $entry->action} }}</strong>
                                 <div class="small muted">{{ $entry->actor?->name ?? 'Sistem' }} ·
                                     {{ $entry->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</div>
                             </div>
@@ -269,6 +275,39 @@
                     <p class="small muted mt">Menyalin atau membuka chat bukan bukti pesan diterima.</p>
                 </section>
             @endif
+            @if ($ticket->status === 'Done' && $inboxReminderMessage)
+                @php($inboxNotification = $ticket->whatsappNotifications->firstWhere('event_type', 'inbox_reminder'))
+                <section class="card whatsapp-card">
+                    <div class="section-heading">
+                        <div>
+                            <div class="eyebrow">TAHAP 1 / SEBELUM NOTIFIKASI SELESAI</div>
+                            <h2>Pengingat Cek Inbox Email</h2>
+                        </div><span class="wa-mark">WA</span>
+                    </div>
+                    <p class="small muted">Minta pemohon memeriksa kotak masuk dan folder Spam pada email dinasnya. Pesan ini tidak menyatakan bahwa BSrE sudah mengirim email.</p>
+                    <div class="message-box">
+                        <div class="message-toolbar"><strong>Pratinjau Pesan</strong><button type="button"
+                                class="btn btn-copy btn-small" data-copy-target="inbox-reminder-wa-message">Salin Pesan</button></div>
+                        <div id="inbox-reminder-wa-message" class="message-preview">{{ $inboxReminderMessage }}</div>
+                    </div>
+                    @unless ($ticket->source === 'simulated')
+                        <form target="tte_whatsapp_web" method="post" action="{{ route('tickets.whatsapp.inbox', $ticket) }}">
+                            @csrf<button type="submit" class="btn btn-wa full">Buka WhatsApp Pengingat Inbox ↗</button>
+                        </form>
+                        @if ($inboxNotification?->opened_at)
+                            <p class="small muted mt">Tautan dibuka: {{ $inboxNotification->opened_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</p>
+                            @if ($inboxNotification->confirmed_at)
+                                <div class="alert success mt">Petugas telah mengonfirmasi pengiriman pengingat cek inbox.</div>
+                            @else
+                                <form method="post" action="{{ route('tickets.whatsapp.inbox.confirm', $ticket) }}" class="mt">
+                                    @csrf<button type="submit" class="btn btn-outline full">Saya Sudah Mengirim Pengingat</button>
+                                </form>
+                            @endif
+                        @endif
+                    @endunless
+                    <p class="small muted mt">Konfirmasi ini dilakukan manual dan bukan bukti pesan telah diterima.</p>
+                </section>
+            @endif
             @if ($ticket->status === 'Done' && $waMessage)
                 @php($notification = $ticket->whatsappNotifications->firstWhere('event_type', 'completed'))
                 <section class="card whatsapp-card">
@@ -287,8 +326,12 @@
                         <div id="completed-wa-message" class="message-preview">{{ $waMessage }}</div>
                     </div>
                     @unless ($ticket->source === 'simulated')
-                        <form target="tte_whatsapp_web" method="post" action="{{ route('tickets.whatsapp', $ticket) }}">
-                            @csrf<button class="btn btn-wa full" type="submit">Buka WhatsApp Web ↗</button></form>
+                        @if ($ticket->whatsappNotifications->firstWhere('event_type', 'inbox_reminder')?->confirmed_at)
+                            <form target="tte_whatsapp_web" method="post" action="{{ route('tickets.whatsapp', $ticket) }}">
+                                @csrf<button class="btn btn-wa full" type="submit">Buka WhatsApp Selesai ↗</button></form>
+                        @else
+                            <div class="alert warn mt">Sebelum mengirim notifikasi selesai, kirim dan konfirmasi pengingat cek inbox email di kartu sebelumnya.</div>
+                        @endif
                         @if ($notification?->opened_at)
                             <p class="muted small mt">Tautan dibuka:
                                 {{ $notification->opened_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</p>

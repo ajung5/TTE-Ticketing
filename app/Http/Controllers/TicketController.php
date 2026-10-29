@@ -57,6 +57,10 @@ class TicketController extends Controller {
             $ticket->status === 'Done' && $ticket->wa_verification_status === 'verified'
                 ? $whatsapp->forCompletedTicket($ticket)
                 : null;
+        $inboxReminderMessage =
+            $ticket->status === 'Done' && $ticket->wa_verification_status === 'verified'
+                ? $whatsapp->forInboxReminderTicket($ticket)
+                : null;
         $unverifiedMessage =
             $ticket->status === 'In Progress' && $ticket->wa_verification_status === 'unverified'
                 ? $whatsapp->forUnverifiedTicket($ticket)
@@ -68,7 +72,7 @@ class TicketController extends Controller {
                 ? $whatsapp->forFollowUpTicket($ticket)
                 : null;
 
-        return view('tickets.show', compact('ticket', 'waMessage', 'followupMessage', 'unverifiedMessage'));
+        return view('tickets.show', compact('ticket', 'waMessage', 'followupMessage', 'unverifiedMessage', 'inboxReminderMessage'));
     }
 
     public function signature(Request $request, Ticket $ticket) {
@@ -281,10 +285,52 @@ class TicketController extends Controller {
         return back()->with('success', 'Konfirmasi tindak lanjut WhatsApp tercatat (manual).');
     }
 
+    /** Pesan pengecekan inbox wajib dikirim lebih dulu sebelum notifikasi selesai. */
+    public function openInboxReminderWhatsApp(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp) {
+        $this->owner($request, $ticket);
+        abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
+        abort_unless($ticket->status === 'Done' && $ticket->wa_verification_status === 'verified', 409);
+        $ticket->load('claimant');
+        $message = $whatsapp->forInboxReminderTicket($ticket);
+        WaNotification::updateOrCreate(
+            ['ticket_id' => $ticket->id, 'event_type' => 'inbox_reminder'],
+            ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now()]
+        );
+
+        return redirect()->away($whatsapp->url($ticket, $message));
+    }
+
+    public function confirmInboxReminderWhatsApp(Request $request, Ticket $ticket) {
+        $this->owner($request, $ticket);
+        abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
+        abort_unless($ticket->status === 'Done' && $ticket->wa_verification_status === 'verified', 409);
+        DB::transaction(function () use ($request, $ticket) {
+            $notification = WaNotification::where('ticket_id', $ticket->id)
+                ->where('event_type', 'inbox_reminder')->lockForUpdate()->first();
+            abort_unless($notification && $notification->opened_at, 409, 'Buka pengingat cek inbox terlebih dahulu.');
+            if (!$notification->confirmed_at) {
+                $notification->update(['confirmed_at' => now()]);
+                TicketActivity::create([
+                    'ticket_id' => $ticket->id,
+                    'actor_id' => $request->user()->id,
+                    'action' => 'wa_inbox_confirmed'
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Pengiriman pengingat cek inbox telah dicatat (konfirmasi manual).');
+    }
+
     public function openWhatsApp(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp) {
         $this->owner($request, $ticket);
         abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
         abort_unless($ticket->status === 'Done' && $ticket->wa_verification_status === 'verified', 409);
+        abort_unless(
+            WaNotification::where('ticket_id', $ticket->id)
+                ->where('event_type', 'inbox_reminder')->whereNotNull('confirmed_at')->exists(),
+            409,
+            'Kirim dan konfirmasi pesan pengingat cek inbox email terlebih dahulu.'
+        );
         $ticket->load('claimant');
         $message = $whatsapp->forCompletedTicket($ticket);
         WaNotification::updateOrCreate(
@@ -298,6 +344,12 @@ class TicketController extends Controller {
     public function confirmWhatsApp(Request $request, Ticket $ticket) {
         $this->owner($request, $ticket);
         abort_unless($ticket->status === 'Done' && $ticket->wa_verification_status === 'verified', 409);
+        abort_unless(
+            WaNotification::where('ticket_id', $ticket->id)
+                ->where('event_type', 'inbox_reminder')->whereNotNull('confirmed_at')->exists(),
+            409,
+            'Pengingat cek inbox email harus dikonfirmasi terlebih dahulu.'
+        );
         $notification = WaNotification::where('ticket_id', $ticket->id)->where('event_type', 'completed')->first();
         abort_unless($notification && $notification->opened_at, 409, 'Buka pesan WhatsApp terlebih dahulu.');
         if (!$notification->confirmed_at) {

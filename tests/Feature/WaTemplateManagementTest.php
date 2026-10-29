@@ -8,10 +8,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('seeds nine default WhatsApp templates through the migrations', function () {
-    expect(WaMessageTemplate::count())->toBe(9);
+it('seeds twelve default WhatsApp templates through the migrations', function () {
+    expect(WaMessageTemplate::count())->toBe(12);
     foreach (['Reset Passphrase', 'Pembaruan', 'Pendaftaran'] as $service) {
-        foreach (['unverified', 'followup', 'completed'] as $event) {
+        foreach (['unverified', 'followup', 'inbox_reminder', 'completed'] as $event) {
             $this->assertDatabaseHas('wa_message_templates', ['service_code' => $service, 'event_type' => $event]);
         }
     }

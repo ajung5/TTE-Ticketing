@@ -36,6 +36,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/tickets/{ticket}/complete', [TicketController::class, 'complete'])->name('tickets.complete');
     Route::post('/tickets/{ticket}/whatsapp-followup', [TicketController::class, 'openFollowUpWhatsApp'])->name('tickets.whatsapp.followup');
     Route::post('/tickets/{ticket}/whatsapp-followup-confirm', [TicketController::class, 'confirmFollowUpWhatsApp'])->name('tickets.whatsapp.followup.confirm');
+    Route::post('/tickets/{ticket}/whatsapp-inbox', [TicketController::class, 'openInboxReminderWhatsApp'])->name('tickets.whatsapp.inbox');
+    Route::post('/tickets/{ticket}/whatsapp-inbox-confirm', [TicketController::class, 'confirmInboxReminderWhatsApp'])->name('tickets.whatsapp.inbox.confirm');
     Route::post('/tickets/{ticket}/whatsapp', [TicketController::class, 'openWhatsApp'])->name('tickets.whatsapp');
     Route::post('/tickets/{ticket}/whatsapp-confirm', [TicketController::class, 'confirmWhatsApp'])->name('tickets.whatsapp.confirm');
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');

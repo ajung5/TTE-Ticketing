@@ -16,6 +16,7 @@ class WaMessageTemplate extends Model {
     public const EVENTS = [
         'unverified' => 'Nomor WA belum terverifikasi',
         'followup' => 'Tindak lanjut',
+        'inbox_reminder' => 'Pengingat cek inbox email',
         'completed' => 'Selesai'
     ];
 

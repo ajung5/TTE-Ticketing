@@ -118,10 +118,17 @@ it('does not mark a WhatsApp message sent until manually confirmed', function ()
         'completed_at' => now(),
         'resolution_note' => 'Proses selesai'
     ]);
+    $this->actingAs($verifier)->post(route('tickets.whatsapp.inbox', $ticket))->assertRedirect();
+    $this->actingAs($verifier)->post(route('tickets.whatsapp.inbox.confirm', $ticket))->assertRedirect();
     $this->actingAs($verifier)->post(route('tickets.whatsapp', $ticket))->assertRedirect();
-    $this->assertDatabaseHas('wa_notifications', ['ticket_id' => $ticket->id, 'confirmed_at' => null]);
+    $this->assertDatabaseHas('wa_notifications', [
+        'ticket_id' => $ticket->id,
+        'event_type' => 'completed',
+        'confirmed_at' => null,
+    ]);
     $this->actingAs($verifier)->post(route('tickets.whatsapp.confirm', $ticket))->assertRedirect();
-    expect(\App\Models\WaNotification::where('ticket_id', $ticket->id)->first()->confirmed_at)->not->toBeNull();
+    expect(\App\Models\WaNotification::where('ticket_id', $ticket->id)
+        ->where('event_type', 'completed')->first()->confirmed_at)->not->toBeNull();
 });
 
 it('allows a user to change their password with the correct current password', function () {

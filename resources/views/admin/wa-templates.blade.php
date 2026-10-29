@@ -11,7 +11,7 @@
             <div class="eyebrow">ADMIN / PENGATURAN</div>
             <h1>Preset Pesan WhatsApp</h1>
             <p class="muted">Kelola redaksi notifikasi untuk setiap layanan dan tahap penanganan.</p>
-        </div><span class="pill pill-blue">9 preset aktif</span>
+        </div><span class="pill pill-blue">12 preset aktif</span>
     </div>
     <div class="note-box notice-blue"><strong>Pesan tetap dikirim secara manual.</strong>
         <p class="small muted">Perubahan preset berlaku saat pesan dibuat berikutnya. Pesan yang sebelumnya tercatat di log
@@ -33,7 +33,7 @@
                             <div class="eyebrow">
                                 {{ $selected === 'Reset Passphrase' ? 'RESET PASSPHRASE' : ($selected === 'Pembaruan' ? 'RENEWAL' : 'PENDAFTARAN BARU') }}
                             </div>
-                            <h2>{{ $eventCode === 'completed' ? 'Pesan Setelah Selesai' : ($eventCode === 'unverified' ? 'Pesan WA Belum Terverifikasi' : 'Pesan Tindak Lanjut') }}
+                            <h2>{{ match ($eventCode) { 'completed' => 'Pesan Setelah Selesai', 'inbox_reminder' => 'Pengingat Cek Inbox Email', 'unverified' => 'Pesan WA Belum Terverifikasi', default => 'Pesan Tindak Lanjut' } }}
                             </h2>
                         </div><span
                             class="pill {{ $eventCode === 'completed' ? 'pill-green' : 'pill-blue' }}">{{ $eventLabel }}</span>

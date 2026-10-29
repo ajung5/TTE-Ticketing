@@ -109,12 +109,8 @@
         <h2 id="email-modal-title">Username Email Belum Tersedia</h2>
         <p>NIK yang dimasukkan belum ditemukan atau belum memiliki username Email Gov pada direktori. Silakan menghubungi Pengelola Email Dinas Kabupaten Subang sebelum mengirim permohonan.</p>
         <div class="directory-modal-actions">
-            @php
-                $contactWa = preg_replace('/\D+/', '', (string) config('email_directory.admin_contact_wa', ''));
-                if (str_starts_with($contactWa, '0')) $contactWa = '62'.substr($contactWa, 1);
-                $contactUrl = preg_match('/^628[0-9]{7,12}$/D', $contactWa) ? 'https://wa.me/'.$contactWa : null;
-            @endphp
-            @if ($contactUrl)
+            @php($contactUrl = config('email_directory.admin_contact_url'))
+            @if (is_string($contactUrl) && str_starts_with($contactUrl, 'https://wa.me/'))
                 <a href="{{ $contactUrl }}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Hubungi Pengelola via WhatsApp</a>
             @else
                 <span class="small muted">Nomor WhatsApp pengelola email belum dikonfigurasi. Silakan hubungi helpdesk internal.</span>

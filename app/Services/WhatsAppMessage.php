@@ -14,6 +14,10 @@ class WhatsAppMessage {
         return $this->render($ticket, 'followup');
     }
 
+    public function forInboxReminderTicket(Ticket $ticket): string {
+        return $this->render($ticket, 'inbox_reminder');
+    }
+
     public function forCompletedTicket(Ticket $ticket): string {
         return $this->render($ticket, 'completed');
     }
