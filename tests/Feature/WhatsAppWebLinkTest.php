@@ -26,22 +26,28 @@ it('opens follow-up and completion WhatsApp in the same dedicated browser target
         'wa_verification_status' => 'verified',
         'source' => 'demo',
         'claimed_by' => $verifier->id,
-        'ticket_number' => 'TTE-TEST-000001',
+        'ticket_number' => 'TTE-TEST-000001'
     ]);
 
-    $this->actingAs($verifier)->post(route('tickets.note', $ticket), [
-        'note' => 'Pemohon telah diverifikasi dan sedang ditindaklanjuti.',
-    ])->assertRedirect();
+    $this->actingAs($verifier)
+        ->post(route('tickets.note', $ticket), [
+            'note' => 'Pemohon telah diverifikasi dan sedang ditindaklanjuti.'
+        ])
+        ->assertRedirect();
 
-    $this->actingAs($verifier)->get(route('tickets.show', $ticket))
+    $this->actingAs($verifier)
+        ->get(route('tickets.show', $ticket))
         ->assertOk()
         ->assertSee('target="tte_whatsapp_web"', false);
 
-    $this->actingAs($verifier)->post(route('tickets.complete', $ticket), [
-        'resolution_note' => 'Penanganan selesai sesuai prosedur dan telah diverifikasi.',
-    ])->assertRedirect();
+    $this->actingAs($verifier)
+        ->post(route('tickets.complete', $ticket), [
+            'resolution_note' => 'Penanganan selesai sesuai prosedur dan telah diverifikasi.'
+        ])
+        ->assertRedirect();
 
-    $this->actingAs($verifier)->get(route('tickets.show', $ticket))
+    $this->actingAs($verifier)
+        ->get(route('tickets.show', $ticket))
         ->assertOk()
         ->assertSee('target="tte_whatsapp_web"', false);
 });

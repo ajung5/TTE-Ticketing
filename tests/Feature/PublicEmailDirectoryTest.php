@@ -9,57 +9,107 @@ use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
-function directoryRows(string $email = 'pemohon@subang.go.id'): array
-{
+function directoryRows(string $email = 'pemohon@subang.go.id'): array {
     return [
-        ['No', 'NAMA', 'NIK', 'NIP', 'Email Gov', 'JABATAN', 'JENIS JABATAN', 'RUMPUN JABATAN', 'STATUS PEGAWAI', 'STATUS KEPEGAWAIAN', 'NAMA UNOR', 'Jenis Instansi', 'UPTD', 'UNIT KERJA', 'Status Pengguna', 'Status Sertifikat', 'Tanggal terbit', 'Tanggal berakhir'],
-        ['1', 'Pemohon Contoh', '3273010101010001', '198901012020011001', $email, 'Analis', '', '', '', '', 'Sekretariat', '', '', 'Diskominfo', 'Aktif', '', '', ''],
+        [
+            'No',
+            'NAMA',
+            'NIK',
+            'NIP',
+            'Email Gov',
+            'JABATAN',
+            'JENIS JABATAN',
+            'RUMPUN JABATAN',
+            'STATUS PEGAWAI',
+            'STATUS KEPEGAWAIAN',
+            'NAMA UNOR',
+            'Jenis Instansi',
+            'UPTD',
+            'UNIT KERJA',
+            'Status Pengguna',
+            'Status Sertifikat',
+            'Tanggal terbit',
+            'Tanggal berakhir'
+        ],
+        [
+            '1',
+            'Pemohon Contoh',
+            '3273010101010001',
+            '198901012020011001',
+            $email,
+            'Analis',
+            '',
+            '',
+            '',
+            '',
+            'Sekretariat',
+            '',
+            '',
+            'Diskominfo',
+            'Aktif',
+            '',
+            '',
+            ''
+        ]
     ];
 }
 
-function directFormWithSignature(): array
-{
+function directFormWithSignature(): array {
     return [
-        'layanan' => 'Reset Passphrase', 'nama_user' => 'Pemohon Contoh',
-        'nik' => '3273010101010001', 'nip' => '198901012020011001',
+        'layanan' => 'Reset Passphrase',
+        'nama_user' => 'Pemohon Contoh',
+        'nik' => '3273010101010001',
+        'nip' => '198901012020011001',
         'email' => 'palsu@subang.go.id', // must be ignored in favor of directory record
-        'no_wa' => '081212345678', 'opd' => 'Diskominfo', 'jabatan' => 'Analis',
-        'persetujuan' => '1', 'submission_token' => '4b8f5c10-f06e-4f5c-8a03-0a9260210b11',
-        'signature_data' => 'data:image/png;base64,'.base64_encode(file_get_contents(base_path('tests/Fixtures/signature-test.png'))),
+        'no_wa' => '081212345678',
+        'opd' => 'Diskominfo',
+        'jabatan' => 'Analis',
+        'persetujuan' => '1',
+        'submission_token' => '4b8f5c10-f06e-4f5c-8a03-0a9260210b11',
+        'signature_data' =>
+            'data:image/png;base64,' . base64_encode(file_get_contents(base_path('tests/Fixtures/signature-test.png')))
     ];
 }
 
 it('requires a synchronized email directory for NIK lookup', function () {
     $this->postJson(route('public.lookup-nik'), ['nik' => '3273010101010001'])
-        ->assertStatus(503)->assertJsonPath('status', 'service_unavailable');
+        ->assertStatus(503)
+        ->assertJsonPath('status', 'service_unavailable');
 });
 
 it('shows only masked email for matching NIK and a generic modal state otherwise', function () {
     app(EmailDirectorySync::class)->import(directoryRows());
     $this->postJson(route('public.lookup-nik'), ['nik' => '3273010101010001'])
-        ->assertOk()->assertJsonPath('status', 'found')
+        ->assertOk()
+        ->assertJsonPath('status', 'found')
         ->assertJsonPath('email_masked', 'pe***@subang.go.id')
         ->assertDontSee('pemohon@subang.go.id');
     $this->postJson(route('public.lookup-nik'), ['nik' => '3273010101010002'])
-        ->assertOk()->assertJsonPath('status', 'not_found');
+        ->assertOk()
+        ->assertJsonPath('status', 'not_found');
 });
 
-it('rejects empty usernames and allows re-synchronization without changing the last good data after an error', function () {
-    $sync = app(EmailDirectorySync::class);
-    $sync->import(directoryRows(''));
-    $this->postJson(route('public.lookup-nik'), ['nik' => '3273010101010001'])
-        ->assertOk()->assertJsonPath('status', 'not_found');
-    $sync->import(directoryRows());
-    $this->postJson(route('public.lookup-nik'), ['nik' => '3273010101010001'])
-        ->assertOk()->assertJsonPath('status', 'found');
-    try {
-        $sync->import([directoryRows()[0], ['1', 'Contoh', '123', '', 'example@subang.go.id']]);
-        $this->fail('Invalid NIK should throw.');
-    } catch (\RuntimeException $e) {
-        expect($e->getMessage())->toContain('16 digit');
+it(
+    'rejects empty usernames and allows re-synchronization without changing the last good data after an error',
+    function () {
+        $sync = app(EmailDirectorySync::class);
+        $sync->import(directoryRows(''));
+        $this->postJson(route('public.lookup-nik'), ['nik' => '3273010101010001'])
+            ->assertOk()
+            ->assertJsonPath('status', 'not_found');
+        $sync->import(directoryRows());
+        $this->postJson(route('public.lookup-nik'), ['nik' => '3273010101010001'])
+            ->assertOk()
+            ->assertJsonPath('status', 'found');
+        try {
+            $sync->import([directoryRows()[0], ['1', 'Contoh', '123', '', 'example@subang.go.id']]);
+            $this->fail('Invalid NIK should throw.');
+        } catch (\RuntimeException $e) {
+            expect($e->getMessage())->toContain('16 digit');
+        }
+        expect(EmailDirectory::count())->toBe(1);
     }
-    expect(EmailDirectory::count())->toBe(1);
-});
+);
 
 it('creates a public ticket from authoritative directory email and stores private signature', function () {
     Storage::fake('local');
@@ -76,7 +126,10 @@ it('creates a public ticket from authoritative directory email and stores privat
     $other = \App\Models\User::factory()->create(['role' => 'verifier']);
     $this->actingAs($other)->get(route('tickets.signature', $ticket))->assertForbidden();
     $ticket->update(['claimed_by' => $verifier->id, 'status' => 'In Progress']);
-    $this->actingAs($verifier)->get(route('tickets.signature', $ticket))->assertOk()->assertHeader('Content-Type', 'image/png');
+    $this->actingAs($verifier)
+        ->get(route('tickets.signature', $ticket))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'image/png');
     expect($ticket->signature_path)->toStartWith('signatures/');
     $this->post(route('public.submit'), $data)->assertRedirect(route('public.success'));
     expect(Ticket::where('source', 'direct')->count())->toBe(1);
@@ -86,11 +139,16 @@ it('blocks direct submissions if NIK not present, username empty, signature miss
     app(EmailDirectorySync::class)->import(directoryRows(''));
     $this->post(route('public.submit'), directFormWithSignature())->assertSessionHasErrors('nik');
     app(EmailDirectorySync::class)->import(directoryRows());
-    $this->post(route('public.submit'), array_diff_key(directFormWithSignature(), ['signature_data' => true]))
-        ->assertSessionHasErrors('signature_data');
-    $this->post(route('public.submit'), array_diff_key(directFormWithSignature(), ['persetujuan' => true]))
-        ->assertSessionHasErrors('persetujuan');
-    $data = directFormWithSignature(); $data['nik'] = '3273010101010002';
+    $this->post(
+        route('public.submit'),
+        array_diff_key(directFormWithSignature(), ['signature_data' => true])
+    )->assertSessionHasErrors('signature_data');
+    $this->post(
+        route('public.submit'),
+        array_diff_key(directFormWithSignature(), ['persetujuan' => true])
+    )->assertSessionHasErrors('persetujuan');
+    $data = directFormWithSignature();
+    $data['nik'] = '3273010101010002';
     $this->post(route('public.submit'), $data)->assertSessionHasErrors('nik');
     expect(Ticket::count())->toBe(0);
 });
