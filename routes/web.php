@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminSurveyController;
+use App\Http\Controllers\PublicSurveyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PublicTicketController;
@@ -13,6 +15,10 @@ Route::get('/permohonan', [PublicTicketController::class, 'create'])->name('publ
 Route::post('/permohonan', [PublicTicketController::class, 'store'])->middleware('throttle:5,10')->name('public.submit');
 Route::post('/permohonan/cek-nik', [PublicTicketController::class, 'lookupNik'])->middleware('throttle:tte-nik-lookup')->name('public.lookup-nik');
 Route::get('/permohonan/berhasil', [PublicTicketController::class, 'success'])->name('public.success');
+// Signed URL 30 hari. Survei publik hanya melalui tautan dari notifikasi selesai.
+Route::get('/survei/terima-kasih', [PublicSurveyController::class, 'thanks'])->name('public.survey.thanks');
+Route::get('/survei/{ticket}', [PublicSurveyController::class, 'show'])->middleware(['signed', 'throttle:20,1'])->name('public.survey.show');
+Route::post('/survei/{ticket}', [PublicSurveyController::class, 'store'])->middleware(['signed', 'throttle:5,10'])->name('public.survey.store');
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'form'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1')->name('login.submit');
@@ -41,6 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/tickets/{ticket}/whatsapp', [TicketController::class, 'openWhatsApp'])->name('tickets.whatsapp');
     Route::post('/tickets/{ticket}/whatsapp-confirm', [TicketController::class, 'confirmWhatsApp'])->name('tickets.whatsapp.confirm');
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/survei', [AdminSurveyController::class, 'index'])->name('admin.surveys.index');
     Route::get('/admin/wa-templates', [WaTemplateController::class, 'index'])->name('admin.templates.index');
     Route::put('/admin/wa-templates/{template}', [WaTemplateController::class, 'update'])->name('admin.templates.update');
     Route::post('/admin/verifiers/{user}/password-reset', [AdminController::class, 'sendResetLink'])->middleware('throttle:10,1')->name('admin.password-reset');

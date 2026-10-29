@@ -10,6 +10,7 @@
         <div>
             <div class="eyebrow">ADMIN / PENGATURAN</div>
             <h1>Preset Pesan WhatsApp</h1>
+            <p class="small"><a href="{{ route('admin.surveys.index') }}">Lihat Hasil Survei Kepuasan Layanan →</a></p>
             <p class="muted">Kelola redaksi notifikasi untuk setiap layanan dan tahap penanganan.</p>
         </div><span class="pill pill-blue">12 preset aktif</span>
     </div>
@@ -68,6 +69,7 @@
                                 class="small muted">{{ $desc }}</span></div>
                     @endforeach
                 </div>
+                <div class="note-box"><strong>Link Survei Internal</strong><p class="small muted">Untuk notifikasi selesai, gunakan <code>{survey_url}</code>. Tautan berlaku 30 hari dan setiap tiket hanya dapat mengisi sekali. Tautan tetap dilampirkan secara otomatis apabila placeholder tidak digunakan.</p></div>
                 <div class="note-box"><strong>Perlindungan NIK</strong>
                     <p class="small muted">Token <code>{nik}</code> menghasilkan NIK yang tersamarkan. Hindari mengirim
                         identitas lengkap melalui WhatsApp.</p>

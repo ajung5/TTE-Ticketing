@@ -1,0 +1,30 @@
+/* Survei publik mobile-first, mengikuti palet formulir TTE. */
+.survey-wrap{max-width:900px;margin:0 auto;padding:18px 0 50px}
+.survey-header{display:flex;align-items:center;gap:16px;margin:0 0 24px}
+.survey-header h1{font-size:clamp(23px,3vw,30px);margin:4px 0 5px}
+.survey-mark{display:grid;place-items:center;width:56px;height:56px;flex-shrink:0;background:linear-gradient(135deg,#315ca8,#173b74);color:#fff;border-radius:16px;font-size:26px;font-weight:800}
+.survey-card{padding:30px;box-shadow:0 14px 40px rgba(27,55,99,.05)}
+.survey-ticket{display:flex;flex-wrap:wrap;gap:8px 20px;padding:15px 18px;background:#f2f6fc;border:1px solid #dce7f5;border-radius:12px;margin-bottom:25px;color:#3f587b;font-size:13px;overflow-wrap:anywhere}
+.survey-card h2{font-size:20px;margin:0 0 10px}
+.survey-form{display:grid;gap:17px;margin-top:22px}
+.survey-question{margin:0;padding:19px 20px;border:1px solid #dbe5f2;border-radius:14px;min-width:0}
+.survey-question legend{font-weight:700;font-size:14px;padding:0 6px;line-height:1.5;color:#284064}
+.survey-question legend span{color:#c54050}
+.survey-scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:8px}
+.survey-score{min-width:0;position:relative;cursor:pointer}
+.survey-score input{position:absolute;opacity:0;width:1px;height:1px}
+.survey-score span{display:grid;place-items:center;min-height:49px;border:1px solid #cbd9eb;border-radius:10px;background:#fff;color:#3c5a81;font-size:17px;font-weight:750;transition:background .15s ease,border-color .15s ease}
+.survey-score input:checked+span{background:#315ca8;border-color:#315ca8;color:#fff}
+.survey-score input:focus-visible+span{outline:3px solid #82b9ff;outline-offset:3px}
+.survey-scale-caption{display:flex;justify-content:space-between;font-size:11px;color:#687c96;margin-top:8px;gap:10px}
+.survey-feedback{display:grid;gap:9px;font-size:13px;font-weight:700;color:#284064}
+.survey-feedback textarea{width:100%;min-height:110px;resize:vertical;border:1px solid #cbd9eb;border-radius:11px;padding:14px;font:inherit;font-weight:400;line-height:1.6}
+.survey-error{color:#b91c1c;font-size:12px;margin:5px 0 0}
+.survey-submit{min-height:51px;font-size:14px}
+.survey-success,.survey-thanks{text-align:center;padding:40px 20px}
+.survey-thanks{margin-top:9vh}
+.survey-thanks .btn{margin-top:22px}
+.survey-check{display:grid;place-items:center;margin:0 auto 18px;width:64px;height:64px;border-radius:50%;color:#0f7b48;background:#d9f5e4;font-size:35px}
+.survey-comment{max-width:470px;overflow-wrap:anywhere;white-space:pre-wrap}
+.survey-stat-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+@media(max-width:620px){.survey-wrap{padding:8px 0 40px}.survey-header{gap:12px;margin:3px 0 19px}.survey-mark{width:43px;height:43px;font-size:21px;border-radius:12px}.survey-card{padding:20px 14px}.survey-question{padding:15px 11px}.survey-question legend{font-size:13px}.survey-scale{gap:6px}.survey-score span{min-height:48px}.survey-ticket{padding:12px 13px;font-size:12px}.survey-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

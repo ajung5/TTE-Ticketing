@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Ticket;
 use App\Models\WaMessageTemplate;
+use Illuminate\Support\Facades\URL;
 
 class WhatsAppMessage {
     public function forUnverifiedTicket(Ticket $ticket): string {
@@ -19,7 +20,20 @@ class WhatsAppMessage {
     }
 
     public function forCompletedTicket(Ticket $ticket): string {
-        return $this->render($ticket, 'completed');
+        $message = $this->render($ticket, 'completed');
+        // Legacy/admin template without {survey_url} must still include a survey invitation.
+        if (!str_contains($message, '/survei/'.$ticket->getKey().'?')) {
+            $message .= "\n\nSurvei Kepuasan Layanan (30 hari):\n".$this->surveyUrl($ticket);
+        }
+        return $message;
+    }
+
+    public function surveyUrl(Ticket $ticket): string {
+        return URL::temporarySignedRoute(
+            'public.survey.show',
+            now()->addDays(30),
+            ['ticket' => $ticket->getKey()]
+        );
     }
 
     private function render(Ticket $ticket, string $event): string {
@@ -53,7 +67,8 @@ class WhatsAppMessage {
             '{nomor_wa}' => (string) ($ticket->no_wa ?: '-'),
             '{jabatan}' => (string) ($ticket->jabatan ?: '-'),
             '{keterangan}' => (string) ($ticket->keterangan ?: '-'),
-            '{status_verifikasi_wa}' => $ticket->wa_verification_label
+            '{status_verifikasi_wa}' => $ticket->wa_verification_label,
+            '{survey_url}' => $event === 'completed' ? $this->surveyUrl($ticket) : '-'
         ]);
     }
 

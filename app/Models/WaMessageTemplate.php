@@ -34,7 +34,8 @@ class WaMessageTemplate extends Model {
         '{status_verifikasi_wa}' => 'Status pemeriksaan nomor pada AMS BSrE',
         '{nama_verifikator}' => 'Nama petugas',
         '{inisial_verifikator}' => 'Inisial petugas',
-        '{nama_instansi}' => 'Nama instansi/layanan'
+        '{nama_instansi}' => 'Nama instansi/layanan',
+        '{survey_url}' => 'Tautan survei internal (untuk pesan selesai)'
     ];
 
     public const PLACEHOLDERS = [
@@ -51,6 +52,7 @@ class WaMessageTemplate extends Model {
         '{status_verifikasi_wa}',
         '{nama_verifikator}',
         '{inisial_verifikator}',
-        '{nama_instansi}'
+        '{nama_instansi}',
+        '{survey_url}'
     ];
 }
