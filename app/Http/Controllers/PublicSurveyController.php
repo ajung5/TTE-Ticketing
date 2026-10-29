@@ -20,6 +20,7 @@ class PublicSurveyController extends Controller {
     public function store(Request $request, Ticket $ticket) {
         abort_unless($ticket->status === 'Done', 404);
         $data = $request->validate([
+            'respondent_name' => ['required', 'string', 'min:3', 'max:160'],
             'overall_rating' => ['required', 'integer', 'between:1,5'],
             'staff_rating' => ['required', 'integer', 'between:1,5'],
             'clarity_rating' => ['required', 'integer', 'between:1,5'],
@@ -33,6 +34,7 @@ class PublicSurveyController extends Controller {
         try {
             ServiceSurveyResponse::create([
                 'ticket_id' => $ticket->id,
+                'respondent_name' => trim($data['respondent_name']),
                 'overall_rating' => $data['overall_rating'],
                 'staff_rating' => $data['staff_rating'],
                 'clarity_rating' => $data['clarity_rating'],

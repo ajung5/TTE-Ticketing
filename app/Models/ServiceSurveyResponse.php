@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ServiceSurveyResponse extends Model {
     protected $fillable = [
-        'ticket_id', 'overall_rating', 'staff_rating', 'clarity_rating', 'speed_rating', 'feedback'
+        'ticket_id', 'respondent_name', 'overall_rating', 'staff_rating', 'clarity_rating', 'speed_rating', 'feedback'
     ];
 
     public function ticket(): BelongsTo {

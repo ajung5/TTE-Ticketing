@@ -35,10 +35,11 @@ it('accepts exactly one response and does not request sensitive identity informa
     $ticket = surveyTestTicket();
     $url = surveyTestUrl($ticket);
     $this->get($url)->assertDontSee('Masukkan NIK');
-    $payload = ['overall_rating'=>5, 'staff_rating'=>4, 'clarity_rating'=>4, 'speed_rating'=>5, 'feedback'=>'Sangat membantu'];
+    $payload = ['respondent_name'=>'Responden Survei Contoh', 'overall_rating'=>5, 'staff_rating'=>4, 'clarity_rating'=>4, 'speed_rating'=>5, 'feedback'=>'Sangat membantu'];
     $this->post($url, $payload)->assertRedirect(route('public.survey.thanks'));
     $this->post($url, $payload)->assertRedirect(route('public.survey.thanks'));
     expect(ServiceSurveyResponse::where('ticket_id', $ticket->id)->count())->toBe(1);
+    expect(ServiceSurveyResponse::where('ticket_id', $ticket->id)->first()->respondent_name)->toBe('Responden Survei Contoh');
     $this->get($url)->assertSee('sudah diisi');
 });
 
@@ -62,4 +63,33 @@ it('restricts survey statistics to admin users', function () {
     $this->get(route('admin.surveys.index'))->assertRedirect(route('login'));
     $this->actingAs(User::factory()->create(['role'=>'verifier']))->get(route('admin.surveys.index'))->assertForbidden();
     $this->actingAs(User::factory()->create(['role'=>'admin']))->get(route('admin.surveys.index'))->assertOk()->assertSee('Survei Kepuasan Layanan');
+});
+
+it('requires a respondent name and shows that name in the admin feedback table', function () {
+    $ticket = surveyTestTicket(['nama_user' => 'Pemohon Pada Tiket']);
+    $url = surveyTestUrl($ticket);
+    $data = [
+        'overall_rating' => 5,
+        'staff_rating' => 4,
+        'clarity_rating' => 5,
+        'speed_rating' => 4,
+        'feedback' => 'Masukan pengisi survei.',
+    ];
+
+    $this->post($url, $data)->assertSessionHasErrors('respondent_name');
+    $this->assertDatabaseCount('service_survey_responses', 0);
+
+    $this->post($url, $data + ['respondent_name' => 'Orang yang Mengisi Survei'])
+        ->assertRedirect(route('public.survey.thanks'));
+
+    $this->actingAs(User::factory()->create(['role' => 'admin']))
+        ->get(route('admin.surveys.index'))
+        ->assertOk()
+        ->assertSee('Waktu')
+        ->assertSee('Nomor Tiket')
+        ->assertSee('Nama Pengisi Survei')
+        ->assertSee('Nilai')
+        ->assertSee('Saran / Masukan')
+        ->assertSee('Orang yang Mengisi Survei')
+        ->assertSee('Masukan pengisi survei.');
 });

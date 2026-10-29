@@ -21,6 +21,11 @@
             <form method="post" action="{{ request()->fullUrl() }}" class="survey-form">
                 @csrf
                 <div class="honeypot" aria-hidden="true"><label>Biarkan kosong <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+                <label class="survey-feedback" for="respondent_name">Nama Pengisi Survei <span aria-label="wajib">*</span>
+                    <input id="respondent_name" name="respondent_name" type="text" maxlength="160" minlength="3" required autocomplete="name"
+                        value="{{ old('respondent_name') }}" placeholder="Masukkan nama lengkap pengisi survei">
+                </label>
+                @error('respondent_name')<p class="survey-error">{{ $message }}</p>@enderror
                 @foreach ([
                     'overall_rating' => 'Kepuasan keseluruhan terhadap layanan',
                     'staff_rating' => 'Keramahan dan bantuan petugas',
@@ -42,7 +47,7 @@
                     <textarea id="survey-feedback" name="feedback" rows="4" maxlength="1000" placeholder="Tuliskan saran untuk meningkatkan layanan kami...">{{ old('feedback') }}</textarea>
                 </label>
                 @error('feedback')<p class="survey-error">{{ $message }}</p>@enderror
-                <p class="small muted">Tanggapan digunakan untuk evaluasi layanan. Hindari mencantumkan NIK, password, OTP, atau data pribadi sensitif pada kolom masukan.</p>
+                <p class="small muted">Nama pengisi dan tanggapan hanya ditampilkan kepada administrator untuk evaluasi layanan. Jangan cantumkan NIK, password, OTP, atau informasi sensitif pada kolom masukan.</p>
                 <button type="submit" class="btn btn-primary full survey-submit">Kirim Survei Kepuasan</button>
             </form>
         @endif

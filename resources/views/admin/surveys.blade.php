@@ -38,7 +38,8 @@
                             <td>{{ $service->total }}</td>
                             <td>{{ number_format((float) $service->average, 2, ',', '.') }} / 5</td>
                         </tr>
-                    @empty<tr>
+                    @empty
+                        <tr>
                             <td colspan="3">Belum ada tanggapan.</td>
                         </tr>
                     @endforelse
@@ -48,32 +49,35 @@
     </section>
     <section class="card mt">
         <h2>Masukan Pemohon</h2>
-        <p class="small muted">Masukan hanya diperlihatkan kepada administrator. Hindari membagikan identitas pemohon dari
-            tiket.</p>
+        <p class="small muted">Nama pengisi survei dan tanggapannya hanya dapat dilihat oleh administrator. Respons lama yang tidak mencatat nama ditampilkan sebagai "Belum dicatat".</p>
         <div class="table-scroll">
             <table>
                 <thead>
                     <tr>
                         <th>Waktu</th>
-                        <th>Tiket</th>
+                        <th>Nomor Tiket</th>
+                        <th>Nama Pengisi Survei</th>
                         <th>Nilai</th>
                         <th>Saran / Masukan</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($responses as $response)
+                    @forelse ($responses as $response)
                         <tr>
                             <td>{{ $response->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</td>
                             <td>{{ $response->ticket?->ticket_number ?? '-' }}</td>
+                            <td>{{ $response->respondent_name ?: 'Belum dicatat' }}</td>
                             <td>{{ $response->overall_rating }}/5</td>
                             <td class="survey-comment">{{ $response->feedback ?: '-' }}</td>
                         </tr>
-                    @empty<tr>
-                            <td colspan="4">Belum ada survei yang masuk.</td>
+                    @empty
+                        <tr>
+                            <td colspan="5">Belum ada survei yang masuk.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
-        </div>{{ $responses->links() }}
+        </div>
+        {{ $responses->links() }}
     </section>
 @endsection
