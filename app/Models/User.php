@@ -6,26 +6,31 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'password', 'role', 'initials'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable {
-    use HasFactory, Notifiable;
+class User extends Authenticatable
+{
+    use HasFactory, Notifiable, SoftDeletes;
 
-    public function isAdmin(): bool {
+    public function isAdmin(): bool
+    {
         return $this->role === 'admin';
     }
 
-    public function isVerifier(): bool {
+    public function isVerifier(): bool
+    {
         return $this->role === 'verifier';
     }
 
-    protected function casts(): array {
+    protected function casts(): array
+    {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed'
+            'password' => 'hashed',
         ];
     }
 }

@@ -2,11 +2,12 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminSurveyController;
-use App\Http\Controllers\PublicSurveyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PublicSurveyController;
 use App\Http\Controllers\PublicTicketController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\VerifierManagementController;
 use App\Http\Controllers\WaTemplateController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,5 +47,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/survei', [AdminSurveyController::class, 'index'])->name('admin.surveys.index');
     Route::get('/admin/wa-templates', [WaTemplateController::class, 'index'])->name('admin.templates.index');
     Route::put('/admin/wa-templates/{template}', [WaTemplateController::class, 'update'])->name('admin.templates.update');
+    Route::get('/admin/verifiers', [VerifierManagementController::class, 'index'])->name('admin.verifiers.index');
+    Route::post('/admin/verifiers', [VerifierManagementController::class, 'store'])->middleware('throttle:10,1')->name('admin.verifiers.store');
+    Route::put('/admin/verifiers/{verifier}', [VerifierManagementController::class, 'update'])->middleware('throttle:20,1')->name('admin.verifiers.update');
+    Route::delete('/admin/verifiers/{verifier}', [VerifierManagementController::class, 'destroy'])->middleware('throttle:10,1')->name('admin.verifiers.destroy');
     Route::post('/admin/verifiers/{user}/password-reset', [AdminController::class, 'sendResetLink'])->middleware('throttle:10,1')->name('admin.password-reset');
 });
