@@ -1,0 +1,63 @@
+/* v5: responsive public request, compatible with existing dashboard theme. */
+.public-request-v5{max-width:940px;margin:0 auto}
+.public-request-v5 .public-layout{display:block;max-width:850px;margin:0 auto}
+.public-request-v5 .public-header{max-width:850px;margin:12px auto 26px;align-items:center}
+.public-request-v5 .public-form-card{width:100%;padding:30px 34px;border-radius:19px}
+.public-request-v5 .request-form-heading{margin-bottom:23px;gap:10px}
+.public-request-v5 .request-form-heading h2{font-size:19px;margin:0 0 5px}
+.public-request-v5 .request-form-heading p{max-width:490px;margin:0}
+.public-request-v5 .request-step{background:#fff;border:1px solid #dce6f2;border-radius:15px;padding:22px;min-width:0}
+.public-request-v5 .request-entry{background:linear-gradient(135deg,#f8fbff,#eef5ff);border-color:#ccdff7}
+.public-request-v5 .request-step-title{display:flex;align-items:flex-start;gap:12px;margin:0 0 19px}
+.public-request-v5 .request-step-title h2{font-size:16px;margin:2px 0 4px;line-height:1.4}
+.public-request-v5 .request-step-title p{margin:0}
+.public-request-v5 .request-step-number{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;background:#e3edfd;border:1px solid #c5d8f7;border-radius:9px;color:#325eb0;font-weight:800;font-size:13px}
+.public-request-v5 .request-entry-grid,.public-request-v5 .public-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px}
+.public-request-v5 .request-entry-grid>*{min-width:0}
+.public-request-v5 label{min-width:0}
+.public-request-v5 label input,.public-request-v5 label select{margin-top:2px;min-height:46px;font-size:14px}
+.public-request-v5 input:focus-visible,.public-request-v5 select:focus-visible,.public-request-v5 button:focus-visible{outline:3px solid rgba(58,115,210,.24);outline-offset:1px;border-color:#5783ce}
+.public-request-v5 .field-group>p{margin:0;line-height:1.5}
+.public-request-v5 .required-mark{color:#b64252;font-weight:800}
+.public-request-v5 .directory-lookup-status{color:#295a9a;min-height:20px;margin-top:4px}
+.public-request-v5 .request-pending-note{display:flex;gap:14px;align-items:flex-start;border:1px dashed #c9d7e9;border-radius:14px;background:#f7faff;padding:20px;color:#385273}
+.public-request-v5 .request-pending-note>span{font-size:26px;line-height:1}
+.public-request-v5 .request-pending-note p{margin:4px 0 0}
+.public-request-v5 .request-details{border-color:#cfe0f3}
+.public-request-v5 .request-details[hidden],.public-request-v5 .request-pending-note[hidden]{display:none!important}
+.public-request-v5 .request-email-group input[readonly]{color:#264b7d;background:#eaf2ff;border-color:#cbdbf5;font-weight:700;cursor:default}
+.public-request-v5 .consent-section,.public-request-v5 .signature-section{padding:21px;border-radius:15px}
+.public-request-v5 .consent-section .request-step-title{margin-bottom:8px}
+.public-request-v5 .public-check{padding:10px 0;min-height:44px}
+.public-request-v5 .public-check input{height:19px;width:19px!important;margin-top:2px}
+.public-request-v5 #signature-pad{width:100%;height:185px;min-height:185px;max-height:185px;touch-action:none}
+.public-request-v5 #public-submit{min-height:51px;font-size:14px;font-weight:750}
+.public-request-v5 #public-submit:disabled{opacity:.56;cursor:not-allowed}
+@media(max-width:760px){
+ .public-request-v5 .public-form-card{padding:23px}
+ .public-request-v5 .request-entry-grid,.public-request-v5 .public-fields{grid-template-columns:1fr}
+ .public-request-v5 .request-step{padding:20px}
+ .public-request-v5 .request-form-heading{align-items:flex-start;flex-wrap:wrap}
+}
+@media(max-width:480px){
+ .public-auth-page{padding:14px 10px 38px}
+ .public-request-v5 .public-header{gap:11px;margin:8px 2px 19px}
+ .public-request-v5 .public-header .brand-icon{width:42px;height:42px;font-size:20px;border-radius:11px}
+ .public-request-v5 .public-header .eyebrow{font-size:9px;letter-spacing:.5px}
+ .public-request-v5 .public-header h1{font-size:21px;line-height:1.23}
+ .public-request-v5 .public-header p{font-size:11px}
+ .public-request-v5 .public-form-card{padding:18px 13px;border-radius:14px}
+ .public-request-v5 .request-form-heading{gap:9px}
+ .public-request-v5 .request-step{padding:16px 12px;border-radius:12px}
+ .public-request-v5 .request-step-title{gap:9px}
+ .public-request-v5 .request-step-title h2{font-size:14px}
+ .public-request-v5 .request-entry-grid,.public-request-v5 .public-fields{gap:13px}
+ .public-request-v5 .consent-section,.public-request-v5 .signature-section{padding:16px 12px}
+ .public-request-v5 .signature-section .section-heading{gap:8px;align-items:flex-start}
+ .public-request-v5 .signature-section .section-heading h2{font-size:14px;line-height:1.5}
+ .public-request-v5 .signature-section .btn{min-height:42px;flex-shrink:0}
+ .public-request-v5 #signature-pad{height:170px;min-height:170px;max-height:170px}
+ .public-request-v5 .request-pending-note{padding:15px 12px}
+ .directory-modal-body{max-height:calc(100dvh - 30px);overflow-y:auto}
+}
+@media(prefers-reduced-motion:reduce){.public-request-v5 *{scroll-behavior:auto!important;transition:none!important}}
