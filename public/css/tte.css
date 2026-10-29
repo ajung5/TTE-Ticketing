@@ -38,3 +38,34 @@ input,select,textarea{border:1px solid #dae2ec;color:#1e304a;background:#fff;bor
 @media(max-width:860px){.detail-columns{grid-template-columns:1fr}.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stat-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.sidebar{width:214px}.content{padding:23px 18px}.topbar{padding:0 18px}.filters input,.filters select{min-width:150px}}
 @media(max-width:680px){.shell{display:block}.sidebar{width:auto;height:auto;position:static;padding:13px 15px}.brand{padding:0 0 14px}.sidebar-group{display:flex;flex-wrap:wrap;gap:4px}.nav-caption,.sidebar-help{display:none}.nav-item{padding:10px 12px}.sidebar-bottom{margin-top:8px;display:flex;align-items:center;gap:9px;padding:10px 0 0}.profile-chip{flex:1;padding:0}.sidebar-secondary{display:none}.sidebar-logout{width:auto;padding:9px}.topbar{height:auto;min-height:49px;gap:8px;padding:11px 15px;flex-wrap:wrap}.topbar-date{font-size:10px}.content{padding:23px 14px 55px}.page-heading{display:block}.page-heading>.pill{margin-top:11px}.stat-grid,.stat-grid.three{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat-card{padding:15px 14px}.stat-icon{width:31px;height:31px}.stat-micro{font-size:8px}.stat-number{font-size:28px}.stat-name{font-size:11px}.card{padding:19px 16px}.columns,.overview-columns,.detail-columns,.template-columns{grid-template-columns:1fr}.section-heading{align-items:start}.filters{display:grid;grid-template-columns:1fr 1fr}.filters input{grid-column:1 / -1}.filters .btn{width:100%}.detail-grid{grid-template-columns:1fr 1fr;gap:15px}.heading-right{margin-top:10px}.template-actions{align-items:stretch}.template-actions .btn{width:100%}.service-tab{flex:1 1 100%;text-align:center}.clipboard-status{bottom:14px;left:14px;right:14px}}
 @media(max-width:400px){.stat-grid,.stat-grid.three,.detail-grid{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.filters input{grid-column:1}.topbar-date{display:none}}
+
+/* Permohonan publik tanpa login; mengikuti palet UI dashboard. */
+.public-auth-page{display:block;min-height:100vh;padding:28px 18px 56px;background:#f4f7fc}
+.public-request-wrap{max-width:1160px;margin:0 auto}
+.public-header{display:flex;align-items:center;gap:16px;margin:5px 0 28px}
+.public-header .brand-icon{flex-shrink:0;width:54px;height:54px}
+.public-header h1{margin-bottom:4px}
+.public-header p{margin:0}
+.public-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(275px,.8fr);gap:20px;align-items:start}
+.public-form-card{padding:28px 32px}
+.public-form-card label{display:flex;flex-direction:column;gap:7px;font-weight:650;font-size:12px;color:#354765}
+.public-form-card input,.public-form-card select,.public-form-card textarea{width:100%;font-size:13px;min-height:43px}
+.public-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.public-check{flex-direction:row!important;align-items:flex-start;gap:10px!important;line-height:1.55;font-weight:500!important}
+.public-check input{width:auto!important;min-height:0;flex:0 0 auto;margin-top:4px}
+.public-steps{padding-left:19px;color:#425571;font-size:13px;line-height:1.8}
+.public-steps li{margin-bottom:8px;padding-left:5px}
+.public-success{max-width:590px;margin:8vh auto;padding:36px;text-align:center}
+.public-success-icon{display:inline-grid;place-items:center;width:55px;height:55px;border-radius:15px;background:#e2f8ea;color:#1b8a57;font-size:30px;margin-bottom:20px}
+.public-ticket-number{font-size:25px;letter-spacing:.6px;background:#f1f5fb;border:1px dashed #b4c5e4;border-radius:12px;padding:18px 10px;font-weight:800;margin:22px 0;overflow-wrap:anywhere}
+.public-success .note-box{text-align:left;margin-bottom:20px}
+.honeypot{position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden}
+.verification-panel{border:1px solid #dee8f5;background:#f8faff;border-radius:12px;padding:17px;margin-bottom:17px}
+.verification-panel .verification-tag{margin-bottom:13px}
+.verification-panel select,.verification-panel textarea{width:100%}
+.verification-panel form{gap:12px}
+.verification-status{font-weight:750;font-size:12px}
+.token-insert{padding:4px 6px;border:1px solid #d5e4ff;background:#eef3ff;border-radius:6px;font-family:ui-monospace,monospace;font-size:11px;color:#3158b5;cursor:pointer}
+.token-insert:hover{background:#dbe8ff}
+@media(max-width:850px){.public-layout{grid-template-columns:1fr}.public-aside{display:grid;grid-template-columns:1fr 1fr;gap:15px}}
+@media(max-width:620px){.public-auth-page{padding:15px 10px 40px}.public-header h1{font-size:22px}.public-fields{grid-template-columns:1fr}.public-form-card{padding:20px 16px}.public-aside{grid-template-columns:1fr}.public-success{margin:20px auto;padding:25px 18px}.public-ticket-number{font-size:19px}}

@@ -30,6 +30,22 @@
     if (!copied) throw new Error('Clipboard unavailable');
   }
 
+  let focusedPresetEditor = null;
+  document.addEventListener('focusin', (event) => {
+    if (event.target.matches('.template-textarea')) focusedPresetEditor = event.target;
+  });
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-insert-token]');
+    if (!button) return;
+    const token = button.getAttribute('data-insert-token');
+    const textarea = focusedPresetEditor || document.querySelector('.template-textarea');
+    if (!textarea || !token) return;
+    const start = textarea.selectionStart, end = textarea.selectionEnd;
+    textarea.setRangeText(token, start, end, 'end');
+    textarea.focus();
+    toast('Variabel ' + token + ' dimasukkan ke editor.');
+  });
+
   document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-copy-target]');
     if (!button) return;

@@ -47,6 +47,7 @@ class DemoTicketsSeeder extends Seeder
                 'no_wa' => sprintf('628000001%04d', $i),
                 'layanan' => $services[($i - 1) % 3],
                 'status' => $status,
+                'wa_verification_status' => $status === 'Done' ? 'verified' : ($i % 5 === 0 ? 'unverified' : ($status === 'In Progress' ? 'verified' : 'unchecked')),
                 'source' => 'simulated',
                 'opd' => $units[($i - 1) % count($units)],
                 'jabatan' => 'Jabatan Simulasi',

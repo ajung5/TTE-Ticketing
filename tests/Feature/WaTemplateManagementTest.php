@@ -8,10 +8,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('seeds six default WhatsApp templates through the migration', function () {
-    expect(WaMessageTemplate::count())->toBe(6);
+it('seeds nine default WhatsApp templates through the migrations', function () {
+    expect(WaMessageTemplate::count())->toBe(9);
     foreach (['Reset Passphrase', 'Pembaruan', 'Pendaftaran'] as $service) {
-        foreach (['followup', 'completed'] as $event) {
+        foreach (['unverified', 'followup', 'completed'] as $event) {
             $this->assertDatabaseHas('wa_message_templates', ['service_code' => $service, 'event_type' => $event]);
         }
     }
@@ -54,7 +54,7 @@ it('renders the admin preset using ticket and verifier data', function () {
     $template->update(['body' => 'Halo {nama_pemohon}; tiket {nomor_tiket}; {layanan}; petugas {nama_verifikator} ({inisial_verifikator}); {nama_instansi}.']);
     $ticket = Ticket::create([
         'nama_user' => 'Pemohon Demo', 'no_wa' => '6281212345678',
-        'layanan' => 'Pembaruan', 'status' => 'Done', 'source' => 'demo',
+        'layanan' => 'Pembaruan', 'status' => 'Done', 'source' => 'demo', 'wa_verification_status' => 'verified',
         'claimed_by' => $verifier->id, 'ticket_number' => 'TTE-TEST-001',
     ]);
     $message = app(WhatsAppMessage::class)->forCompletedTicket($ticket);
@@ -68,7 +68,7 @@ it('shows copy action but blocks opening WhatsApp for simulated tickets', functi
     $ticket = Ticket::create([
         'external_submission_id' => 'TTE-SIMULASI-TEST', 'nama_user' => 'Pemohon Simulasi',
         'no_wa' => '6280000010001', 'layanan' => 'Reset Passphrase',
-        'source' => 'simulated', 'status' => 'Done', 'claimed_by' => $verifier->id,
+        'source' => 'simulated', 'status' => 'Done', 'wa_verification_status' => 'verified', 'claimed_by' => $verifier->id,
         'ticket_number' => 'TTE-SIM-TEST',
     ]);
     $this->actingAs($verifier)->get(route('tickets.show', $ticket))

@@ -26,7 +26,7 @@ class WaTemplateController extends Controller
     public function update(Request $request, WaMessageTemplate $template)
     {
         $this->check($request);
-        $data = $request->validate(['body' => ['required', 'string', 'min:40', 'max:2500']]);
+        $data = $request->validate(['body' => ['required', 'string', 'min:40', 'max:3500']]);
         $body = trim($data['body']);
 
         foreach (['{nama_pemohon}', '{nomor_tiket}', '{nama_verifikator}'] as $required) {
@@ -34,7 +34,7 @@ class WaTemplateController extends Controller
                 throw ValidationException::withMessages(['body' => "Preset harus menyertakan {$required}."]);
             }
         }
-        preg_match_all('/\{[A-Za-z_]+\}/', $body, $matches);
+        preg_match_all('/\{[^{}]+\}/u', $body, $matches);
         $unknown = array_diff($matches[0], WaMessageTemplate::PLACEHOLDERS);
         if ($unknown !== []) {
             throw ValidationException::withMessages(['body' => 'Placeholder tidak dikenal: '.implode(', ', array_unique($unknown))]);

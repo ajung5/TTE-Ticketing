@@ -23,6 +23,7 @@ it('opens follow-up and completion WhatsApp in the same dedicated browser target
         'no_wa' => '6281212345678',
         'layanan' => 'Reset Passphrase',
         'status' => 'In Progress',
+        'wa_verification_status' => 'verified',
         'source' => 'demo',
         'claimed_by' => $verifier->id,
         'ticket_number' => 'TTE-TEST-000001',

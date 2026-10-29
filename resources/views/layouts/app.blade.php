@@ -6,8 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#14243b">
     <title>@yield('title', 'Layanan TTE') · TTE Ticketing</title>
-    <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=2">
-    <script src="{{ asset('js/tte.js') }}?v=2" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3">
+    <script src="{{ asset('js/tte.js') }}?v=3" defer></script>
 </head>
 <body>
 @auth
@@ -25,6 +25,7 @@
             @else
                 <a class="nav-item {{ request()->routeIs('tickets.*') ? 'active' : '' }}" href="{{ route('tickets.index') }}"><span class="nav-symbol">▤</span> Antrean Tiket</a>
             @endif
+            <a class="nav-item" href="{{ route('public.form') }}" target="_blank" rel="noopener"><span class="nav-symbol">↗</span> Formulir Publik</a>
         </div>
         <div class="sidebar-help"><span class="mini-dot"></span><strong>Self-Claim Ticketing</strong><p>Permohonan dicatat secara transparan. Setiap tiket memiliki penanggung jawab.</p></div>
         <div class="sidebar-bottom">
@@ -43,7 +44,7 @@
     </main>
 </div>
 @else
-<main class="auth-page">
+<main class="auth-page {{ request()->routeIs('public.*') ? 'public-auth-page' : '' }}">
     @if(session('success'))<div class="alert success" role="status">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="alert error" role="alert"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
     @yield('content')

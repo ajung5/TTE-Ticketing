@@ -54,11 +54,15 @@ class TicketController extends Controller
         $this->verifier($request);
         abort_unless($ticket->status === 'Open' || $ticket->claimed_by === $request->user()->id, 403);
         $ticket->load(['claimant', 'activities.actor', 'whatsappNotifications']);
-        $waMessage = $ticket->status === 'Done' ? $whatsapp->forCompletedTicket($ticket) : null;
-        $followupMessage = $ticket->status === 'In Progress' && $ticket->activities->contains('action', 'note')
+        $waMessage = $ticket->status === 'Done' && $ticket->wa_verification_status === 'verified'
+            ? $whatsapp->forCompletedTicket($ticket) : null;
+        $unverifiedMessage = $ticket->status === 'In Progress' && $ticket->wa_verification_status === 'unverified'
+            ? $whatsapp->forUnverifiedTicket($ticket) : null;
+        $followupMessage = $ticket->status === 'In Progress' && $ticket->wa_verification_status === 'verified'
+            && $ticket->activities->contains('action', 'note')
             ? $whatsapp->forFollowUpTicket($ticket) : null;
 
-        return view('tickets.show', compact('ticket', 'waMessage', 'followupMessage'));
+        return view('tickets.show', compact('ticket', 'waMessage', 'followupMessage', 'unverifiedMessage'));
     }
 
     public function claim(Request $request, Ticket $ticket)
@@ -93,6 +97,64 @@ class TicketController extends Controller
         return redirect()->route('tickets.index')->with('success', 'Tiket dikembalikan ke antrean.');
     }
 
+    /**
+     * An authorised verifier manually records what they found in AMS BSrE.
+     * Never infer registration from a valid phone format or a WhatsApp response.
+     */
+    public function verifyWhatsApp(Request $request, Ticket $ticket)
+    {
+        $this->owner($request, $ticket);
+        $data = $request->validate([
+            'wa_verification_status' => ['required', 'in:verified,unverified'],
+            'wa_verification_note' => ['required', 'string', 'min:8', 'max:500'],
+        ]);
+        DB::transaction(function () use ($request, $ticket, $data) {
+            $record = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+            abort_unless($record->claimed_by === $request->user()->id && in_array($record->status, ['In Progress', 'Done'], true), 409);
+            abort_if($record->status === 'Done' && $data['wa_verification_status'] !== 'verified', 409, 'Tiket selesai hanya dapat dilengkapi dengan verifikasi nomor.');
+            $record->update([
+                'wa_verification_status' => $data['wa_verification_status'],
+                'wa_verification_note' => $data['wa_verification_note'],
+                'wa_checked_at' => now(),
+                'wa_checked_by' => $request->user()->id,
+            ]);
+            TicketActivity::create([
+                'ticket_id' => $ticket->id,
+                'actor_id' => $request->user()->id,
+                'action' => $data['wa_verification_status'] === 'verified' ? 'wa_verified' : 'wa_unverified',
+                'note' => $data['wa_verification_note'],
+            ]);
+        });
+        return back()->with('success', 'Hasil pemeriksaan nomor WhatsApp pada AMS BSrE berhasil dicatat.');
+    }
+
+    public function openUnverifiedWhatsApp(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp)
+    {
+        $this->owner($request, $ticket);
+        abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
+        abort_unless($ticket->status === 'In Progress' && $ticket->wa_verification_status === 'unverified', 409);
+        $ticket->load('claimant');
+        $message = $whatsapp->forUnverifiedTicket($ticket);
+        WaNotification::updateOrCreate(
+            ['ticket_id' => $ticket->id, 'event_type' => 'unverified'],
+            ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now(), 'confirmed_at' => null]
+        );
+        return redirect()->away($whatsapp->url($ticket, $message));
+    }
+
+    public function confirmUnverifiedWhatsApp(Request $request, Ticket $ticket)
+    {
+        $this->owner($request, $ticket);
+        abort_unless($ticket->status === 'In Progress' && $ticket->wa_verification_status === 'unverified', 409);
+        $notification = WaNotification::where('ticket_id', $ticket->id)->where('event_type', 'unverified')->first();
+        abort_unless($notification && $notification->opened_at, 409, 'Buka WhatsApp terlebih dahulu.');
+        if (! $notification->confirmed_at) {
+            $notification->update(['confirmed_at' => now()]);
+            TicketActivity::create(['ticket_id' => $ticket->id, 'actor_id' => $request->user()->id, 'action' => 'wa_unverified_confirmed']);
+        }
+        return back()->with('success', 'Konfirmasi manual pesan nomor WA belum terverifikasi tersimpan.');
+    }
+
     public function note(Request $request, Ticket $ticket)
     {
         $this->owner($request, $ticket);
@@ -113,6 +175,7 @@ class TicketController extends Controller
         DB::transaction(function () use ($ticket, $request, $data) {
             $record = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
             abort_unless($record->claimed_by === $request->user()->id && $record->status === 'In Progress', 409);
+            abort_unless($record->wa_verification_status === 'verified', 409, 'Nomor WhatsApp belum terverifikasi di AMS BSrE.');
             $record->update(['status' => 'Done', 'completed_at' => now(), 'resolution_note' => $data['resolution_note']]);
             TicketActivity::create(['ticket_id' => $record->id, 'actor_id' => $request->user()->id, 'action' => 'completed', 'note' => $data['resolution_note']]);
         });
@@ -124,7 +187,7 @@ class TicketController extends Controller
     {
         $this->owner($request, $ticket);
         abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
-        abort_unless($ticket->status === 'In Progress', 409);
+        abort_unless($ticket->status === 'In Progress' && $ticket->wa_verification_status === 'verified', 409);
         abort_unless(TicketActivity::where('ticket_id', $ticket->id)->where('action', 'note')->exists(), 409, 'Catat tindak lanjut dahulu.');
         $ticket->load('claimant');
         $message = $whatsapp->forFollowUpTicket($ticket);
@@ -139,7 +202,7 @@ class TicketController extends Controller
     public function confirmFollowUpWhatsApp(Request $request, Ticket $ticket)
     {
         $this->owner($request, $ticket);
-        abort_unless($ticket->status === 'In Progress', 409);
+        abort_unless($ticket->status === 'In Progress' && $ticket->wa_verification_status === 'verified', 409);
         $notification = WaNotification::where('ticket_id', $ticket->id)->where('event_type', 'followup')->first();
         abort_unless($notification && $notification->opened_at, 409, 'Buka pesan WhatsApp terlebih dahulu.');
         if (! $notification->confirmed_at) {
@@ -154,7 +217,7 @@ class TicketController extends Controller
     {
         $this->owner($request, $ticket);
         abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
-        abort_unless($ticket->status === 'Done', 409);
+        abort_unless($ticket->status === 'Done' && $ticket->wa_verification_status === 'verified', 409);
         $ticket->load('claimant');
         $message = $whatsapp->forCompletedTicket($ticket);
         WaNotification::updateOrCreate(
@@ -168,7 +231,7 @@ class TicketController extends Controller
     public function confirmWhatsApp(Request $request, Ticket $ticket)
     {
         $this->owner($request, $ticket);
-        abort_unless($ticket->status === 'Done', 409);
+        abort_unless($ticket->status === 'Done' && $ticket->wa_verification_status === 'verified', 409);
         $notification = WaNotification::where('ticket_id', $ticket->id)->where('event_type', 'completed')->first();
         abort_unless($notification && $notification->opened_at, 409, 'Buka pesan WhatsApp terlebih dahulu.');
         if (! $notification->confirmed_at) {

@@ -12,6 +12,7 @@ function newTteTicket(array $attrs = []): Ticket
     return Ticket::create(array_merge([
         'nama_user' => 'Pemohon Uji', 'no_wa' => '6281212345678',
         'layanan' => 'Reset Passphrase', 'status' => 'Open', 'source' => 'demo',
+        'wa_verification_status' => 'verified',
     ], $attrs));
 }
 
@@ -121,7 +122,7 @@ it('allows a user to change their password with the correct current password', f
 });
 
 it('loads the login page from the site root on a fresh install', function () {
-    $this->get('/')->assertRedirect(route('dashboard'));
+    $this->get('/')->assertRedirect(route('public.form'));
     $this->get('/login')->assertOk();
 });
 

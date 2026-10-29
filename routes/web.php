@@ -3,11 +3,15 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PublicTicketController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\WaTemplateController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect()->route('dashboard'));
+Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'public.form'));
+Route::get('/permohonan', [PublicTicketController::class, 'create'])->name('public.form');
+Route::post('/permohonan', [PublicTicketController::class, 'store'])->middleware('throttle:5,10')->name('public.submit');
+Route::get('/permohonan/berhasil', [PublicTicketController::class, 'success'])->name('public.success');
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'form'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1')->name('login.submit');
@@ -23,6 +27,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
     Route::post('/tickets/{ticket}/claim', [TicketController::class, 'claim'])->name('tickets.claim');
     Route::post('/tickets/{ticket}/release', [TicketController::class, 'release'])->name('tickets.release');
+    Route::post('/tickets/{ticket}/verify-whatsapp', [TicketController::class, 'verifyWhatsApp'])->name('tickets.verify-whatsapp');
+    Route::post('/tickets/{ticket}/whatsapp-unverified', [TicketController::class, 'openUnverifiedWhatsApp'])->name('tickets.whatsapp.unverified');
+    Route::post('/tickets/{ticket}/whatsapp-unverified-confirm', [TicketController::class, 'confirmUnverifiedWhatsApp'])->name('tickets.whatsapp.unverified.confirm');
     Route::post('/tickets/{ticket}/note', [TicketController::class, 'note'])->name('tickets.note');
     Route::post('/tickets/{ticket}/complete', [TicketController::class, 'complete'])->name('tickets.complete');
     Route::post('/tickets/{ticket}/whatsapp-followup', [TicketController::class, 'openFollowUpWhatsApp'])->name('tickets.whatsapp.followup');

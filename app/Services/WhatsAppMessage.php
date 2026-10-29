@@ -7,6 +7,11 @@ use App\Models\WaMessageTemplate;
 
 class WhatsAppMessage
 {
+    public function forUnverifiedTicket(Ticket $ticket): string
+    {
+        return $this->render($ticket, 'unverified');
+    }
+
     public function forFollowUpTicket(Ticket $ticket): string
     {
         return $this->render($ticket, 'followup');
@@ -42,6 +47,13 @@ class WhatsAppMessage
             '{inisial_verifikator}' => (string) ($verifier?->initials ?: '-'),
             '{nama_instansi}' => (string) config('tte.service_name', 'Layanan TTE'),
             '{opd}' => (string) ($ticket->opd ?: '-'),
+            '{email}' => (string) ($ticket->email ?: '-'),
+            '{nik}' => $ticket->masked_nik,
+            '{nip}' => (string) ($ticket->nip ?: '-'),
+            '{nomor_wa}' => (string) ($ticket->no_wa ?: '-'),
+            '{jabatan}' => (string) ($ticket->jabatan ?: '-'),
+            '{keterangan}' => (string) ($ticket->keterangan ?: '-'),
+            '{status_verifikasi_wa}' => $ticket->wa_verification_label,
         ]);
     }
 
