@@ -284,23 +284,29 @@
                             <h2>Pengingat Cek Inbox Email</h2>
                         </div><span class="wa-mark">WA</span>
                     </div>
-                    <p class="small muted">Minta pemohon memeriksa kotak masuk dan folder Spam pada email dinasnya. Pesan ini tidak menyatakan bahwa BSrE sudah mengirim email.</p>
+                    <p class="small muted">Minta pemohon memeriksa kotak masuk dan folder Spam pada email dinasnya. Pesan
+                        ini tidak menyatakan bahwa BSrE sudah mengirim email.</p>
                     <div class="message-box">
                         <div class="message-toolbar"><strong>Pratinjau Pesan</strong><button type="button"
-                                class="btn btn-copy btn-small" data-copy-target="inbox-reminder-wa-message">Salin Pesan</button></div>
+                                class="btn btn-copy btn-small" data-copy-target="inbox-reminder-wa-message">Salin
+                                Pesan</button></div>
                         <div id="inbox-reminder-wa-message" class="message-preview">{{ $inboxReminderMessage }}</div>
                     </div>
                     @unless ($ticket->source === 'simulated')
-                        <form target="tte_whatsapp_web" method="post" action="{{ route('tickets.whatsapp.inbox', $ticket) }}">
+                        <form target="tte_whatsapp_web" method="post"
+                            action="{{ route('tickets.whatsapp.inbox', $ticket) }}">
                             @csrf<button type="submit" class="btn btn-wa full">Buka WhatsApp Pengingat Inbox ↗</button>
                         </form>
                         @if ($inboxNotification?->opened_at)
-                            <p class="small muted mt">Tautan dibuka: {{ $inboxNotification->opened_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</p>
+                            <p class="small muted mt">Tautan dibuka:
+                                {{ $inboxNotification->opened_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</p>
                             @if ($inboxNotification->confirmed_at)
                                 <div class="alert success mt">Petugas telah mengonfirmasi pengiriman pengingat cek inbox.</div>
                             @else
-                                <form method="post" action="{{ route('tickets.whatsapp.inbox.confirm', $ticket) }}" class="mt">
-                                    @csrf<button type="submit" class="btn btn-outline full">Saya Sudah Mengirim Pengingat</button>
+                                <form method="post" action="{{ route('tickets.whatsapp.inbox.confirm', $ticket) }}"
+                                    class="mt">
+                                    @csrf<button type="submit" class="btn btn-outline full">Saya Sudah Mengirim
+                                        Pengingat</button>
                                 </form>
                             @endif
                         @endif
@@ -327,10 +333,12 @@
                     </div>
                     @unless ($ticket->source === 'simulated')
                         @if ($ticket->whatsappNotifications->firstWhere('event_type', 'inbox_reminder')?->confirmed_at)
-                            <form target="tte_whatsapp_web" method="post" action="{{ route('tickets.whatsapp', $ticket) }}">
+                            <form target="tte_whatsapp_web" method="post"
+                                action="{{ route('tickets.whatsapp', $ticket) }}">
                                 @csrf<button class="btn btn-wa full" type="submit">Buka WhatsApp Selesai ↗</button></form>
                         @else
-                            <div class="alert warn mt">Sebelum mengirim notifikasi selesai, kirim dan konfirmasi pengingat cek inbox email di kartu sebelumnya.</div>
+                            <div class="alert warn mt">Sebelum mengirim notifikasi selesai, kirim dan konfirmasi pengingat cek
+                                inbox email di kartu sebelumnya.</div>
                         @endif
                         @if ($notification?->opened_at)
                             <p class="muted small mt">Tautan dibuka:
