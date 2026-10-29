@@ -36,6 +36,30 @@ class AuthController extends Controller {
 
     public function profile(Request $request) {
         return view('auth.profile', ['user' => $request->user()]);
+        public function updateProfile(Request $request)
+{
+    abort_unless(
+        $request->user()?->isAdmin(),
+        403,
+        'Hanya administrator yang dapat mengubah nama profil melalui halaman ini.'
+    );
+
+    $data = $request->validate([
+        'name' => ['required', 'string', 'min:3', 'max:255'],
+    ], [
+        'name.required' => 'Nama administrator wajib diisi.',
+        'name.min' => 'Nama minimal 3 karakter.',
+        'name.max' => 'Nama maksimal 255 karakter.',
+    ]);
+
+    $request->user()->update([
+        'name' => trim($data['name']),
+    ]);
+
+    return redirect()
+        ->route('profile')
+        ->with('success', 'Nama profil administrator berhasil diperbarui.');
+}
     }
 
     public function changePassword(Request $request) {

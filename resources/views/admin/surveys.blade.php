@@ -49,7 +49,8 @@
     </section>
     <section class="card mt">
         <h2>Masukan Pemohon</h2>
-        <p class="small muted">Nama pengisi survei dan tanggapannya hanya dapat dilihat oleh administrator. Respons lama yang tidak mencatat nama ditampilkan sebagai "Belum dicatat".</p>
+        <p class="small muted">Nama pengisi survei dan tanggapannya hanya dapat dilihat oleh administrator. Respons lama
+            yang tidak mencatat nama ditampilkan sebagai "Belum dicatat".</p>
         <div class="table-scroll">
             <table>
                 <thead>
