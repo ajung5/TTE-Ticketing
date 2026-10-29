@@ -4,43 +4,51 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Layanan TTE') — Manajemen TTE</title>
-    <link rel="stylesheet" href="{{ asset('css/tte.css') }}">
+    <meta name="theme-color" content="#14243b">
+    <title>@yield('title', 'Layanan TTE') · TTE Ticketing</title>
+    <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=2">
+    <script src="{{ asset('js/tte.js') }}?v=2" defer></script>
 </head>
 <body>
 @auth
 <div class="shell">
     <aside class="sidebar">
-        <a href="{{ route('dashboard') }}" class="brand"><span class="brand-icon">T</span><span>Manajemen TTE<small>Layanan Sertifikat Elektronik</small></span></a>
-        <div class="nav-caption">MENU UTAMA</div>
-        @if(auth()->user()->isAdmin())
-            <a class="nav-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">▦ &nbsp; Statistik &amp; Akun</a>
-        @else
-            <a class="nav-item {{ request()->routeIs('tickets.*') ? 'active' : '' }}" href="{{ route('tickets.index') }}">▤ &nbsp; Antrean Tiket</a>
-        @endif
+        <a href="{{ route('dashboard') }}" class="brand" aria-label="Dashboard TTE Ticketing">
+            <span class="brand-icon">T</span>
+            <span>TTE Ticketing<small>Layanan Sertifikat Elektronik</small></span>
+        </a>
+        <div class="sidebar-group">
+            <div class="nav-caption">MENU UTAMA</div>
+            @if(auth()->user()->isAdmin())
+                <a class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}"><span class="nav-symbol">▦</span> Statistik Layanan</a>
+                <a class="nav-item {{ request()->routeIs('admin.templates.*') ? 'active' : '' }}" href="{{ route('admin.templates.index') }}"><span class="nav-symbol">✉</span> Preset WhatsApp</a>
+            @else
+                <a class="nav-item {{ request()->routeIs('tickets.*') ? 'active' : '' }}" href="{{ route('tickets.index') }}"><span class="nav-symbol">▤</span> Antrean Tiket</a>
+            @endif
+        </div>
+        <div class="sidebar-help"><span class="mini-dot"></span><strong>Self-Claim Ticketing</strong><p>Permohonan dicatat secara transparan. Setiap tiket memiliki penanggung jawab.</p></div>
         <div class="sidebar-bottom">
-            <div class="small muted">MASUK SEBAGAI</div>
-            <div class="user-name">{{ auth()->user()->name }}</div>
-            <div class="small muted">{{ auth()->user()->isAdmin() ? 'Administrator' : 'Verifikator' }}</div>
-            <a href="{{ route('profile') }}" class="nav-item mt">⚙ &nbsp; Profil &amp; Password</a>
-            <form method="post" action="{{ route('logout') }}" class="mt">@csrf<button class="btn btn-ghost full" type="submit">Keluar</button></form>
+            <div class="profile-chip"><span class="avatar">{{ strtoupper(substr(auth()->user()->initials ?: auth()->user()->name, 0, 2)) }}</span><span><strong class="user-name">{{ auth()->user()->name }}</strong><small>{{ auth()->user()->isAdmin() ? 'Administrator' : 'Verifikator' }}</small></span></div>
+            <a href="{{ route('profile') }}" class="nav-item sidebar-secondary">Pengaturan Profil</a>
+            <form method="post" action="{{ route('logout') }}">@csrf<button class="btn btn-ghost full sidebar-logout" type="submit">Keluar Sistem</button></form>
         </div>
     </aside>
     <main class="main">
-        <div class="topbar"><span class="muted">Sistem Informasi Manajemen Layanan TTE</span><span class="pill pill-neutral">{{ now('Asia/Jakarta')->translatedFormat('d M Y') }}</span></div>
+        <header class="topbar"><span><span class="topbar-circle"></span> Sistem Manajemen Layanan TTE</span><span class="topbar-date">{{ now('Asia/Jakarta')->translatedFormat('l, d F Y') }}</span></header>
         <div class="content">
-            @if(session('success'))<div class="alert success">{{ session('success') }}</div>@endif
-            @if($errors->any())<div class="alert error"><strong>Periksa kembali:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+            @if(session('success'))<div class="alert success" role="status">{{ session('success') }}</div>@endif
+            @if($errors->any())<div class="alert error" role="alert"><strong>Mohon periksa kembali:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
             @yield('content')
         </div>
     </main>
 </div>
 @else
 <main class="auth-page">
-    @if(session('success'))<div class="alert success">{{ session('success') }}</div>@endif
-    @if($errors->any())<div class="alert error"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+    @if(session('success'))<div class="alert success" role="status">{{ session('success') }}</div>@endif
+    @if($errors->any())<div class="alert error" role="alert"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
     @yield('content')
 </main>
 @endauth
+<div id="clipboard-status" class="clipboard-status" role="status" aria-live="polite"></div>
 </body>
 </html>

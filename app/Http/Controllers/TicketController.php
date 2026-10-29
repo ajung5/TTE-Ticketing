@@ -55,8 +55,10 @@ class TicketController extends Controller
         abort_unless($ticket->status === 'Open' || $ticket->claimed_by === $request->user()->id, 403);
         $ticket->load(['claimant', 'activities.actor', 'whatsappNotifications']);
         $waMessage = $ticket->status === 'Done' ? $whatsapp->forCompletedTicket($ticket) : null;
+        $followupMessage = $ticket->status === 'In Progress' && $ticket->activities->contains('action', 'note')
+            ? $whatsapp->forFollowUpTicket($ticket) : null;
 
-        return view('tickets.show', compact('ticket', 'waMessage'));
+        return view('tickets.show', compact('ticket', 'waMessage', 'followupMessage'));
     }
 
     public function claim(Request $request, Ticket $ticket)
@@ -121,6 +123,7 @@ class TicketController extends Controller
     public function openFollowUpWhatsApp(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp)
     {
         $this->owner($request, $ticket);
+        abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
         abort_unless($ticket->status === 'In Progress', 409);
         abort_unless(TicketActivity::where('ticket_id', $ticket->id)->where('action', 'note')->exists(), 409, 'Catat tindak lanjut dahulu.');
         $ticket->load('claimant');
@@ -150,6 +153,7 @@ class TicketController extends Controller
     public function openWhatsApp(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp)
     {
         $this->owner($request, $ticket);
+        abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
         abort_unless($ticket->status === 'Done', 409);
         $ticket->load('claimant');
         $message = $whatsapp->forCompletedTicket($ticket);

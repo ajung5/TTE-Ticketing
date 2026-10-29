@@ -35,5 +35,7 @@ class DatabaseSeeder extends Seeder
                 $ticket->update(['ticket_number' => 'TTE-'.now('Asia/Jakarta')->format('Ymd').'-'.str_pad((string) $ticket->id, 6, '0', STR_PAD_LEFT)]);
             }
         }
+
+        $this->call(DemoTicketsSeeder::class);
     }
 }
