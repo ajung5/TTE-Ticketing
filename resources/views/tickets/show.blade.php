@@ -19,6 +19,13 @@
                 <div><div class="field-name">Tanggal Masuk</div><div class="field-value">{{ $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i') }}</div></div>
                 <div><div class="field-name">Penanggung Jawab</div><div class="field-value">{{ $ticket->claimant?->name ?? 'Belum diambil' }}</div></div>
             </div>
+            @if($ticket->signature_path && $ticket->claimed_by === auth()->id())
+                <div class="note-box mt"><div class="field-name">Tanda tangan persetujuan pemohon</div>
+                    <div class="small muted">Persetujuan tercatat: {{ $ticket->consent_accepted_at?->timezone('Asia/Jakarta')->format('d M Y, H:i') ?? '-' }}</div>
+                    <img src="{{ route('tickets.signature', $ticket) }}" alt="Tanda tangan persetujuan formulir pemohon" class="signature-evidence" loading="lazy">
+                    <div class="small muted">Tanda tangan persetujuan bukan TTE tersertifikasi BSrE dan tidak membuktikan identitas secara mandiri.</div>
+                </div>
+            @endif
             @if($ticket->keterangan)<div class="note-box"><div class="field-name">Keterangan pemohon</div><div class="pre-wrap">{{ $ticket->keterangan }}</div></div>@endif
         </section>
         <section class="card"><div class="section-heading"><div><div class="eyebrow">JEJAK AKTIVITAS</div><h2>Riwayat Penanganan</h2></div><span class="pill pill-neutral">{{ $ticket->activities->count() }} aktivitas</span></div>

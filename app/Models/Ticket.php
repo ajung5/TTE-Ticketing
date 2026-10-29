@@ -17,11 +17,12 @@ class Ticket extends Model
         'jabatan', 'email', 'keterangan', 'claimed_by', 'claimed_at',
         'completed_at', 'resolution_note', 'nik', 'wa_verification_status',
         'wa_verification_note', 'wa_checked_at', 'wa_checked_by',
+        'consent_accepted_at', 'signature_path',
     ];
 
     protected function casts(): array
     {
-        return ['claimed_at' => 'datetime', 'completed_at' => 'datetime', 'wa_checked_at' => 'datetime', 'nik' => 'encrypted'];
+        return ['claimed_at' => 'datetime', 'completed_at' => 'datetime', 'wa_checked_at' => 'datetime', 'nik' => 'encrypted', 'consent_accepted_at' => 'datetime'];
     }
 
     public function claimant(): BelongsTo

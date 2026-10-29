@@ -65,6 +65,20 @@ class TicketController extends Controller
         return view('tickets.show', compact('ticket', 'waMessage', 'followupMessage', 'unverifiedMessage'));
     }
 
+    public function signature(Request $request, Ticket $ticket)
+    {
+        // Signature evidence is private: only the verifier who claimed this ticket may view it.
+        $this->owner($request, $ticket);
+        abort_unless(is_string($ticket->signature_path)
+            && str_starts_with($ticket->signature_path, 'signatures/')
+            && \Illuminate\Support\Facades\Storage::disk('local')->exists($ticket->signature_path), 404);
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->response(
+            $ticket->signature_path, null,
+            ['Cache-Control' => 'no-store, private', 'X-Content-Type-Options' => 'nosniff', 'Content-Type' => 'image/png']
+        );
+    }
+
     public function claim(Request $request, Ticket $ticket)
     {
         $this->verifier($request);

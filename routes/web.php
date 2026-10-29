@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'public.form'));
 Route::get('/permohonan', [PublicTicketController::class, 'create'])->name('public.form');
 Route::post('/permohonan', [PublicTicketController::class, 'store'])->middleware('throttle:5,10')->name('public.submit');
+Route::post('/permohonan/cek-nik', [PublicTicketController::class, 'lookupNik'])->middleware('throttle:tte-nik-lookup')->name('public.lookup-nik');
 Route::get('/permohonan/berhasil', [PublicTicketController::class, 'success'])->name('public.success');
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'form'])->name('login');
@@ -25,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
+    Route::get('/tickets/{ticket}/signature', [TicketController::class, 'signature'])->name('tickets.signature');
     Route::post('/tickets/{ticket}/claim', [TicketController::class, 'claim'])->name('tickets.claim');
     Route::post('/tickets/{ticket}/release', [TicketController::class, 'release'])->name('tickets.release');
     Route::post('/tickets/{ticket}/verify-whatsapp', [TicketController::class, 'verifyWhatsApp'])->name('tickets.verify-whatsapp');

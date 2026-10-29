@@ -2,6 +2,7 @@
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\EmailDirectorySync;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -11,17 +12,20 @@ function directRequestData(): array
     return [
         'layanan' => 'Reset Passphrase', 'nama_user' => 'Pemohon Uji Integrasi',
         'nik' => '3273010101010001', 'nip' => '198901012020011001',
-        'email' => 'penguji@subang.go.id', 'no_wa' => '081212345678',
-        'opd' => 'Diskominfo', 'jabatan' => 'Pranata Komputer',
+        'no_wa' => '081212345678', 'opd' => 'Diskominfo', 'jabatan' => 'Pranata Komputer',
+        'signature_data' => 'data:image/png;base64,'.base64_encode(file_get_contents(base_path('tests/Fixtures/signature-test.png'))),
         'persetujuan' => '1', 'submission_token' => '4b8f5c10-f06e-4f5c-8a03-0a9260210b11',
     ];
 }
 
-it('accepts public direct submission without login and encrypts NIK', function () {
+it('accepts public direct submission from synchronized directory without login and encrypts NIK', function () {
+    \Illuminate\Support\Facades\Storage::fake('local');
+    app(EmailDirectorySync::class)->import([['NIK', 'Email Gov'], ['3273010101010001', 'penguji@subang.go.id']]);
     $this->get(route('public.form'))->assertOk()->assertSee('Permohonan Layanan TTE');
     $this->post(route('public.submit'), directRequestData())->assertRedirect(route('public.success'));
     $ticket = Ticket::where('source', 'direct')->firstOrFail();
     expect($ticket->status)->toBe('Open');
+    expect($ticket->email)->toBe('penguji@subang.go.id');
     expect($ticket->no_wa)->toBe('6281212345678');
     expect($ticket->nik)->toBe('3273010101010001');
     expect($ticket->getRawOriginal('nik'))->not->toBe('3273010101010001');
@@ -31,11 +35,11 @@ it('accepts public direct submission without login and encrypts NIK', function (
     expect(Ticket::where('source', 'direct')->count())->toBe(1);
 });
 
-it('rejects incomplete submissions and non-subang emails', function () {
+it('rejects incomplete submissions and NIK missing from the directory', function () {
+    app(EmailDirectorySync::class)->import([['NIK', 'Email Gov'], ['3273010101010001', 'penguji@subang.go.id']]);
     $data = directRequestData();
     $data['nik'] = '123';
-    $data['email'] = 'test@example.com';
-    $this->post(route('public.submit'), $data)->assertSessionHasErrors(['nik','email']);
+    $this->post(route('public.submit'), $data)->assertSessionHasErrors('nik');
     expect(Ticket::count())->toBe(0);
 });
 
