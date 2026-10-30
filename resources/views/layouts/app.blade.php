@@ -26,6 +26,8 @@
                             href="{{ route('admin.dashboard') }}"><span class="nav-symbol">▦</span> Statistik Layanan</a>
                         <a class="nav-item {{ request()->routeIs('admin.verifiers.*') ? 'active' : '' }}"
                             href="{{ route('admin.verifiers.index') }}"><span class="nav-symbol">♙</span> Manajemen Verifikator</a>
+                        <a class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
+                            href="{{ route('admin.reports.tickets.index') }}"><span class="nav-symbol">▤</span> Laporan Tiket</a>
                         <a class="nav-item {{ request()->routeIs('admin.surveys.*') ? 'active' : '' }}"
                             href="{{ route('admin.surveys.index') }}"><span class="nav-symbol">▤</span> Hasil Survei</a>
                         <a class="nav-item {{ request()->routeIs('admin.templates.*') ? 'active' : '' }}"
