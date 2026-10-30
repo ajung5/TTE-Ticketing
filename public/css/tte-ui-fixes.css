@@ -1,0 +1,51 @@
+/* TTE Ticketing UI patch v11: icon SVG sidebar dan pagination native tanpa Tailwind */
+.tte-icon-sprite{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
+.sidebar .nav-item{display:flex;align-items:center;gap:12px}
+.sidebar .nav-item .nav-symbol{
+    display:block;width:20px;height:20px;flex:0 0 20px;
+    color:#a9c0e4;fill:none;stroke:currentColor;stroke-width:1.9;
+    stroke-linecap:round;stroke-linejoin:round;
+}
+.sidebar .nav-item:hover .nav-symbol{color:#dcecff}
+.sidebar .nav-item.active .nav-symbol{color:#c5dbff}
+.sidebar .nav-item.sidebar-secondary .nav-symbol{width:18px;height:18px;flex-basis:18px}
+
+/* Wrapper .pagination sudah ada pada tiga halaman, tetapi tidak diwajibkan. */
+.tte-pagination{
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:12px;padding:17px 0 0;margin-top:17px;
+    border-top:1px solid #e6edf6;font-size:12px;
+}
+.tte-pagination-summary{margin:0;color:#65758f;line-height:1.5}
+.tte-pagination-summary strong{color:#334860;font-weight:700}
+.pagination .tte-pagination .tte-pagination-pages,
+.tte-pagination .tte-pagination-pages{
+    display:flex;align-items:center;justify-content:flex-end;
+    flex-wrap:wrap;gap:5px;margin-left:auto;
+}
+.tte-page-item{
+    box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;
+    min-width:35px;height:35px;padding:0 8px;
+    border:1px solid #d9e3f2;border-radius:9px;
+    background:#fff;color:#36537a;text-decoration:none;
+    font-size:12px;font-weight:700;line-height:1;
+    font-variant-numeric:tabular-nums;
+}
+a.tte-page-item:hover{background:#edf4ff;border-color:#aac2ed;color:#234a99;text-decoration:none}
+a.tte-page-item:focus-visible{outline:2px solid #5887dc;outline-offset:2px}
+.tte-page-item.is-active{background:#315dbe;border-color:#315dbe;color:#fff;box-shadow:0 2px 5px rgba(49,93,190,.14)}
+.tte-page-item[aria-disabled="true"]{color:#a1adc0;background:#f7f9fc;border-color:#e4eaf2;cursor:default}
+.tte-pagination .tte-page-arrow svg,
+.pagination .tte-pagination .tte-page-arrow svg{
+    width:16px;height:16px;display:block;
+    fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;
+}
+.tte-page-dots{display:inline-flex;align-items:center;justify-content:center;min-width:25px;height:35px;color:#8a96aa}
+@media (max-width:640px){
+    .tte-pagination{justify-content:center;text-align:center}
+    .tte-pagination-summary{width:100%}
+    .pagination .tte-pagination .tte-pagination-pages,
+    .tte-pagination .tte-pagination-pages{justify-content:center;margin-left:0}
+    .tte-page-item{min-width:33px;height:33px}
+}
+@media print{.tte-pagination{display:none!important}}
