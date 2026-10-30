@@ -352,12 +352,21 @@
             <div class="report-metric"><small>Dalam
                     Proses</small><strong>{{ number_format((int) $summary->progress_count, 0, ',', '.') }}</strong><small>Dari
                     tiket masuk periode</small></div>
-            <div class="report-metric"><small>Selesai (Tiket
-                    Masuk)</small><strong>{{ number_format((int) $summary->done_count, 0, ',', '.') }}</strong><small>{{ (int) $summary->total > 0 ? number_format((100 * (int) $summary->done_count) / (int) $summary->total, 1, ',', '.') : '0' }}%
-                    dari tiket masuk</small></div>
-            <div class="report-metric"><small>Selesai Selama
-                    Periode</small><strong>{{ number_format($completedDuringPeriod, 0, ',', '.') }}</strong><small>Menurut
-                    waktu penyelesaian</small></div>
+            <div class="report-metric">
+                <small>Selesai (Tiket Masuk)</small>
+                <strong>
+                    {{ number_format((int) $summary->done_count, 0, ',', '.') }}
+                </strong>
+                <small>{{ (int) $summary->total > 0 ? number_format((100 * (int) $summary->done_count) / (int) $summary->total, 1, ',', '.') : '0' }}%
+                    dari tiket masuk</small>
+            </div>
+            <div class="report-metric">
+                <small>Selesai Selama Periode</small>
+                <strong>
+                    {{ number_format($completedDuringPeriod, 0, ',', '.') }}
+                </strong>
+                <small>Menurut waktu penyelesaian</small>
+            </div>
         </div>
 
         <section class="card">
