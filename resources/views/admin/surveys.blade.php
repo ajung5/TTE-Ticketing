@@ -79,6 +79,8 @@
                 </tbody>
             </table>
         </div>
-        {{ $responses->links() }}
+        <div class="pagination">
+            {{ $responses->links() }}
+        </div>
     </section>
 @endsection
