@@ -276,7 +276,7 @@
                         <div id="service-wa-message" class="message-preview">{{ $serviceMessage }}</div>
                     </div>
                     @unless ($ticket->source === 'simulated')
-                        <form target="tte_whatsapp_web" method="post"
+                        <form target="tte_whatsapp_web" method="post" data-wa-open="1"
                             action="{{ route('tickets.whatsapp.service', $ticket) }}">@csrf
                             <button class="btn btn-wa full" type="submit">Buka WhatsApp Web ↗</button>
                         </form>
@@ -318,7 +318,7 @@
                         <div id="completed-wa-message" class="message-preview">{{ $waMessage }}</div>
                     </div>
                     @unless ($ticket->source === 'simulated')
-                        <form target="tte_whatsapp_web" method="post" action="{{ route('tickets.whatsapp', $ticket) }}">
+                        <form target="tte_whatsapp_web" method="post" data-wa-open="1" action="{{ route('tickets.whatsapp', $ticket) }}">
                             @csrf
                             <button class="btn btn-wa full" type="submit">Buka WhatsApp Selesai ↗</button>
                         </form>
@@ -433,4 +433,5 @@
     </div>
     <link rel="stylesheet" href="{{ asset('css/ams-workflow.css') }}?v=16">
     <script src="{{ asset('js/ams-workflow.js') }}?v=18" defer></script>
+    <script src="{{ asset('js/whatsapp-open-refresh.js') }}?v=1" defer></script>
 @endsection

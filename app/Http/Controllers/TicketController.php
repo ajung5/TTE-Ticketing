@@ -353,7 +353,11 @@ class TicketController extends Controller {
             ['ticket_id' => $ticket->id, 'event_type' => $event],
             ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now(), 'confirmed_at' => null]
         );
-        return redirect()->away($whatsapp->url($ticket, $message));
+        $whatsappUrl = $whatsapp->url($ticket, $message);
+        if ($request->expectsJson()) {
+            return response()->json(['url' => $whatsappUrl]);
+        }
+        return redirect()->away($whatsappUrl);
     }
 
     public function confirmServiceWhatsApp(Request $request, Ticket $ticket) {
@@ -488,7 +492,11 @@ class TicketController extends Controller {
             ['ticket_id' => $ticket->id, 'event_type' => 'completed'],
             ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now()]
         );
-        return redirect()->away($whatsapp->url($ticket, $message));
+        $whatsappUrl = $whatsapp->url($ticket, $message);
+        if ($request->expectsJson()) {
+            return response()->json(['url' => $whatsappUrl]);
+        }
+        return redirect()->away($whatsappUrl);
     }
 
     public function confirmWhatsApp(Request $request, Ticket $ticket) {
