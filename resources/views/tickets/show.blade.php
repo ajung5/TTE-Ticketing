@@ -134,9 +134,6 @@
         <div class="stack">
             @if ($ticket->status === 'In Progress')
                 @php
-                    $requiresAmsRecheck = in_array($ticket->layanan, ['Reset Passphrase', 'Pembaruan'], true)
-                        && $ticket->certificate_issuance_status === 'not_issued'
-                        && $ticket->recommended_service !== 'Pendaftaran';
                     $issuanceNoticeConfirmed = $ticket->activities
                         ->where('action', 'wa_service_confirmed')
                         ->where('note', \App\Models\WaMessageTemplate::EVENTS['certificate_not_issued'])
@@ -180,12 +177,6 @@
                             SE bisa belum terbit bila pemohon belum melakukan set passphrase melalui email BSrE.
                             Pilih <strong>Sudah/pernah terbit</strong> bila SE pernah diterbitkan, termasuk bila
                             kedaluwarsa. Pilih <strong>Belum pernah terbit</strong> hanya jika belum ada SE yang pernah diterbitkan.</p>
-                        @if ($requiresAmsRecheck)
-                            <div class="note-box" role="alert"><strong>Periksa ulang riwayat penerbitan SE.</strong>
-                                <p>Hasil lama belum membedakan SE yang belum pernah terbit dan SE yang pernah terbit.
-                                    Pilih status yang sesuai lalu simpan hasil pemeriksaan sebelum mengirim notifikasi.</p>
-                            </div>
-                        @endif
                         <form method="post" action="{{ route('tickets.verify-whatsapp', $ticket) }}" class="stack"
                             id="ams-verification-form" data-requested-service="{{ $ticket->layanan }}"
                             data-onboarding-history="{{ $onboardingHistory ? '1' : '0' }}"
@@ -212,8 +203,8 @@
                                     diperiksa walaupun WA terverifikasi)
                                     <select id="ams-certificate-status" name="certificate_issuance_status" disabled>
                                         <option value="">Pilih status penerbitan</option>
-                                        <option value="issued" @selected(old('certificate_issuance_status', $requiresAmsRecheck ? null : $ticket->certificate_issuance_status) === 'issued')>Sudah/pernah terbit (termasuk kedaluwarsa)</option>
-                                        <option value="not_issued" @selected(old('certificate_issuance_status', $requiresAmsRecheck ? null : $ticket->certificate_issuance_status) === 'not_issued')>Belum pernah terbit</option>
+                                        <option value="issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'issued')>Sudah/pernah terbit (termasuk kedaluwarsa)</option>
+                                        <option value="not_issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'not_issued')>Belum pernah terbit</option>
                                     </select>
                                 </label>
                             </div>
@@ -284,8 +275,10 @@
                         </div>
                     @elseif ($serviceEvent === 'certificate_not_issued')
                         <div class="note-box"><strong>Menunggu set passphrase.</strong>
-                            <p>Pemohon perlu mengikuti petunjuk email BSrE. Pemeriksaan AMS harus diulang sebelum tiket
-                                dapat diselesaikan.</p>
+                            <p>Pemohon cukup melanjutkan set passphrase melalui petunjuk email BSrE.
+                                Gunakan tiket ini; <strong>tidak perlu mengisi permohonan baru</strong>.
+                                Setelah selesai, periksa ulang AMS. Tiket belum dapat diselesaikan sebelum
+                                SE terbit dan nomor WA terverifikasi.</p>
                         </div>
                     @endif
                     <div class="message-box">
@@ -453,6 +446,6 @@
         </div>
     </div>
     <link rel="stylesheet" href="{{ asset('css/ams-workflow.css') }}?v=16">
-    <script src="{{ asset('js/ams-workflow.js') }}?v=24" defer></script>
+    <script src="{{ asset('js/ams-workflow.js') }}?v=25" defer></script>
     <script src="{{ asset('js/whatsapp-open-refresh.js') }}?v=1" defer></script>
 @endsection

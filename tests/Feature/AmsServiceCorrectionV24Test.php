@@ -25,7 +25,7 @@ function amsV24Ticket(User $owner, string $service): Ticket
     ]);
 }
 
-it('returns reset or renewal without any issued certificate only after the new notice is confirmed', function (string $service, string $wa) {
+it('continues issuance on the same reset or renewal ticket without returning it', function (string $service, string $wa) {
     $owner = User::factory()->create(['role' => 'verifier']);
     $ticket = amsV24Ticket($owner, $service);
     $this->actingAs($owner)->post(route('tickets.verify-whatsapp', $ticket), [
@@ -33,55 +33,54 @@ it('returns reset or renewal without any issued certificate only after the new n
         'activation_status' => 'activated',
         'certificate_issuance_status' => 'not_issued',
     ])->assertRedirect()->assertSessionHasNoErrors();
-    expect($ticket->fresh()->recommended_service)->toBe('Pendaftaran');
-    $this->get(route('tickets.show', $ticket))->assertOk()
-        ->assertSee('Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)')
-        ->assertSee('Kembalikan Permohonan')->assertDontSee('Tandai Selesai');
+    expect($ticket->fresh()->recommended_service)->toBeNull();
+    $this->get(route('tickets.show', $ticket))->assertOk()->assertSee('SE Belum Terbit')
+        ->assertSee('tidak perlu mengisi permohonan baru')->assertDontSee('Kembalikan Permohonan');
     $this->post(route('tickets.complete', $ticket))->assertStatus(409);
     $this->post(route('tickets.return-for-correction', $ticket))->assertStatus(409);
     $this->post(route('tickets.whatsapp.service.confirm', $ticket))->assertStatus(409);
     $this->postJson(route('tickets.whatsapp.service', $ticket))->assertOk()->assertJsonStructure(['url']);
-    $this->assertDatabaseHas('wa_notifications', ['ticket_id' => $ticket->id, 'event_type' => 'issuance_required']);
-    $this->post(route('tickets.return-for-correction', $ticket))->assertStatus(409);
+    $this->assertDatabaseHas('wa_notifications', ['ticket_id' => $ticket->id, 'event_type' => 'certificate_not_issued']);
     $this->post(route('tickets.whatsapp.service.confirm', $ticket))->assertRedirect();
-    expect($ticket->fresh()->status)->toBe('In Progress');
+    $this->post(route('tickets.return-for-correction', $ticket))->assertStatus(409);
     $this->post(route('tickets.complete', $ticket))->assertStatus(409);
-    $this->post(route('tickets.return-for-correction', $ticket))->assertRedirect();
-    expect($ticket->fresh()->status)->toBe('Returned');
+    expect($ticket->fresh()->status)->toBe('In Progress');
     expect($ticket->fresh()->layanan)->toBe($service);
     expect($ticket->fresh()->completed_at)->toBeNull();
-    $this->get(route('tickets.show', $ticket))->assertOk()->assertDontSee('completed-wa-message');
 })->with([
     ['Reset Passphrase', 'verified'], ['Reset Passphrase', 'unverified'],
     ['Pembaruan', 'verified'], ['Pembaruan', 'unverified'],
 ]);
 
-it('requires a fresh check for legacy not-issued reset tickets and rejects the old confirmation', function () {
+it('does not use a previous correction confirmation as confirmation of the set-passphrase notice', function () {
     $owner = User::factory()->create(['role' => 'verifier']);
     $ticket = amsV24Ticket($owner, 'Reset Passphrase');
     $ticket->forceFill([
-        'wa_verification_status' => 'verified', 'certificate_issuance_status' => 'not_issued',
-        'wa_checked_at' => now(), 'recommended_service' => null,
+        'wa_verification_status' => 'unverified', 'activation_status' => 'activated',
+        'certificate_issuance_status' => 'not_issued', 'wa_checked_at' => now(),
+        'recommended_service' => 'Pendaftaran',
     ])->save();
     WaNotification::create([
-        'ticket_id' => $ticket->id, 'verifier_id' => $owner->id, 'event_type' => 'certificate_not_issued',
-        'message' => 'Pesan lama', 'opened_at' => now(), 'confirmed_at' => now(),
+        'ticket_id' => $ticket->id, 'verifier_id' => $owner->id, 'event_type' => 'issuance_required',
+        'message' => 'Pesan koreksi lama', 'opened_at' => now(), 'confirmed_at' => now(),
     ]);
     $this->actingAs($owner)->get(route('tickets.show', $ticket))->assertOk()
-        ->assertSee('Periksa ulang riwayat penerbitan SE.')->assertDontSee('id="service-wa-message"', false);
-    $this->post(route('tickets.whatsapp.service', $ticket))->assertStatus(409);
+        ->assertSee('SE Belum Terbit')->assertDontSee('Kembalikan Permohonan');
     $this->post(route('tickets.whatsapp.service.confirm', $ticket))->assertStatus(409);
-    $this->post(route('tickets.complete', $ticket))->assertStatus(409);
-    $this->post(route('tickets.verify-whatsapp', $ticket), [
-        'wa_verification_status' => 'verified', 'certificate_issuance_status' => 'not_issued',
-    ])->assertSessionHasNoErrors();
-    $this->assertDatabaseHas('wa_notifications', [
-        'ticket_id' => $ticket->id, 'event_type' => 'certificate_not_issued', 'confirmed_at' => null,
-    ]);
     $this->post(route('tickets.return-for-correction', $ticket))->assertStatus(409);
+    $this->post(route('tickets.verify-whatsapp', $ticket), [
+        'wa_verification_status' => 'unverified', 'activation_status' => 'activated',
+        'certificate_issuance_status' => 'not_issued',
+    ])->assertSessionHasNoErrors();
+    expect($ticket->fresh()->recommended_service)->toBeNull();
+    $this->assertDatabaseHas('wa_notifications', [
+        'ticket_id' => $ticket->id, 'event_type' => 'issuance_required', 'confirmed_at' => null,
+    ]);
+    $this->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
+    $this->assertDatabaseHas('wa_notifications', ['ticket_id' => $ticket->id, 'event_type' => 'certificate_not_issued']);
 });
 
-it('keeps previously issued certificates on their chosen service even with an old pending-issuance history', function (string $service, string $event) {
+it('allows completion after confirmed pending issuance and a verified issued result for either service', function (string $service) {
     $owner = User::factory()->create(['role' => 'verifier']);
     $ticket = amsV24Ticket($owner, $service);
     TicketActivity::create([
@@ -93,11 +92,12 @@ it('keeps previously issued certificates on their chosen service even with an ol
     ])->assertSessionHasNoErrors();
     expect($ticket->fresh()->recommended_service)->toBeNull();
     $this->get(route('tickets.show', $ticket))->assertOk()
-        ->assertDontSee('SE Sudah Terbit — Siap Ditandai Selesai');
-    $this->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
-    $this->assertDatabaseHas('wa_notifications', ['ticket_id' => $ticket->id, 'event_type' => $event]);
+        ->assertSee('SE Sudah Terbit — Siap Ditandai Selesai');
+    $this->post(route('tickets.whatsapp.service', $ticket))->assertStatus(409);
     $this->post(route('tickets.return-for-correction', $ticket))->assertStatus(409);
-})->with([['Reset Passphrase', 'reset'], ['Pembaruan', 'renewal']]);
+    $this->post(route('tickets.complete', $ticket))->assertRedirect();
+    expect($ticket->fresh()->status)->toBe('Done');
+})->with(['Reset Passphrase', 'Pembaruan']);
 
 it('allows an explicit reset-renewal correction after clarification and invalidates it when withdrawn', function (string $service, string $recommended, string $wa) {
     $owner = User::factory()->create(['role' => 'verifier']);

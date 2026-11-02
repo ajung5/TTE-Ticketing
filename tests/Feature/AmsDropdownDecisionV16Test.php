@@ -95,7 +95,7 @@ it('notifies when SE is not yet issued and blocks completion until rechecked', f
             'certificate_issuance_status' => 'not_issued',
         ])
         ->assertRedirect();
-    $this->actingAs($verifier)->get(route('tickets.show', $ticket))->assertSee('Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)');
+    $this->actingAs($verifier)->get(route('tickets.show', $ticket))->assertSee('SE Belum Terbit');
     $this->actingAs($verifier)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
     $this->actingAs($verifier)
         ->post(route('tickets.whatsapp.service.confirm', $ticket))

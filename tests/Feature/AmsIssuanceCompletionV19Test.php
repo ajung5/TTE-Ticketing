@@ -22,7 +22,7 @@ function v19Ticket(User $owner, string $service): Ticket {
 }
 
 it('shows SE Belum Terbit first and then skips straight to Selesai + Survei after issuance', function () {
-    foreach (['Pendaftaran'] as $service) {
+    foreach (['Reset Passphrase', 'Pembaruan', 'Pendaftaran'] as $service) {
         $owner = User::factory()->create(['role' => 'verifier']);
         $ticket = v19Ticket($owner, $service);
         $this->actingAs($owner)->post(route('tickets.verify-whatsapp', $ticket), [

@@ -33,7 +33,7 @@ it('requires explicit certificate issuance status despite verified WhatsApp', fu
 });
 
 it(
-    'shows issuance correction and blocks completion even with verified WhatsApp',
+    'continues issuance and blocks completion even with verified WhatsApp',
     function () {
         $owner = User::factory()->create(['role' => 'verifier']);
         $ticket = v18Ticket($owner);
@@ -50,12 +50,12 @@ it(
         $this->actingAs($owner)
             ->get(route('tickets.show', $ticket))
             ->assertOk()
-            ->assertSee('Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)');
+            ->assertSee('SE Belum Terbit');
         $this->actingAs($owner)->post(route('tickets.complete', $ticket))->assertStatus(409);
         $this->actingAs($owner)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
         $this->assertDatabaseHas('wa_notifications', [
             'ticket_id' => $ticket->id,
-            'event_type' => 'issuance_required',
+            'event_type' => 'certificate_not_issued',
         ]);
     },
 );

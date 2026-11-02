@@ -65,11 +65,8 @@ class TicketController extends Controller {
             $ticket->certificate_issuance_status === 'not_issued' &&
             ($ticket->wa_verification_status === 'verified' || $ticket->activation_status === 'activated')
         ) {
-            if (in_array($ticket->layanan, ['Reset Passphrase', 'Pembaruan'], true)) {
-                // Hasil lama wajib diperiksa ulang; jangan mengirim rekomendasi kosong.
-                return $ticket->recommended_service === 'Pendaftaran'
-                    ? 'issuance_required' : null;
-            }
+            // Aktivasi sudah berjalan: lanjutkan set passphrase pada tiket yang sama,
+            // termasuk bila pemohon memilih Reset Passphrase atau Pembaruan.
             return 'certificate_not_issued';
         }
         // Reset dan Pembaruan hanya dapat dibedakan setelah klarifikasi kebutuhan.
@@ -121,7 +118,7 @@ class TicketController extends Controller {
 
     /** Konfirmasi SE Belum Terbit sebelumnya harus tercatat dalam audit trail. */
     private function readyAfterCertificateIssuance(Ticket $ticket): bool {
-        if ($ticket->layanan !== 'Pendaftaran' || !$ticket->wa_checked_at ||
+        if (!$ticket->wa_checked_at ||
             $ticket->wa_verification_status !== 'verified' ||
             $ticket->certificate_issuance_status !== 'issued') {
             return false;
@@ -297,8 +294,10 @@ class TicketController extends Controller {
             $record = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
             abort_unless($record->claimed_by === $request->user()->id && $record->status === 'In Progress', 409);
             $previousEvent = $this->serviceEvent($record);
+            // Akun sudah aktivasi tetapi SE belum terbit cukup melanjutkan proses,
+            // bukan pengajuan ulang. Koreksi ke Penerbitan hanya untuk akun belum aktivasi.
             $mismatch = in_array($record->layanan, ['Reset Passphrase', 'Pembaruan'], true) &&
-                (($wa === 'unverified' && $activation === 'not_activated') || $issuance === 'not_issued');
+                $wa === 'unverified' && $activation === 'not_activated';
             $mismatch =
                 $mismatch ||
                 ($record->layanan === 'Pendaftaran' &&
