@@ -25,7 +25,7 @@ function nipPublicForm(string $identifier): array
         'nik' => $identifier, 'nip' => '198901012020011001',
         'no_wa' => '85812341234', 'opd' => 'Diskominfo', 'jabatan' => 'Pranata Komputer',
         'persetujuan' => '1', 'submission_token' => (string) Str::uuid(),
-        'signature_data' => 'data:image/png;base64.'.base64_encode(
+        'signature_data' => 'data:image/png;base64,' . base64_encode(
             file_get_contents(base_path('tests/Fixtures/signature-test.png'))
         ),
     ];
