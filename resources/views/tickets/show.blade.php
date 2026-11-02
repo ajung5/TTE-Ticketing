@@ -134,6 +134,13 @@
         <div class="stack">
             @if ($ticket->status === 'In Progress')
                 @php
+                    $requiresAmsRecheck = in_array($ticket->layanan, ['Reset Passphrase', 'Pembaruan'], true)
+                        && $ticket->certificate_issuance_status === 'not_issued'
+                        && $ticket->recommended_service !== 'Pendaftaran';
+                    $issuanceNoticeConfirmed = $ticket->activities
+                        ->where('action', 'wa_service_confirmed')
+                        ->where('note', \App\Models\WaMessageTemplate::EVENTS['certificate_not_issued'])
+                        ->isNotEmpty();
                     $onboardingHistory = $ticket->activities
                         ->where('action', 'wa_service_confirmed')
                         ->whereIn('note', [
@@ -171,10 +178,18 @@
                         <p class="small muted">Periksa status nomor WhatsApp pada AMS BSrE. Jika WA sudah
                             terverifikasi, lewati aktivasi akun tetapi <strong>tetap periksa penerbitan SE</strong>.
                             SE bisa belum terbit bila pemohon belum melakukan set passphrase melalui email BSrE.
-                            Semua pilihan menggunakan dropdown.</p>
+                            Pilih <strong>Sudah/pernah terbit</strong> bila SE pernah diterbitkan, termasuk bila
+                            kedaluwarsa. Pilih <strong>Belum pernah terbit</strong> hanya jika belum ada SE yang pernah diterbitkan.</p>
+                        @if ($requiresAmsRecheck)
+                            <div class="note-box" role="alert"><strong>Periksa ulang riwayat penerbitan SE.</strong>
+                                <p>Hasil lama belum membedakan SE yang belum pernah terbit dan SE yang pernah terbit.
+                                    Pilih status yang sesuai lalu simpan hasil pemeriksaan sebelum mengirim notifikasi.</p>
+                            </div>
+                        @endif
                         <form method="post" action="{{ route('tickets.verify-whatsapp', $ticket) }}" class="stack"
                             id="ams-verification-form" data-requested-service="{{ $ticket->layanan }}"
-                            data-onboarding-history="{{ $onboardingHistory ? '1' : '0' }}">
+                            data-onboarding-history="{{ $onboardingHistory ? '1' : '0' }}"
+                            data-issuance-notice-confirmed="{{ $issuanceNoticeConfirmed ? '1' : '0' }}">
                             @csrf
                             <label for="ams-wa-status">1. Status verifikasi nomor WhatsApp pada AMS BSrE
                                 <select id="ams-wa-status" name="wa_verification_status" required>
@@ -197,8 +212,8 @@
                                     diperiksa walaupun WA terverifikasi)
                                     <select id="ams-certificate-status" name="certificate_issuance_status" disabled>
                                         <option value="">Pilih status penerbitan</option>
-                                        <option value="issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'issued')>Sudah terbit</option>
-                                        <option value="not_issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'not_issued')>Belum terbit</option>
+                                        <option value="issued" @selected(old('certificate_issuance_status', $requiresAmsRecheck ? null : $ticket->certificate_issuance_status) === 'issued')>Sudah/pernah terbit (termasuk kedaluwarsa)</option>
+                                        <option value="not_issued" @selected(old('certificate_issuance_status', $requiresAmsRecheck ? null : $ticket->certificate_issuance_status) === 'not_issued')>Belum pernah terbit</option>
                                     </select>
                                 </label>
                             </div>
@@ -206,14 +221,14 @@
                                 <label for="ams-recommended-service">Layanan yang disarankan setelah klarifikasi dengan
                                     pemohon
                                     <select id="ams-recommended-service" name="recommended_service" disabled>
-                                        <option value="">Pilih layanan yang benar</option>
+                                        <option value="">{{ $ticket->layanan === 'Pendaftaran' ? 'Pilih layanan yang benar' : 'Layanan sudah sesuai' }}</option>
                                         <option value="Reset Passphrase" @selected(old('recommended_service', $ticket->recommended_service) === 'Reset Passphrase')>Reset Passphrase
                                         </option>
                                         <option value="Pembaruan" @selected(old('recommended_service', $ticket->recommended_service) === 'Pembaruan')>Pembaruan Sertifikat
                                             Elektronik</option>
                                     </select>
                                 </label>
-                                <p class="small muted">Jangan memilih rekomendasi tanpa memastikan kebutuhan pemohon.</p>
+                                <p class="small muted">Untuk Reset/Pembaruan, pilih layanan lain hanya setelah klarifikasi. Status AMS saja tidak menentukan kebutuhan pemohon.</p>
                             </div>
                             <div id="ams-decision-preview" class="ams-decision-preview small muted" role="status"
                                 aria-live="polite">Lengkapi hasil pemeriksaan AMS.</div>
@@ -256,7 +271,7 @@
                     </div>
                     <p class="small muted">Sistem menentukan jenis notifikasi dari status sertifikat, verifikasi WA, dan
                         layanan yang dipilih. Periksa isi pesan sebelum dikirim.</p>
-                    @if ($serviceEvent === 'service_mismatch')
+                    @if (in_array($serviceEvent, \App\Models\WaMessageTemplate::CORRECTION_EVENTS, true))
                         <div class="note-box" role="alert"><strong>Permohonan perlu diajukan ulang.</strong>
                             <p>Setelah pesan dikirim, klik <strong>Saya Sudah Mengirim Pesan</strong>.
                                 Selanjutnya gunakan tombol <strong>Kembalikan Permohonan</strong> di bagian
@@ -376,7 +391,7 @@
                     @elseif ($serviceEvent === 'ready_for_completion')
                         <p class="small muted">SE sudah terbit setelah notifikasi SE Belum Terbit dikonfirmasi.
                             Klik Tandai Selesai agar notifikasi Selesai + Survei dan tautan penilaian tersedia.</p>
-                    @elseif ($serviceEvent === 'service_mismatch')
+                    @elseif (in_array($serviceEvent, \App\Models\WaMessageTemplate::CORRECTION_EVENTS, true))
                         @if ($ticket->source === 'simulated')
                             <p class="small muted">Pengembalian melalui WhatsApp tidak tersedia untuk tiket simulasi.</p>
                         @elseif (!$serviceConfirmed)
@@ -399,7 +414,7 @@
                         <p class="small muted">Penanganan telah dicatat. Anda dapat menandai tiket selesai tanpa mengisi
                             catatan.</p>
                     @endif
-                    @if ($serviceEvent === 'service_mismatch')
+                    @if (in_array($serviceEvent, \App\Models\WaMessageTemplate::CORRECTION_EVENTS, true))
                         <form method="post" action="{{ route('tickets.return-for-correction', $ticket) }}">@csrf
                             <button type="submit" class="btn btn-primary full"
                                 @disabled(!$serviceConfirmed || $ticket->source === 'simulated')>Kembalikan Permohonan</button>
@@ -438,6 +453,6 @@
         </div>
     </div>
     <link rel="stylesheet" href="{{ asset('css/ams-workflow.css') }}?v=16">
-    <script src="{{ asset('js/ams-workflow.js') }}?v=18" defer></script>
+    <script src="{{ asset('js/ams-workflow.js') }}?v=24" defer></script>
     <script src="{{ asset('js/whatsapp-open-refresh.js') }}?v=1" defer></script>
 @endsection

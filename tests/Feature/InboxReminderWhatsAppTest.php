@@ -27,7 +27,7 @@ function amsTicket(array $overrides = []): Ticket
 }
 
 it(
-    'registers eight active message templates, retaining legacy templates as historical data',
+    'registers nine active message templates, retaining legacy templates as historical data',
     function () {
         foreach (WaMessageTemplate::TEMPLATE_SERVICE_CODES as $event => $service) {
             $this->assertDatabaseHas('wa_message_templates', [
@@ -35,7 +35,7 @@ it(
                 'service_code' => $service,
             ]);
         }
-        expect(WaMessageTemplate::EVENTS)->toHaveCount(8);
+        expect(WaMessageTemplate::EVENTS)->toHaveCount(9);
     },
 );
 

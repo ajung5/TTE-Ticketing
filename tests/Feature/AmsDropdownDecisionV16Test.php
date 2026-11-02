@@ -24,10 +24,10 @@ function amsV16Ticket(User $verifier, string $service = 'Reset Passphrase'): Tic
     ]);
 }
 
-it('keeps the verification UI dropdown-only and registers exactly eight templates', function () {
+it('keeps the verification UI dropdown-only and registers exactly nine templates', function () {
     $verifier = User::factory()->create(['role' => 'verifier']);
     $ticket = amsV16Ticket($verifier);
-    expect(WaMessageTemplate::EVENTS)->toHaveCount(8);
+    expect(WaMessageTemplate::EVENTS)->toHaveCount(9);
     $this->actingAs($verifier)
         ->get(route('tickets.show', $ticket))
         ->assertOk()
@@ -95,7 +95,7 @@ it('notifies when SE is not yet issued and blocks completion until rechecked', f
             'certificate_issuance_status' => 'not_issued',
         ])
         ->assertRedirect();
-    $this->actingAs($verifier)->get(route('tickets.show', $ticket))->assertSee('SE Belum Terbit');
+    $this->actingAs($verifier)->get(route('tickets.show', $ticket))->assertSee('Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)');
     $this->actingAs($verifier)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
     $this->actingAs($verifier)
         ->post(route('tickets.whatsapp.service.confirm', $ticket))

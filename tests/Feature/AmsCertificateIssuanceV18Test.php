@@ -33,7 +33,7 @@ it('requires explicit certificate issuance status despite verified WhatsApp', fu
 });
 
 it(
-    'shows existing SE Belum Terbit notice and blocks completion even with verified WhatsApp',
+    'shows issuance correction and blocks completion even with verified WhatsApp',
     function () {
         $owner = User::factory()->create(['role' => 'verifier']);
         $ticket = v18Ticket($owner);
@@ -50,12 +50,12 @@ it(
         $this->actingAs($owner)
             ->get(route('tickets.show', $ticket))
             ->assertOk()
-            ->assertSee('SE Belum Terbit');
+            ->assertSee('Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)');
         $this->actingAs($owner)->post(route('tickets.complete', $ticket))->assertStatus(409);
         $this->actingAs($owner)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
         $this->assertDatabaseHas('wa_notifications', [
             'ticket_id' => $ticket->id,
-            'event_type' => 'certificate_not_issued',
+            'event_type' => 'issuance_required',
         ]);
     },
 );
@@ -82,7 +82,7 @@ it(
 
 it('switches from SE Belum Terbit directly to ready for completion after issuance', function () {
     $owner = User::factory()->create(['role' => 'verifier']);
-    $ticket = v18Ticket($owner, 'Pembaruan');
+    $ticket = v18Ticket($owner, 'Pendaftaran');
     $this->actingAs($owner)
         ->post(route('tickets.verify-whatsapp', $ticket), [
             'wa_verification_status' => 'verified',

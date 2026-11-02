@@ -89,6 +89,21 @@ class TteBaselineSeeder extends Seeder
             'completed' => "Yth. Bapak/Ibu {nama_pemohon},\n\nPenanganan permohonan {layanan} nomor tiket {nomor_tiket} telah selesai. Mohon isi survei kepuasan layanan: {survey_url}\nPetugas: {nama_verifikator}",
             'unregistered' => "Yth. Bapak/Ibu {nama_pemohon},\n\nHasil pemeriksaan AMS BSrE menunjukkan akun belum diaktivasi. Mohon ikuti petunjuk pendaftaran dan konfirmasi kembali kepada petugas.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'certificate_not_issued' => "Yth. Bapak/Ibu {nama_pemohon},\n\nAkun AMS BSrE telah diaktivasi, tetapi Sertifikat Elektronik belum terbit. Periksa inbox/spam email dinas {email}, lakukan set passphrase melalui petunjuk resmi BSrE, lalu hubungi petugas untuk pemeriksaan ulang.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}\nJangan pernah membagikan passphrase atau OTP.",
+            'issuance_required' => 'Yth. Bapak/Ibu {nama_pemohon},
+
+Berdasarkan pemeriksaan AMS BSrE, Sertifikat Elektronik Anda belum pernah terbit, meskipun akun sudah diaktivasi atau nomor WhatsApp sudah terverifikasi. Layanan Reset Passphrase atau Pembaruan belum sesuai untuk kondisi ini.
+
+Layanan diajukan: {layanan_diajukan}
+Layanan disarankan: {layanan_disarankan}
+
+Mohon ajukan permohonan Penerbitan Sertifikat Elektronik melalui: {form_url}
+Petugas akan mengembalikan tiket ini dengan status Perlu Pengajuan Ulang setelah konfirmasi pesan. Tiket ini tidak dihitung sebagai layanan selesai.
+
+Nomor tiket: {nomor_tiket}
+Petugas: {nama_verifikator}
+{nama_instansi}
+
+Jangan membagikan passphrase, OTP, atau password.',
             'service_mismatch' => "Yth. Bapak/Ibu {nama_pemohon},\n\nJenis layanan {layanan_diajukan} belum sesuai dengan kondisi akun. Setelah klarifikasi, layanan yang disarankan: {layanan_disarankan}. Ajukan melalui {form_url}.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
         ];
 

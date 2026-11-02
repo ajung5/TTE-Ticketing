@@ -47,6 +47,22 @@ class WhatsAppMessage {
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Pendaftaran TTE nomor tiket {nomor_tiket} telah diproses. Mohon tunggu informasi tahapan berikutnya.\nPetugas: {nama_verifikator}",
             'certificate_not_issued' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nAkun AMS BSrE Anda sudah diaktivasi, tetapi Sertifikat Elektronik belum terbit. Silakan periksa Inbox/Spam email dinas {email} dan lakukan set passphrase melalui petunjuk resmi BSrE. Setelah selesai, hubungi petugas untuk pemeriksaan ulang.\n\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}\nJangan pernah membagikan passphrase, OTP, atau password.",
+            'issuance_required' =>
+                'Yth. Bapak/Ibu {nama_pemohon},
+
+Berdasarkan pemeriksaan AMS BSrE, Sertifikat Elektronik Anda belum pernah terbit, meskipun akun sudah diaktivasi atau nomor WhatsApp sudah terverifikasi. Layanan Reset Passphrase atau Pembaruan belum sesuai untuk kondisi ini.
+
+Layanan diajukan: {layanan_diajukan}
+Layanan disarankan: {layanan_disarankan}
+
+Mohon ajukan permohonan Penerbitan Sertifikat Elektronik melalui: {form_url}
+Petugas akan mengembalikan tiket ini dengan status Perlu Pengajuan Ulang setelah konfirmasi pesan. Tiket ini tidak dihitung sebagai layanan selesai.
+
+Nomor tiket: {nomor_tiket}
+Petugas: {nama_verifikator}
+{nama_instansi}
+
+Jangan membagikan passphrase, OTP, atau password.',
             'service_mismatch' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nBerdasarkan pemeriksaan AMS BSrE, jenis layanan yang diajukan ({layanan_diajukan}) tidak sesuai dengan kondisi akun. Mohon mengajukan kembali dengan memilih {layanan_disarankan} melalui: {form_url}\n\nTiket sebelumnya ditutup secara administratif dan tidak dihitung sebagai layanan berhasil.\nNomor tiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'completed' =>

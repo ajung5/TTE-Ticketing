@@ -5,9 +5,9 @@
         <div>
             <div class="eyebrow">ADMIN / PENGATURAN</div>
             <h1>Preset Pesan WhatsApp</h1>
-            <p class="muted">Delapan jenis notifikasi untuk alur pemeriksaan AMS BSrE dan penyelesaian tiket.</p>
+            <p class="muted">Preset notifikasi untuk alur pemeriksaan AMS BSrE dan penyelesaian tiket.</p>
         </div>
-        <span class="pill pill-blue">8 jenis notifikasi</span>
+        <span class="pill pill-blue">{{ count(\App\Models\WaMessageTemplate::EVENTS) }} jenis notifikasi</span>
     </div>
     <div class="note-box notice-blue">
         <strong>Pengiriman dilakukan secara manual oleh verifikator.</strong>

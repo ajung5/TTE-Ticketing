@@ -13,7 +13,7 @@ class WaMessageTemplate extends Model {
         'Pendaftaran' => 'Penerbitan Sertifikat Elektronik'
     ];
 
-    // Enam jenis notifikasi yang aktif. Template umum memakai service_code '*'.
+    // Jenis notifikasi yang aktif. Template umum memakai service_code '*'.
     public const EVENTS = [
         'unverified' => 'Nomor WA Belum Terverifikasi',
         'reset' => 'Reset Passphrase',
@@ -22,7 +22,8 @@ class WaMessageTemplate extends Model {
         'completed' => 'Selesai + Survei',
         'unregistered' => 'User Belum Terdaftar',
         'certificate_not_issued' => 'SE Belum Terbit',
-        'service_mismatch' => 'Perbaikan Jenis Permohonan'
+        'service_mismatch' => 'Perbaikan Jenis Permohonan',
+        'issuance_required' => 'Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)'
     ];
 
     public const TEMPLATE_SERVICE_CODES = [
@@ -33,8 +34,11 @@ class WaMessageTemplate extends Model {
         'completed' => '*',
         'unregistered' => '*',
         'certificate_not_issued' => '*',
-        'service_mismatch' => '*'
+        'service_mismatch' => '*',
+        'issuance_required' => '*'
     ];
+
+    public const CORRECTION_EVENTS = ['service_mismatch', 'issuance_required'];
 
     public const VARIABLE_DESCRIPTIONS = [
         '{nama_pemohon}' => 'Nama pemohon',
