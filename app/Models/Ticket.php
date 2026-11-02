@@ -28,7 +28,7 @@ class Ticket extends Model {
         'completed_at',
         'resolution_note',
         'nik',
-        'wa_verification_status',
+        'activation_status', 'certificate_issuance_status', 'recommended_service', 'wa_verification_status',
         'wa_verification_note',
         'wa_checked_at',
         'wa_checked_by',
@@ -84,6 +84,7 @@ class Ticket extends Model {
         return match ($this->status) {
             'In Progress' => 'Diproses',
             'Done' => 'Selesai',
+            'Returned' => 'Perlu Pengajuan Ulang',
             default => 'Baru'
         };
     }

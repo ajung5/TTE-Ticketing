@@ -45,6 +45,10 @@ class WhatsAppMessage {
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Pembaruan Sertifikat Elektronik nomor tiket {nomor_tiket} telah diproses. Silakan periksa Inbox/Spam email dinas {email} untuk informasi pembaruan BSrE.\nPetugas: {nama_verifikator}",
             'registration' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Pendaftaran TTE nomor tiket {nomor_tiket} telah diproses. Mohon tunggu informasi tahapan berikutnya.\nPetugas: {nama_verifikator}",
+            'certificate_not_issued' =>
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nAkun AMS BSrE Anda sudah diaktivasi, tetapi Sertifikat Elektronik belum terbit. Silakan periksa Inbox/Spam email dinas {email} dan lakukan set passphrase melalui petunjuk resmi BSrE. Setelah selesai, hubungi petugas untuk pemeriksaan ulang.\n\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}\nJangan pernah membagikan passphrase, OTP, atau password.",
+            'service_mismatch' =>
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nBerdasarkan pemeriksaan AMS BSrE, jenis layanan yang diajukan ({layanan_diajukan}) tidak sesuai dengan kondisi akun. Mohon mengajukan kembali dengan memilih {layanan_disarankan} melalui: {form_url}\n\nTiket sebelumnya ditutup secara administratif dan tidak dihitung sebagai layanan berhasil.\nNomor tiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'completed' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPenanganan permohonan {layanan} nomor tiket {nomor_tiket} telah selesai. Mohon mengisi survei kepuasan melalui {survey_url}.\nPetugas: {nama_verifikator}"
         ];
@@ -55,6 +59,14 @@ class WhatsAppMessage {
             '{nama_pemohon}' => (string) $ticket->nama_user,
             '{nomor_tiket}' => (string) ($ticket->ticket_number ?? '#' . $ticket->id),
             '{layanan}' => $ticket->service_label,
+            '{layanan_diajukan}' => $ticket->service_label,
+            '{layanan_disarankan}' => match ($ticket->recommended_service) {
+                'Pendaftaran' => 'Penerbitan Sertifikat Elektronik',
+                'Pembaruan' => 'Pembaruan Sertifikat Elektronik',
+                'Reset Passphrase' => 'Reset Passphrase',
+                default => 'Hubungi petugas',
+            },
+            '{form_url}' => route('public.form'),
             '{nama_verifikator}' => (string) ($verifier?->name ?? 'Tim Verifikator TTE'),
             '{inisial_verifikator}' => (string) ($verifier?->initials ?: '-'),
             '{nama_instansi}' => (string) config('tte.service_name', 'Layanan TTE'),

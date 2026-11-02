@@ -18,11 +18,11 @@ function amsTicket(array $overrides = []): Ticket {
     ], $overrides));
 }
 
-it('registers six active message templates, retaining legacy templates as historical data', function () {
+it('registers eight active message templates, retaining legacy templates as historical data', function () {
     foreach (WaMessageTemplate::TEMPLATE_SERVICE_CODES as $event => $service) {
         $this->assertDatabaseHas('wa_message_templates', ['event_type' => $event, 'service_code' => $service]);
     }
-    expect(WaMessageTemplate::EVENTS)->toHaveCount(6);
+    expect(WaMessageTemplate::EVENTS)->toHaveCount(8);
 });
 
 it('prevents sending or completion before both AMS results exist', function () {
@@ -31,8 +31,8 @@ it('prevents sending or completion before both AMS results exist', function () {
     $this->actingAs($owner)->post(route('tickets.whatsapp.service', $ticket))->assertStatus(409);
     $this->actingAs($owner)->post(route('tickets.complete', $ticket))->assertStatus(409);
     $this->actingAs($owner)->post(route('tickets.verify-whatsapp', $ticket), [
-        'wa_verification_status' => 'verified',
-    ])->assertSessionHasErrors('certificate_status');
+        'wa_verification_status' => '',
+    ])->assertSessionHasErrors('wa_verification_status');
     $this->actingAs($owner)->get(route('tickets.show', $ticket))
         ->assertOk()->assertSee('Verifikasi Akun TTE dan Nomor WA')->assertDontSee('Hasil penyelesaian');
 });
@@ -42,14 +42,15 @@ it('uses certificate status before WA and separates reset, renewal, registration
     foreach ([
         ['Reset Passphrase','active','verified','reset'],
         ['Pembaruan','active','verified','renewal'],
-        ['Pendaftaran','active','verified','registration'],
+        ['Pendaftaran','active','verified','service_mismatch'],
         ['Reset Passphrase','active','unverified','unverified'],
-        ['Pendaftaran','inactive','verified','unregistered'],
-        ['Pembaruan','inactive','unverified','unregistered'],
+        ['Pendaftaran','inactive','unverified','unregistered'],
+        ['Pembaruan','inactive','unverified','service_mismatch'],
     ] as $i => [$layanan,$certificate,$wa,$expected]) {
         $ticket = amsTicket(['claimed_by' => $owner->id, 'layanan' => $layanan, 'ticket_number' => 'TTE-AMS-'.($i+1)]);
         $this->actingAs($owner)->post(route('tickets.verify-whatsapp', $ticket), [
             'certificate_status' => $certificate, 'wa_verification_status' => $wa,
+            'recommended_service' => 'Reset Passphrase',
         ])->assertRedirect();
         $this->actingAs($owner)->get(route('tickets.show', $ticket))
             ->assertOk()->assertSee(WaMessageTemplate::EVENTS[$expected]);

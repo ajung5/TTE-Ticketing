@@ -44,7 +44,7 @@
                 aria-label="Cari tiket">
             <select name="status" aria-label="Filter status">
                 <option value="">Semua Status</option>
-                @foreach (['Open' => 'Baru', 'In Progress' => 'Diproses', 'Done' => 'Selesai'] as $value => $label)
+                @foreach (['Open' => 'Baru', 'In Progress' => 'Diproses', 'Done' => 'Selesai', 'Returned' => 'Perlu Pengajuan Ulang'] as $value => $label)
                     <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
                 @endforeach
             </select>

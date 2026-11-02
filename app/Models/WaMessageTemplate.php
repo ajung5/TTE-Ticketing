@@ -20,7 +20,9 @@ class WaMessageTemplate extends Model {
         'renewal' => 'Pembaruan Sertifikat',
         'registration' => 'Pendaftaran Diproses',
         'completed' => 'Selesai + Survei',
-        'unregistered' => 'User Belum Terdaftar'
+        'unregistered' => 'User Belum Terdaftar',
+        'certificate_not_issued' => 'SE Belum Terbit',
+        'service_mismatch' => 'Perbaikan Jenis Permohonan'
     ];
 
     public const TEMPLATE_SERVICE_CODES = [
@@ -29,13 +31,18 @@ class WaMessageTemplate extends Model {
         'renewal' => 'Pembaruan',
         'registration' => 'Pendaftaran',
         'completed' => '*',
-        'unregistered' => '*'
+        'unregistered' => '*',
+        'certificate_not_issued' => '*',
+        'service_mismatch' => '*'
     ];
 
     public const VARIABLE_DESCRIPTIONS = [
         '{nama_pemohon}' => 'Nama pemohon',
         '{nomor_tiket}' => 'Nomor tiket',
         '{layanan}' => 'Jenis layanan',
+        '{layanan_diajukan}' => 'Layanan yang diajukan pemohon',
+        '{layanan_disarankan}' => 'Layanan yang disarankan verifikator',
+        '{form_url}' => 'Tautan formulir permohonan',
         '{email}' => 'Email dinas pemohon',
         '{nik}' => 'NIK tersamarkan (12 digit disembunyikan)',
         '{nip}' => 'NIP (jika diisi)',
@@ -54,6 +61,9 @@ class WaMessageTemplate extends Model {
         '{nama_pemohon}',
         '{nomor_tiket}',
         '{layanan}',
+        '{layanan_diajukan}',
+        '{layanan_disarankan}',
+        '{form_url}',
         '{email}',
         '{nik}',
         '{nip}',

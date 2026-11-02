@@ -1,0 +1,4 @@
+.ams-conditional[hidden] { display: none !important; }
+.ams-conditional { min-width: 0; }
+#ams-verification-form select { min-height: 46px; }
+.ams-decision-preview { border: 1px solid #d6e3f5; background: #f5f9ff; color: #27528b; padding: 12px 14px; border-radius: 10px; line-height: 1.6; }
