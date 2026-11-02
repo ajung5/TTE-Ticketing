@@ -123,9 +123,12 @@
                                         value="{{ old('no_wa') }}" placeholder="85812341234"
                                         autocomplete="tel-national" aria-describedby="wa-help">
                                 </div>
-                                <p class="small muted" id="wa-help">Masukkan nomor tanpa angka 0 di depan, mulai dari
-                                    <strong>8</strong>. Contoh: <strong>85812341234</strong>. Pastikan nomor dapat menerima
-                                    pesan WhatsApp.
+                                <p class="small muted" id="wa-help">
+                                    Kode negara <strong>+62</strong> ditambahkan otomatis.
+                                    Masukkan nomor tanpa angka 0 di depan, dimulai dari
+                                    <strong>8</strong>.
+                                    Contoh: <strong>85812341234</strong>.
+                                    Pastikan nomor dapat menerima pesan WhatsApp.
                                 </p>
                             </div>
                         </div>
