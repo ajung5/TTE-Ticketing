@@ -64,7 +64,7 @@ class WhatsAppMessage {
                 'Pendaftaran' => 'Penerbitan Sertifikat Elektronik',
                 'Pembaruan' => 'Pembaruan Sertifikat Elektronik',
                 'Reset Passphrase' => 'Reset Passphrase',
-                default => 'Hubungi petugas',
+                default => 'Hubungi petugas'
             },
             '{form_url}' => route('public.form'),
             '{nama_verifikator}' => (string) ($verifier?->name ?? 'Tim Verifikator TTE'),

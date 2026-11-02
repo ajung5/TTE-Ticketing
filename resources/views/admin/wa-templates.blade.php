@@ -67,7 +67,8 @@
                 </div>
                 <div class="note-box"><strong>Token wajib</strong>
                     <p class="small muted"><code>{nama_pemohon}</code>, <code>{nomor_tiket}</code>,
-                        <code>{nama_verifikator}</code>.</p>
+                        <code>{nama_verifikator}</code>.
+                    </p>
                 </div>
             </section>
         </aside>

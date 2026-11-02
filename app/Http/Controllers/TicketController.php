@@ -55,8 +55,7 @@ class TicketController extends Controller {
     }
 
     /** Hanya hasil pemeriksaan manual AMS BSrE yang menentukan pesan layanan. */
-    private function serviceEvent(Ticket $ticket): ?string
-    {
+    private function serviceEvent(Ticket $ticket): ?string {
         if (!$ticket->wa_checked_at) {
             return null;
         }
@@ -67,7 +66,7 @@ class TicketController extends Controller {
             return match ($ticket->layanan) {
                 'Reset Passphrase' => 'reset',
                 'Pembaruan' => 'renewal',
-                default => null,
+                default => null
             };
         }
         if ($ticket->wa_verification_status !== 'unverified') {
@@ -91,15 +90,15 @@ class TicketController extends Controller {
         return null;
     }
 
-    private function hasOnboardingHistory(Ticket $ticket): bool
-    {
+    private function hasOnboardingHistory(Ticket $ticket): bool {
         return TicketActivity::query()
             ->where('ticket_id', $ticket->id)
             ->where('action', 'wa_service_confirmed')
             ->whereIn('note', [
                 \App\Models\WaMessageTemplate::EVENTS['unregistered'],
-                \App\Models\WaMessageTemplate::EVENTS['certificate_not_issued'],
-            ])->exists();
+                \App\Models\WaMessageTemplate::EVENTS['certificate_not_issued']
+            ])
+            ->exists();
     }
 
     public function show(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp) {
@@ -186,8 +185,7 @@ class TicketController extends Controller {
     }
 
     /** Catat status sertifikat dan WA berdasarkan pemeriksaan manual pada AMS BSrE. */
-    public function verifyWhatsApp(Request $request, Ticket $ticket)
-    {
+    public function verifyWhatsApp(Request $request, Ticket $ticket) {
         $this->owner($request, $ticket);
         $data = $request->validate([
             'wa_verification_status' => ['required', Rule::in(['verified', 'unverified'])],
@@ -196,7 +194,7 @@ class TicketController extends Controller {
             'recommended_service' => ['nullable', Rule::in(['Reset Passphrase', 'Pembaruan'])],
             'wa_verification_note' => ['nullable', 'string', 'max:500'],
             // Kompatibilitas request pengujian/klien internal versi sebelumnya.
-            'certificate_status' => ['nullable', Rule::in(['active', 'inactive'])],
+            'certificate_status' => ['nullable', Rule::in(['active', 'inactive'])]
         ]);
 
         $wa = $data['wa_verification_status'];
@@ -211,12 +209,12 @@ class TicketController extends Controller {
             }
             if ($activation === null) {
                 throw ValidationException::withMessages([
-                    'activation_status' => 'Status aktivasi akun wajib dipilih jika WA belum terverifikasi.',
+                    'activation_status' => 'Status aktivasi akun wajib dipilih jika WA belum terverifikasi.'
                 ]);
             }
             if ($activation === 'activated' && $issuance === null) {
                 throw ValidationException::withMessages([
-                    'certificate_issuance_status' => 'Status penerbitan SE wajib dipilih jika akun sudah aktivasi.',
+                    'certificate_issuance_status' => 'Status penerbitan SE wajib dipilih jika akun sudah aktivasi.'
                 ]);
             }
             if ($activation === 'not_activated') {
@@ -229,37 +227,43 @@ class TicketController extends Controller {
             abort_unless($record->claimed_by === $request->user()->id && $record->status === 'In Progress', 409);
             $previousEvent = $this->serviceEvent($record);
             $mismatch = $record->layanan !== 'Pendaftaran' && $wa === 'unverified' && $activation === 'not_activated';
-            $mismatch = $mismatch || ($record->layanan === 'Pendaftaran'
-                && ($wa === 'verified' || ($wa === 'unverified' && $issuance === 'issued'))
-                && !$this->hasOnboardingHistory($record));
+            $mismatch =
+                $mismatch ||
+                ($record->layanan === 'Pendaftaran' &&
+                    ($wa === 'verified' || ($wa === 'unverified' && $issuance === 'issued')) &&
+                    !$this->hasOnboardingHistory($record));
             $recommended = null;
             if ($mismatch) {
                 if ($record->layanan === 'Pendaftaran') {
                     $recommended = $data['recommended_service'] ?? null;
                     if ($recommended === null) {
                         throw ValidationException::withMessages([
-                            'recommended_service' => 'Pilih layanan yang disarankan setelah klarifikasi kebutuhan pemohon.',
+                            'recommended_service' =>
+                                'Pilih layanan yang disarankan setelah klarifikasi kebutuhan pemohon.'
                         ]);
                     }
                 } else {
                     $recommended = 'Pendaftaran';
                 }
             }
-            $legacyCertificate = ($wa === 'verified' || $issuance === 'issued') ? 'active' : 'inactive';
-            $changed = $record->wa_verification_status !== $wa
-                || $record->activation_status !== $activation
-                || $record->certificate_issuance_status !== $issuance
-                || $record->recommended_service !== $recommended;
-            $record->forceFill([
-                'wa_verification_status' => $wa,
-                'activation_status' => $activation,
-                'certificate_issuance_status' => $issuance,
-                'certificate_status' => $legacyCertificate,
-                'recommended_service' => $recommended,
-                'wa_verification_note' => $data['wa_verification_note'] ?? null,
-                'wa_checked_at' => now(),
-                'wa_checked_by' => $request->user()->id,
-            ])->save();
+            $legacyCertificate = $wa === 'verified' || $issuance === 'issued' ? 'active' : 'inactive';
+            $changed =
+                $record->wa_verification_status !== $wa ||
+                $record->activation_status !== $activation ||
+                $record->certificate_issuance_status !== $issuance ||
+                $record->recommended_service !== $recommended;
+            $record
+                ->forceFill([
+                    'wa_verification_status' => $wa,
+                    'activation_status' => $activation,
+                    'certificate_issuance_status' => $issuance,
+                    'certificate_status' => $legacyCertificate,
+                    'recommended_service' => $recommended,
+                    'wa_verification_note' => $data['wa_verification_note'] ?? null,
+                    'wa_checked_at' => now(),
+                    'wa_checked_by' => $request->user()->id
+                ])
+                ->save();
             if ($changed) {
                 // Konfirmasi notifikasi lama tidak berlaku sesudah hasil pemeriksaan berubah.
                 WaNotification::where('ticket_id', $record->id)
@@ -270,24 +274,34 @@ class TicketController extends Controller {
                 'ticket_id' => $record->id,
                 'actor_id' => $request->user()->id,
                 'action' => 'ams_checked',
-                'note' => 'WA: '.($wa === 'verified' ? 'Terverifikasi' : 'Belum terverifikasi')
-                    .'; Aktivasi: '.($activation ?? 'Dilewati (inferensi)')
-                    .'; SE: '.($issuance ?? 'Dilewati')
-                    .'; Keputusan: '.($this->serviceEvent($record) ?? 'Belum ada')
-                    .($recommended ? '; Disarankan: '.$recommended : '')
-                    .(!empty($data['wa_verification_note']) ? '; '.$data['wa_verification_note'] : ''),
+                'note' =>
+                    'WA: ' .
+                    ($wa === 'verified' ? 'Terverifikasi' : 'Belum terverifikasi') .
+                    '; Aktivasi: ' .
+                    ($activation ?? 'Dilewati (inferensi)') .
+                    '; SE: ' .
+                    ($issuance ?? 'Dilewati') .
+                    '; Keputusan: ' .
+                    ($this->serviceEvent($record) ?? 'Belum ada') .
+                    ($recommended ? '; Disarankan: ' . $recommended : '') .
+                    (!empty($data['wa_verification_note']) ? '; ' . $data['wa_verification_note'] : '')
             ]);
         });
-        return back()->with('success', 'Pemeriksaan AMS berhasil disimpan. Jenis notifikasi disesuaikan dengan kondisi akun.');
+        return back()->with(
+            'success',
+            'Pemeriksaan AMS berhasil disimpan. Jenis notifikasi disesuaikan dengan kondisi akun.'
+        );
     }
 
-    public function openServiceWhatsApp(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp)
-    {
+    public function openServiceWhatsApp(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp) {
         $this->owner($request, $ticket);
         abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
         $event = $this->serviceEvent($ticket);
-        abort_unless($ticket->status === 'In Progress' && $event !== null, 409,
-            'Lengkapi pemeriksaan AMS sebelum mengirim notifikasi.');
+        abort_unless(
+            $ticket->status === 'In Progress' && $event !== null,
+            409,
+            'Lengkapi pemeriksaan AMS sebelum mengirim notifikasi.'
+        );
         $ticket->load('claimant');
         $message = $whatsapp->forServiceTicket($ticket, $event);
         WaNotification::updateOrCreate(
@@ -297,8 +311,7 @@ class TicketController extends Controller {
         return redirect()->away($whatsapp->url($ticket, $message));
     }
 
-    public function confirmServiceWhatsApp(Request $request, Ticket $ticket)
-    {
+    public function confirmServiceWhatsApp(Request $request, Ticket $ticket) {
         $this->owner($request, $ticket);
         abort_if($ticket->source === 'simulated', 403);
         DB::transaction(function () use ($ticket, $request) {
@@ -307,7 +320,9 @@ class TicketController extends Controller {
             $event = $this->serviceEvent($record);
             abort_unless($event !== null, 409);
             $notification = WaNotification::where('ticket_id', $record->id)
-                ->where('event_type', $event)->lockForUpdate()->first();
+                ->where('event_type', $event)
+                ->lockForUpdate()
+                ->first();
             abort_unless($notification && $notification->opened_at, 409, 'Buka WhatsApp terlebih dahulu.');
             if (!$notification->confirmed_at) {
                 $notification->update(['confirmed_at' => now()]);
@@ -315,20 +330,21 @@ class TicketController extends Controller {
                     'ticket_id' => $record->id,
                     'actor_id' => $request->user()->id,
                     'action' => 'wa_service_confirmed',
-                    'note' => \App\Models\WaMessageTemplate::EVENTS[$event],
+                    'note' => \App\Models\WaMessageTemplate::EVENTS[$event]
                 ]);
                 if ($event === 'service_mismatch') {
                     // Penutupan administratif bukan keberhasilan layanan; tidak ada survei selesai.
                     $record->update([
                         'status' => 'Returned',
                         'completed_at' => null,
-                        'resolution_note' => 'Pengajuan ulang disarankan: '.$record->recommended_service,
+                        'resolution_note' => 'Pengajuan ulang disarankan: ' . $record->recommended_service
                     ]);
                     TicketActivity::create([
                         'ticket_id' => $record->id,
                         'actor_id' => $request->user()->id,
                         'action' => 'returned_for_correction',
-                        'note' => 'Layanan diajukan: '.$record->layanan.'; disarankan: '.$record->recommended_service,
+                        'note' =>
+                            'Layanan diajukan: ' . $record->layanan . '; disarankan: ' . $record->recommended_service
                     ]);
                 }
             }
@@ -362,8 +378,11 @@ class TicketController extends Controller {
             $record = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
             abort_unless($record->claimed_by === $request->user()->id && $record->status === 'In Progress', 409);
             $event = $this->serviceEvent($record);
-            abort_unless(in_array($event, ['reset', 'renewal', 'registration'], true), 409,
-                'Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau pengajuan ulang terlebih dahulu.');
+            abort_unless(
+                in_array($event, ['reset', 'renewal', 'registration'], true),
+                409,
+                'Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau pengajuan ulang terlebih dahulu.'
+            );
             if ($record->source !== 'simulated') {
                 abort_unless(
                     WaNotification::where('ticket_id', $record->id)

@@ -12,7 +12,7 @@ it('displays a hasil survei menu to admins and marks it active on the survey pag
         ->get(route('admin.dashboard'))
         ->assertOk()
         ->assertSee('Hasil Survei')
-        ->assertSee('href="'.route('admin.surveys.index').'"', false);
+        ->assertSee('href="' . route('admin.surveys.index') . '"', false);
 
     $this->actingAs($admin)
         ->get(route('admin.surveys.index'))
@@ -30,7 +30,5 @@ it('hides survey admin navigation from verifiers and forbids survey reports', fu
         ->assertOk()
         ->assertDontSee('Hasil Survei');
 
-    $this->actingAs($verifier)
-        ->get(route('admin.surveys.index'))
-        ->assertForbidden();
+    $this->actingAs($verifier)->get(route('admin.surveys.index'))->assertForbidden();
 });

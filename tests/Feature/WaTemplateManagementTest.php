@@ -11,22 +11,31 @@ uses(RefreshDatabase::class);
 it('shows eight active presets and preserves historical templates', function () {
     expect(WaMessageTemplate::EVENTS)->toHaveCount(8);
     foreach (WaMessageTemplate::TEMPLATE_SERVICE_CODES as $event => $service) {
-        $this->assertDatabaseHas('wa_message_templates', ['service_code' => $service, 'event_type' => $event]);
+        $this->assertDatabaseHas('wa_message_templates', [
+            'service_code' => $service,
+            'event_type' => $event,
+        ]);
     }
 });
 
 it('only lets admins view and update message presets', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $verifier = User::factory()->create(['role' => 'verifier']);
-    $template = WaMessageTemplate::where('service_code','*')->where('event_type','unverified')->firstOrFail();
-    $body = 'Yth. {nama_pemohon}, tiket {nomor_tiket} ditangani oleh {nama_verifikator}. Silakan pantau email resmi.';
+    $template = WaMessageTemplate::where('service_code', '*')
+        ->where('event_type', 'unverified')
+        ->firstOrFail();
+    $body =
+        'Yth. {nama_pemohon}, tiket {nomor_tiket} ditangani oleh {nama_verifikator}. Silakan pantau email resmi.';
 
     $this->get(route('admin.templates.index'))->assertRedirect(route('login'));
     $this->actingAs($verifier)->get(route('admin.templates.index'))->assertForbidden();
     $this->actingAs($verifier)
         ->put(route('admin.templates.update', $template), ['body' => $body])
         ->assertForbidden();
-    $this->actingAs($admin)->get(route('admin.templates.index'))->assertOk()->assertSee('Preset Pesan WhatsApp');
+    $this->actingAs($admin)
+        ->get(route('admin.templates.index'))
+        ->assertOk()
+        ->assertSee('Preset Pesan WhatsApp');
     $this->actingAs($admin)
         ->put(route('admin.templates.update', $template), ['body' => $body])
         ->assertRedirect();
@@ -35,31 +44,41 @@ it('only lets admins view and update message presets', function () {
         'actor_id' => $admin->id,
         'action' => 'admin_updated_wa_template',
         'target_type' => 'wa_message_template',
-        'target_id' => $template->id
+        'target_id' => $template->id,
     ]);
 });
 
 it('rejects unknown or missing required placeholders', function () {
     $admin = User::factory()->create(['role' => 'admin']);
-    $template = WaMessageTemplate::where('service_code','*')->where('event_type','unverified')->firstOrFail();
+    $template = WaMessageTemplate::where('service_code', '*')
+        ->where('event_type', 'unverified')
+        ->firstOrFail();
     $this->actingAs($admin)
         ->put(route('admin.templates.update', $template), [
-            'body' => 'Nama {nama_pemohon}, nomor {nomor_tiket}. Pesan panjang tanpa nama verifikator.'
+            'body' =>
+                'Nama {nama_pemohon}, nomor {nomor_tiket}. Pesan panjang tanpa nama verifikator.',
         ])
         ->assertSessionHasErrors('body');
     $this->actingAs($admin)
         ->put(route('admin.templates.update', $template), [
-            'body' => 'Nama {nama_pemohon}, nomor {nomor_tiket}. Petugas {nama_verifikator}. {password_rahasia}'
+            'body' =>
+                'Nama {nama_pemohon}, nomor {nomor_tiket}. Petugas {nama_verifikator}. {password_rahasia}',
         ])
         ->assertSessionHasErrors('body');
 });
 
 it('renders the admin preset using ticket and verifier data', function () {
-    $verifier = User::factory()->create(['role' => 'verifier', 'name' => 'Petugas Uji', 'initials' => 'PU']);
-    $template = WaMessageTemplate::where('service_code', '*')->where('event_type', 'completed')->firstOrFail();
+    $verifier = User::factory()->create([
+        'role' => 'verifier',
+        'name' => 'Petugas Uji',
+        'initials' => 'PU',
+    ]);
+    $template = WaMessageTemplate::where('service_code', '*')
+        ->where('event_type', 'completed')
+        ->firstOrFail();
     $template->update([
         'body' =>
-            'Halo {nama_pemohon}; tiket {nomor_tiket}; {layanan}; petugas {nama_verifikator} ({inisial_verifikator}); {nama_instansi}.'
+            'Halo {nama_pemohon}; tiket {nomor_tiket}; {layanan}; petugas {nama_verifikator} ({inisial_verifikator}); {nama_instansi}.',
     ]);
     $ticket = Ticket::create([
         'nama_user' => 'Pemohon Demo',
@@ -69,10 +88,15 @@ it('renders the admin preset using ticket and verifier data', function () {
         'source' => 'demo',
         'wa_verification_status' => 'verified',
         'claimed_by' => $verifier->id,
-        'ticket_number' => 'TTE-TEST-001'
+        'ticket_number' => 'TTE-TEST-001',
     ]);
     $message = app(WhatsAppMessage::class)->forCompletedTicket($ticket);
-    expect($message)->toContain('Pemohon Demo', 'TTE-TEST-001', 'Petugas Uji (PU)', 'Pembaruan Sertifikat Elektronik');
+    expect($message)->toContain(
+        'Pemohon Demo',
+        'TTE-TEST-001',
+        'Petugas Uji (PU)',
+        'Pembaruan Sertifikat Elektronik',
+    );
     $this->actingAs($verifier)
         ->get(route('tickets.show', $ticket))
         ->assertOk()
@@ -91,7 +115,7 @@ it('shows copy action but blocks opening WhatsApp for simulated tickets', functi
         'status' => 'Done',
         'wa_verification_status' => 'verified',
         'claimed_by' => $verifier->id,
-        'ticket_number' => 'TTE-SIM-TEST'
+        'ticket_number' => 'TTE-SIM-TEST',
     ]);
     $this->actingAs($verifier)
         ->get(route('tickets.show', $ticket))

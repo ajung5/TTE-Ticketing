@@ -33,7 +33,8 @@
             <div class="stat-name">Tiket Selesai</div>
             <div class="stat-number">{{ number_format($stats['done'], 0, ',', '.') }}</div>
             <div class="stat-foot">
-                {{ $stats['total'] ? number_format(($stats['done'] / $stats['total']) * 100, 1, ',', '.') : 0 }}% dari seluruh
+                {{ $stats['total'] ? number_format(($stats['done'] / $stats['total']) * 100, 1, ',', '.') : 0 }}% dari
+                seluruh
                 tiket</div>
         </div>
     </div>

@@ -7,8 +7,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('shows the configured WhatsApp email administrator contact on the public modal', function () {
-    config()->set('email_directory.admin_contact_url',
-        'https://wa.me/6281212345678?text=Halo%20Pengelola%20Email');
+    config()->set(
+        'email_directory.admin_contact_url',
+        'https://wa.me/6281212345678?text=Halo%20Pengelola%20Email',
+    );
 
     $this->get(route('public.form'))
         ->assertOk()
@@ -29,13 +31,15 @@ it('shows full NIK only to the assigned verifier on the ticket detail', function
         'source' => 'direct',
     ]);
 
-    $this->actingAs($owner)->get(route('tickets.show', $ticket))
+    $this->actingAs($owner)
+        ->get(route('tickets.show', $ticket))
         ->assertOk()
         ->assertSee($ticket->masked_nik)
         ->assertDontSee('3273010101010001');
 
     $this->actingAs($owner)->post(route('tickets.claim', $ticket))->assertRedirect();
-    $this->actingAs($owner)->get(route('tickets.show', $ticket))
+    $this->actingAs($owner)
+        ->get(route('tickets.show', $ticket))
         ->assertOk()
         ->assertSee('3273010101010001')
         ->assertDontSee('(tersamarkan)');
