@@ -147,14 +147,14 @@
                         <div class="verification-tag">
                             <strong class="verification-status">
                                 {{ $ticket->wa_verification_label }}
-                                @if ($ticket->wa_verification_status === 'verified')
-                                    · Akun dan SE dianggap siap sesuai alur
-                                @elseif ($ticket->activation_status === 'not_activated')
-                                    · Akun belum aktivasi
-                                @elseif ($ticket->certificate_issuance_status === 'not_issued')
+                                @if ($ticket->certificate_issuance_status === 'not_issued')
                                     · SE belum terbit
                                 @elseif ($ticket->certificate_issuance_status === 'issued')
                                     · SE sudah terbit
+                                @elseif ($ticket->activation_status === 'not_activated')
+                                    · Akun belum aktivasi
+                                @elseif ($ticket->wa_checked_at)
+                                    · Status penerbitan SE belum diperiksa
                                 @endif
                             </strong>
                             @if ($ticket->wa_checked_at)
@@ -162,9 +162,10 @@
                                     {{ $ticket->wa_checked_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</div>
                             @endif
                         </div>
-                        <p class="small muted">Periksa status nomor WhatsApp terlebih dahulu pada AMS BSrE. Jika belum
-                            terverifikasi, lanjutkan pemeriksaan aktivasi akun dan penerbitan sertifikat. Semua pilihan
-                            berupa dropdown.</p>
+                        <p class="small muted">Periksa status nomor WhatsApp pada AMS BSrE. Jika WA sudah
+                            terverifikasi, lewati aktivasi akun tetapi <strong>tetap periksa penerbitan SE</strong>.
+                            SE bisa belum terbit bila pemohon belum melakukan set passphrase melalui email BSrE.
+                            Semua pilihan menggunakan dropdown.</p>
                         <form method="post" action="{{ route('tickets.verify-whatsapp', $ticket) }}" class="stack"
                             id="ams-verification-form" data-requested-service="{{ $ticket->layanan }}"
                             data-onboarding-history="{{ $onboardingHistory ? '1' : '0' }}">
@@ -186,7 +187,8 @@
                                 </label>
                             </div>
                             <div class="ams-conditional" id="ams-certificate-block" hidden>
-                                <label for="ams-certificate-status">3. Status penerbitan Sertifikat Elektronik
+                                <label for="ams-certificate-status">3. Status penerbitan Sertifikat Elektronik (wajib
+                                    diperiksa walaupun WA terverifikasi)
                                     <select id="ams-certificate-status" name="certificate_issuance_status" disabled>
                                         <option value="">Pilih status penerbitan</option>
                                         <option value="issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'issued')>Sudah terbit</option>
@@ -347,7 +349,8 @@
                         <p class="small muted">Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau arahkan
                             pengajuan ulang terlebih dahulu.</p>
                     @elseif (!$serviceConfirmed && $ticket->source !== 'simulated')
-                        <p class="small muted">Notifikasi layanan utama sudah tersedia, sehingga tiket dapat ditandai selesai.
+                        <p class="small muted">Notifikasi layanan utama sudah tersedia, sehingga tiket dapat ditandai
+                            selesai.
                             Pastikan tindakan layanan telah dilakukan dan kirim notifikasi WhatsApp sebelum menutup tiket.
                             Jika pengiriman belum dikonfirmasi, hal tersebut akan dicatat pada riwayat aktivitas.</p>
                     @else
@@ -384,5 +387,5 @@
         </div>
     </div>
     <link rel="stylesheet" href="{{ asset('css/ams-workflow.css') }}?v=16">
-    <script src="{{ asset('js/ams-workflow.js') }}?v=16" defer></script>
+    <script src="{{ asset('js/ams-workflow.js') }}?v=18" defer></script>
 @endsection

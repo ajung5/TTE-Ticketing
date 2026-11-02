@@ -80,6 +80,7 @@ it(
                 ->post(route('tickets.verify-whatsapp', $ticket), [
                     'certificate_status' => $certificate,
                     'wa_verification_status' => $wa,
+                    'certificate_issuance_status' => $wa === 'verified' ? 'issued' : null,
                     'recommended_service' => 'Reset Passphrase',
                 ])
                 ->assertRedirect();
@@ -107,6 +108,7 @@ it(
             ->post(route('tickets.verify-whatsapp', $ticket), [
                 'certificate_status' => 'active',
                 'wa_verification_status' => 'verified',
+                'certificate_issuance_status' => 'issued',
             ])
             ->assertRedirect();
         // v17.1: setelah notifikasi Reset tersedia, penyelesaian tidak lagi
@@ -165,6 +167,7 @@ it('revokes old confirmation after AMS status changes', function () {
         ->post(route('tickets.verify-whatsapp', $ticket), [
             'certificate_status' => 'active',
             'wa_verification_status' => 'verified',
+            'certificate_issuance_status' => 'issued',
         ])
         ->assertRedirect();
     $this->actingAs($owner)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();

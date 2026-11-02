@@ -86,6 +86,7 @@ it('selects WA-unverified notice, then renewal notice when status changes', func
         ->post(route('tickets.verify-whatsapp', $ticket), [
             'certificate_status' => 'active',
             'wa_verification_status' => 'verified',
+            'certificate_issuance_status' => 'issued',
         ])
         ->assertRedirect();
     $this->actingAs($verifier)

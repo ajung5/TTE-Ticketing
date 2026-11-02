@@ -46,25 +46,32 @@ it('keeps the verification UI dropdown-only and registers exactly eight template
     ]);
 });
 
-it('skips activation and issuance when WA is verified and selects reset notification', function () {
-    $verifier = User::factory()->create(['role' => 'verifier']);
-    $ticket = amsV16Ticket($verifier);
-    $this->actingAs($verifier)
-        ->post(route('tickets.verify-whatsapp', $ticket), [
-            'wa_verification_status' => 'verified',
-            'activation_status' => 'not_activated', // Should be ignored because the step is skipped.
-            'certificate_issuance_status' => 'not_issued',
-        ])
-        ->assertRedirect();
-    expect($ticket->fresh()->activation_status)->toBeNull();
-    expect($ticket->fresh()->certificate_issuance_status)->toBeNull();
-    $this->actingAs($verifier)->get(route('tickets.show', $ticket))->assertSee('Reset Passphrase');
-    $this->actingAs($verifier)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
-    $this->assertDatabaseHas('wa_notifications', [
-        'ticket_id' => $ticket->id,
-        'event_type' => 'reset',
-    ]);
-});
+it(
+    'skips activation but requires issuance when WA is verified before selecting reset',
+    function () {
+        $verifier = User::factory()->create(['role' => 'verifier']);
+        $ticket = amsV16Ticket($verifier);
+        $this->actingAs($verifier)
+            ->post(route('tickets.verify-whatsapp', $ticket), [
+                'wa_verification_status' => 'verified',
+                'activation_status' => 'not_activated', // Ignored when WA is verified.
+                'certificate_issuance_status' => 'issued',
+            ])
+            ->assertRedirect();
+        expect($ticket->fresh()->activation_status)->toBeNull();
+        expect($ticket->fresh()->certificate_issuance_status)->toBe('issued');
+        $this->actingAs($verifier)
+            ->get(route('tickets.show', $ticket))
+            ->assertSee('Reset Passphrase');
+        $this->actingAs($verifier)
+            ->post(route('tickets.whatsapp.service', $ticket))
+            ->assertRedirect();
+        $this->assertDatabaseHas('wa_notifications', [
+            'ticket_id' => $ticket->id,
+            'event_type' => 'reset',
+        ]);
+    },
+);
 
 it('refuses an incomplete unverified WA inspection', function () {
     $verifier = User::factory()->create(['role' => 'verifier']);
@@ -137,11 +144,13 @@ it(
         $this->actingAs($verifier)
             ->post(route('tickets.verify-whatsapp', $ticket), [
                 'wa_verification_status' => 'verified',
+                'certificate_issuance_status' => 'issued',
             ])
             ->assertSessionHasErrors('recommended_service');
         $this->actingAs($verifier)
             ->post(route('tickets.verify-whatsapp', $ticket), [
                 'wa_verification_status' => 'verified',
+                'certificate_issuance_status' => 'issued',
                 'recommended_service' => 'Pembaruan',
             ])
             ->assertRedirect();
@@ -172,6 +181,7 @@ it('preserves legitimate issuance flow after the user was previously unregistere
     $this->actingAs($verifier)
         ->post(route('tickets.verify-whatsapp', $ticket), [
             'wa_verification_status' => 'verified',
+            'certificate_issuance_status' => 'issued',
         ])
         ->assertRedirect();
     $this->actingAs($verifier)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();

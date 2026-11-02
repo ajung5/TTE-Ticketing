@@ -31,6 +31,7 @@ it('opens service and completion notices with the same WhatsApp Web browser targ
         ->post(route('tickets.verify-whatsapp', $ticket), [
             'certificate_status' => 'active',
             'wa_verification_status' => 'verified',
+            'certificate_issuance_status' => 'issued',
         ])
         ->assertRedirect();
     $this->actingAs($verifier)

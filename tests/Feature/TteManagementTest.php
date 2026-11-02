@@ -63,6 +63,7 @@ it('allows completion without a resolution note after AMS check and notification
         ->post(route('tickets.verify-whatsapp', $ticket), [
             'certificate_status' => 'active',
             'wa_verification_status' => 'verified',
+            'certificate_issuance_status' => 'issued',
         ])
         ->assertRedirect();
     $this->actingAs($user)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();

@@ -59,7 +59,18 @@ class TicketController extends Controller {
         if (!$ticket->wa_checked_at) {
             return null;
         }
+        // Verifikasi WA bukan bukti sertifikat telah terbit.
+        // Pengaturan passphrase pada email BSrE bisa masih tertunda.
+        if (
+            $ticket->certificate_issuance_status === 'not_issued' &&
+            ($ticket->wa_verification_status === 'verified' || $ticket->activation_status === 'activated')
+        ) {
+            return 'certificate_not_issued';
+        }
         if ($ticket->wa_verification_status === 'verified') {
+            if ($ticket->certificate_issuance_status !== 'issued') {
+                return null;
+            }
             if ($ticket->layanan === 'Pendaftaran') {
                 return $this->hasOnboardingHistory($ticket) ? 'registration' : 'service_mismatch';
             }
@@ -200,7 +211,16 @@ class TicketController extends Controller {
         $wa = $data['wa_verification_status'];
         $activation = null;
         $issuance = null;
-        if ($wa === 'unverified') {
+        if ($wa === 'verified') {
+            // Status penerbitan SE harus diperiksa secara eksplisit, bahkan ketika WA sudah verified.
+            $issuance = $data['certificate_issuance_status'] ?? null;
+            if ($issuance === null) {
+                throw ValidationException::withMessages([
+                    'certificate_issuance_status' =>
+                        'Periksa status penerbitan SE meskipun nomor WA sudah terverifikasi.'
+                ]);
+            }
+        } elseif ($wa === 'unverified') {
             $activation = $data['activation_status'] ?? null;
             $issuance = $data['certificate_issuance_status'] ?? null;
             if ($activation === null && isset($data['certificate_status'])) {
@@ -230,7 +250,8 @@ class TicketController extends Controller {
             $mismatch =
                 $mismatch ||
                 ($record->layanan === 'Pendaftaran' &&
-                    ($wa === 'verified' || ($wa === 'unverified' && $issuance === 'issued')) &&
+                    ($issuance === 'issued' &&
+                        ($wa === 'verified' || ($wa === 'unverified' && $activation === 'activated'))) &&
                     !$this->hasOnboardingHistory($record));
             $recommended = null;
             if ($mismatch) {
@@ -246,7 +267,8 @@ class TicketController extends Controller {
                     $recommended = 'Pendaftaran';
                 }
             }
-            $legacyCertificate = $wa === 'verified' || $issuance === 'issued' ? 'active' : 'inactive';
+            // Jangan tandai SE aktif hanya karena nomor WA sudah terverifikasi.
+            $legacyCertificate = $issuance === 'issued' ? 'active' : 'inactive';
             $changed =
                 $record->wa_verification_status !== $wa ||
                 $record->activation_status !== $activation ||
@@ -384,7 +406,8 @@ class TicketController extends Controller {
                 'Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau pengajuan ulang terlebih dahulu.'
             );
             // Gate utama: hanya reset/renewal/registration; konfirmasi WA bersifat administratif.
-            $serviceNotificationConfirmed = $record->source === 'simulated' ||
+            $serviceNotificationConfirmed =
+                $record->source === 'simulated' ||
                 WaNotification::where('ticket_id', $record->id)
                     ->where('event_type', $event)
                     ->whereNotNull('confirmed_at')
@@ -394,8 +417,9 @@ class TicketController extends Controller {
                 'ticket_id' => $record->id,
                 'actor_id' => $request->user()->id,
                 'action' => 'completed',
-                'note' => $serviceNotificationConfirmed ? null :
-                    'Konfirmasi pengiriman notifikasi layanan belum tercatat pada saat tiket diselesaikan.'
+                'note' => $serviceNotificationConfirmed
+                    ? null
+                    : 'Konfirmasi pengiriman notifikasi layanan belum tercatat pada saat tiket diselesaikan.'
             ]);
         });
         return back()->with('success', 'Tiket selesai. Notifikasi Selesai + Survei sekarang tersedia.');

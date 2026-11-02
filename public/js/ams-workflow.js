@@ -1,4 +1,4 @@
-/* AMS v16: dropdown bertahap, tanpa radio/checkbox; validasi server tetap otoritatif. */
+/* AMS v18: status WA dan penerbitan SE diperiksa terpisah; tetap dropdown. */
 (() => {
   'use strict';
   const form = document.getElementById('ams-verification-form');
@@ -18,12 +18,12 @@
     activationBlock.hidden = !unverified;
     activation.disabled = !unverified;
     activation.required = unverified;
-    const needsCert = unverified && activation.value === 'activated';
+    const needsCert = wa.value === 'verified' || (unverified && activation.value === 'activated');
     certBlock.hidden = !needsCert;
     cert.disabled = !needsCert;
     cert.required = needsCert;
     const unregisteredWrongService = unverified && activation.value === 'not_activated' && requested !== 'Pendaftaran';
-    const issued = wa.value === 'verified' || (unverified && activation.value === 'activated' && cert.value === 'issued');
+    const issued = needsCert && cert.value === 'issued';
     const registrationMismatch = requested === 'Pendaftaran' && issued && !hasOnboardingHistory;
     const mismatch = unregisteredWrongService || registrationMismatch;
     recommendationBlock.hidden = !registrationMismatch;
@@ -32,10 +32,11 @@
     let message = 'Lengkapi hasil pemeriksaan AMS.';
     if (unregisteredWrongService) message = 'Layanan tidak sesuai: sarankan Penerbitan Sertifikat Elektronik.';
     else if (registrationMismatch) message = 'Penerbitan tidak sesuai karena SE sudah terbit. Tentukan layanan yang tepat setelah klarifikasi.';
-    else if (wa.value === 'verified') message = requested === 'Pembaruan' ? 'Notifikasi Pembaruan Sertifikat.' : requested === 'Reset Passphrase' ? 'Notifikasi Reset Passphrase.' : 'Pendaftaran diproses berdasarkan riwayat tiket.';
+    else if (needsCert && cert.value === 'not_issued') message = 'Notifikasi SE Belum Terbit. Pemohon perlu set passphrase melalui email BSrE; tiket tetap dalam proses.';
+    else if (wa.value === 'verified' && cert.value === 'issued') message = requested === 'Pembaruan' ? 'Notifikasi Pembaruan Sertifikat.' : requested === 'Reset Passphrase' ? 'Notifikasi Reset Passphrase.' : 'Pendaftaran diproses berdasarkan riwayat tiket.';
     else if (unverified && activation.value === 'not_activated') message = 'Notifikasi User Belum Terdaftar.';
-    else if (needsCert && cert.value === 'not_issued') message = 'Notifikasi SE Belum Terbit. Tiket tetap dalam proses.';
-    else if (needsCert && cert.value === 'issued') message = 'Notifikasi Nomor WA Belum Terverifikasi.';
+    else if (unverified && needsCert && cert.value === 'issued') message = 'Notifikasi Nomor WA Belum Terverifikasi.';
+    else if (wa.value === 'verified' && !cert.value) message = 'Pilih status penerbitan SE. WA terverifikasi tidak menjamin sertifikat sudah terbit.';
     indicator.textContent = message;
   }
   for (const element of [wa, activation, cert, recommended]) element.addEventListener('change', refresh);
