@@ -56,9 +56,12 @@ it('allows completion without a resolution note after AMS check and notification
     $user = User::factory()->create(['role' => 'verifier']);
     $ticket = newTteTicket(['status' => 'In Progress', 'claimed_by' => $user->id]);
     $this->actingAs($user)->post(route('tickets.complete', $ticket))->assertStatus(409);
-    $this->actingAs($user)->post(route('tickets.verify-whatsapp', $ticket), [
-        'certificate_status' => 'active', 'wa_verification_status' => 'verified',
-    ])->assertRedirect();
+    $this->actingAs($user)
+        ->post(route('tickets.verify-whatsapp', $ticket), [
+            'certificate_status' => 'active',
+            'wa_verification_status' => 'verified'
+        ])
+        ->assertRedirect();
     $this->actingAs($user)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
     $this->actingAs($user)->post(route('tickets.whatsapp.service.confirm', $ticket))->assertRedirect();
     $this->actingAs($user)->post(route('tickets.complete', $ticket))->assertRedirect();
@@ -124,11 +127,13 @@ it('does not mark a WhatsApp message sent until manually confirmed', function ()
     $this->assertDatabaseHas('wa_notifications', [
         'ticket_id' => $ticket->id,
         'event_type' => 'completed',
-        'confirmed_at' => null,
+        'confirmed_at' => null
     ]);
     $this->actingAs($verifier)->post(route('tickets.whatsapp.confirm', $ticket))->assertRedirect();
-    expect(\App\Models\WaNotification::where('ticket_id', $ticket->id)
-        ->where('event_type', 'completed')->first()->confirmed_at)->not->toBeNull();
+    expect(
+        \App\Models\WaNotification::where('ticket_id', $ticket->id)->where('event_type', 'completed')->first()
+            ->confirmed_at
+    )->not->toBeNull();
 });
 
 it('allows a user to change their password with the correct current password', function () {
@@ -196,6 +201,95 @@ it('treats notes as optional without creating extra WhatsApp notification types'
     $ticket = newTteTicket(['status' => 'In Progress', 'claimed_by' => $verifier->id]);
     $this->actingAs($verifier)->post(route('tickets.note', $ticket), [])->assertRedirect();
     $this->assertDatabaseMissing('ticket_activities', ['ticket_id' => $ticket->id, 'action' => 'note']);
-    $this->actingAs($verifier)->post(route('tickets.note', $ticket), ['note' => 'Pemeriksaan berlangsung'])->assertRedirect();
+    $this->actingAs($verifier)
+        ->post(route('tickets.note', $ticket), ['note' => 'Pemeriksaan berlangsung'])
+        ->assertRedirect();
     $this->assertDatabaseHas('ticket_activities', ['ticket_id' => $ticket->id, 'action' => 'note']);
+});
+
+it('allows admin to update name and initials', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+        'name' => 'Admin Lama',
+        'initials' => 'AL',
+        'password' => 'PasswordAwal!2026'
+    ]);
+
+    $this->actingAs($admin)
+        ->patch(route('profile.update'), [
+            'name' => 'Administrator Baru',
+            'email' => $admin->email,
+            'initials' => 'AB'
+        ])
+        ->assertRedirect(route('profile'))
+        ->assertSessionHas('success');
+
+    expect($admin->fresh()->name)->toBe('Administrator Baru');
+    expect($admin->fresh()->initials)->toBe('AB');
+
+    expect(\Illuminate\Support\Facades\Hash::check('PasswordAwal!2026', $admin->fresh()->password))->toBeTrue();
+});
+
+it('requires current password for admin email changes', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+        'email' => 'adminlama@example.test',
+        'password' => 'PasswordAwal!2026'
+    ]);
+
+    $data = [
+        'name' => $admin->name,
+        'email' => 'adminbaru@example.test',
+        'initials' => 'ADM'
+    ];
+
+    $this->actingAs($admin)->patch(route('profile.update'), $data)->assertSessionHasErrors('current_password');
+
+    $this->actingAs($admin)
+        ->patch(
+            route('profile.update'),
+            array_merge($data, [
+                'current_password' => 'PasswordSalah'
+            ])
+        )
+        ->assertSessionHasErrors('current_password');
+
+    $this->actingAs($admin)
+        ->patch(
+            route('profile.update'),
+            array_merge($data, [
+                'current_password' => 'PasswordAwal!2026'
+            ])
+        )
+        ->assertRedirect(route('profile'))
+        ->assertSessionHas('success');
+
+    expect($admin->fresh()->email)->toBe('adminbaru@example.test');
+
+    $this->assertDatabaseHas('audit_logs', [
+        'actor_id' => $admin->id,
+        'action' => 'admin_updated_own_profile'
+    ]);
+});
+
+it('blocks duplicate admin email and verifier profile updates', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $other = User::factory()->create(['role' => 'verifier']);
+
+    $this->actingAs($admin)
+        ->patch(route('profile.update'), [
+            'name' => $admin->name,
+            'email' => $other->email,
+            'initials' => 'ADM',
+            'current_password' => 'anything'
+        ])
+        ->assertSessionHasErrors('email');
+
+    $this->actingAs($other)
+        ->patch(route('profile.update'), [
+            'name' => 'Nama Tidak Sah',
+            'email' => $other->email,
+            'initials' => 'XXX'
+        ])
+        ->assertForbidden();
 });

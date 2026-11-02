@@ -10,7 +10,7 @@ class WaMessageTemplate extends Model {
     public const SERVICES = [
         'Reset Passphrase' => 'Reset Passphrase',
         'Pembaruan' => 'Pembaruan Sertifikat Elektronik',
-        'Pendaftaran' => 'Pendaftaran TTE Baru'
+        'Pendaftaran' => 'Penerbitan Sertifikat Elektronik'
     ];
 
     // Enam jenis notifikasi yang aktif. Template umum memakai service_code '*'.
@@ -20,7 +20,7 @@ class WaMessageTemplate extends Model {
         'renewal' => 'Pembaruan Sertifikat',
         'registration' => 'Pendaftaran Diproses',
         'completed' => 'Selesai + Survei',
-        'unregistered' => 'User Belum Terdaftar',
+        'unregistered' => 'User Belum Terdaftar'
     ];
 
     public const TEMPLATE_SERVICE_CODES = [
@@ -29,7 +29,7 @@ class WaMessageTemplate extends Model {
         'renewal' => 'Pembaruan',
         'registration' => 'Pendaftaran',
         'completed' => '*',
-        'unregistered' => '*',
+        'unregistered' => '*'
     ];
 
     public const VARIABLE_DESCRIPTIONS = [

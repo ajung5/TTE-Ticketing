@@ -31,31 +31,35 @@
                             minlength="3" maxlength="255" autocomplete="name" required>
                     </label>
 
-                    @error('name')
-                        <p class="small" style="color:#b64252">
-                            {{ $message }}
-                        </p>
-                    @enderror
-
-                    <label>
+                    <label for="profile-email">
                         Email
-                        <input type="email" value="{{ $user->email }}" readonly aria-readonly="true">
+                        <input id="profile-email" type="email" name="email" value="{{ old('email', $user->email) }}"
+                            maxlength="255" autocomplete="email" required>
                     </label>
 
-                    <label>
+                    <label for="profile-initials">
                         Inisial
-                        <input type="text" value="{{ $user->initials ?: '-' }}" readonly aria-readonly="true">
+                        <input id="profile-initials" type="text" name="initials"
+                            value="{{ old('initials', $user->initials) }}" maxlength="12" placeholder="Contoh: ADM"
+                            autocomplete="off">
                     </label>
 
-                    <label>
+                    <label for="profile-role">
                         Peran
-                        <input type="text" value="Administrator" readonly aria-readonly="true">
+                        <input id="profile-role" type="text" value="Administrator" readonly aria-readonly="true">
+                    </label>
+
+                    <label for="profile-current-password">
+                        Password Saat Ini
+                        <input id="profile-current-password" type="password" name="current_password"
+                            autocomplete="current-password" placeholder="Wajib jika mengubah email">
                     </label>
 
                     <p class="small muted">
-                        Anda dapat mengubah nama profil.
-                        Email, inisial, dan peran tidak dapat
-                        diubah melalui formulir ini.
+                        Nama lengkap dan inisial dapat diubah langsung.
+                        Jika mengubah alamat email, masukkan password
+                        saat ini sebagai konfirmasi keamanan.
+                        Gunakan email baru saat login berikutnya.
                     </p>
 
                     <button type="submit" class="btn btn-primary">
