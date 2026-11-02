@@ -1,4 +1,4 @@
-/* v6 public form: NIK directory autofill, editable profile, immutable full email, touch signature. */
+/* v7 public form: NIK directory autofill, editable profile, immutable full email, touch signature. */
 (() => {
   'use strict';
   const form = document.getElementById('tte-public-form');
@@ -59,11 +59,17 @@
   consent.addEventListener('change', refreshSubmit);
   layanan.addEventListener('change', refreshSubmit);
 
-  // Input numerik saja; 08 dibatasi 14 digit, 628 sampai 15 digit.
+  // Field memakai nomor lokal (8...), sedangkan +62 ditampilkan secara terpisah.
+  // Nilai lama dan nomor yang ditempel dengan awalan 08/628 tetap ditangani.
+  function localWhatsApp(value) {
+    const digits = value.replace(/\D/g, '');
+    const local = digits.startsWith('628') ? digits.slice(2)
+      : digits.startsWith('08') ? digits.slice(1) : digits;
+    return local.startsWith('8') ? local.slice(0, 13) : '';
+  }
+  whatsapp.value = localWhatsApp(whatsapp.value);
   whatsapp.addEventListener('input', () => {
-    const numeric = whatsapp.value.replace(/\D/g, '');
-    const maxDigits = numeric.startsWith('08') ? 14 : 15;
-    whatsapp.value = numeric.slice(0, maxDigits);
+    whatsapp.value = localWhatsApp(whatsapp.value);
     refreshSubmit();
   });
 

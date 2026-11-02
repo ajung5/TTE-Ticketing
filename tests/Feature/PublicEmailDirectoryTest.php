@@ -161,5 +161,30 @@ it('explains that autofilled identity fields can be corrected while email remain
         ->assertOk()
         ->assertSee('Data belum sesuai? Anda bisa memperbaikinya.')
         ->assertSee('Email Gov')
-        ->assertSee('pattern="(08[0-9]{8,12}|628[0-9]{8,12})"', false);
+        ->assertSee('pattern="8[0-9]{8,12}"', false)
+        ->assertSee('class="wa-phone-prefix"', false)
+        ->assertSee('Kode negara');
+});
+
+
+it('accepts 8-prefixed WhatsApp input and saves it in 628 format', function () {
+    Storage::fake('local');
+    app(EmailDirectorySync::class)->import(directoryRows());
+
+    $data = directFormWithSignature();
+    $data['no_wa'] = '85812341234';
+    $this->post(route('public.submit'), $data)->assertRedirect(route('public.success'));
+    expect(Ticket::firstOrFail()->no_wa)->toBe('6285812341234');
+});
+
+it('rejects non-8 local numbers and numbers outside the allowed length', function () {
+    Storage::fake('local');
+    app(EmailDirectorySync::class)->import(directoryRows());
+
+    foreach (['71234567890', '81234567', '81234567890123', '8 5812341234', '+6285812341234'] as $invalid) {
+        $data = directFormWithSignature();
+        $data['no_wa'] = $invalid;
+        $this->post(route('public.submit'), $data)->assertSessionHasErrors('no_wa');
+    }
+    expect(Ticket::count())->toBe(0);
 });

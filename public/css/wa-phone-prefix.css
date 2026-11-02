@@ -1,0 +1,35 @@
+/* WhatsApp lokal: prefix Indonesia tetap (+62), pemohon hanya mengisi 8... */
+.public-request-v5 .wa-phone-field > label { display: block; margin-bottom: 7px; }
+.public-request-v5 .wa-phone-input {
+    display: flex; align-items: stretch; width: 100%; min-height: 46px;
+    border: 1px solid #d6e1ef; border-radius: 10px; overflow: hidden;
+    background: #fff; transition: border-color .16s, box-shadow .16s;
+}
+.public-request-v5 .wa-phone-input:focus-within {
+    border-color: #5783ce; box-shadow: 0 0 0 3px rgba(58,115,210,.17);
+}
+.public-request-v5 .wa-phone-prefix {
+    display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center;
+    gap: 9px; padding: 0 13px; border-right: 1px solid #dce4ef;
+    background: #f7faff; color: #243450; white-space: nowrap;
+}
+.public-request-v5 .wa-flag-id {
+    display: inline-block; width: 23px; height: 16px;
+    border: 1px solid #d5dce6; border-radius: 2px;
+    background: linear-gradient(to bottom, #ce1126 0 50%, #fff 50% 100%);
+}
+.public-request-v5 .wa-phone-code { font-size: 14px; font-weight: 700; letter-spacing: .1px; }
+.public-request-v5 .wa-phone-input #no_wa {
+    flex: 1 1 auto; width: 100%; min-width: 0; min-height: 44px;
+    margin: 0; padding: 10px 13px; border: 0; outline: 0;
+    box-shadow: none; background: transparent; border-radius: 0;
+    font-size: 14px; font-weight: 500; color: #243450;
+}
+.public-request-v5 .wa-phone-input #no_wa:focus-visible {
+    border: 0; outline: 0; box-shadow: none;
+}
+.public-request-v5 .wa-phone-input #no_wa::placeholder { color: #8997aa; opacity: 1; }
+@media (max-width: 480px) {
+    .public-request-v5 .wa-phone-prefix { padding: 0 10px; gap: 7px; }
+    .public-request-v5 .wa-flag-id { width: 21px; height: 15px; }
+}

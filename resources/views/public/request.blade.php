@@ -78,11 +78,19 @@
                             </label>
                             <p class="small muted" id="email-help">Alamat email lengkap dari spreadsheet. Tidak dapat diubah melalui formulir.</p>
                         </div>
-                        <div class="field-group">
-                            <label for="no_wa">Nomor WhatsApp aktif <span class="required-mark">*</span>
-                                <input id="no_wa" name="no_wa" type="tel" inputmode="numeric" pattern="(08[0-9]{8,12}|628[0-9]{8,12})" minlength="10" maxlength="15" required value="{{ old('no_wa') }}" placeholder="Contoh: 081234567890" autocomplete="tel" aria-describedby="wa-help">
-                            </label>
-                            <p class="small muted" id="wa-help">Isi nomor WhatsApp aktif. Hanya angka, diawali <strong>08</strong> (10–14 digit) atau <strong>628</strong> (11–15 digit), tanpa spasi atau tanda baca. Nomor harus dapat menerima pesan WhatsApp.</p>
+                        <div class="field-group wa-phone-field">
+                            <label for="no_wa">Nomor WhatsApp aktif <span class="required-mark">*</span></label>
+                            <div class="wa-phone-input">
+                                <span class="wa-phone-prefix" aria-hidden="true">
+                                    <span class="wa-flag-id"></span>
+                                    <span class="wa-phone-code">+62</span>
+                                </span>
+                                <input id="no_wa" name="no_wa" type="tel" inputmode="numeric"
+                                    pattern="8[0-9]{8,12}" minlength="9" maxlength="13" required
+                                    value="{{ old('no_wa') }}" placeholder="85812341234"
+                                    autocomplete="tel-national" aria-describedby="wa-help">
+                            </div>
+                            <p class="small muted" id="wa-help">Masukkan nomor tanpa angka 0 di depan, mulai dari <strong>8</strong>. Contoh: <strong>85812341234</strong>. Kode negara <strong>+62</strong> ditambahkan otomatis. Pastikan nomor dapat menerima pesan WhatsApp.</p>
                         </div>
                     </div>
                 </section>
@@ -132,5 +140,6 @@
     </div>
 </div>
 <link rel="stylesheet" href="{{ asset('css/public-request-v5.css') }}?v=5">
-<script src="{{ asset('js/public-request.js') }}?v=6" defer></script>
+<link rel="stylesheet" href="{{ asset('css/wa-phone-prefix.css') }}?v=1">
+<script src="{{ asset('js/public-request.js') }}?v=7" defer></script>
 @endsection
