@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    public function up(): void
-    {
+    public function up(): void {
         Schema::table('users', function (Blueprint $table) {
             $table->string('role', 20)->default('verifier');
             $table->string('initials', 12)->nullable();
@@ -74,13 +73,12 @@ return new class extends Migration {
         });
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         Schema::dropIfExists('audit_logs');
         Schema::dropIfExists('webhook_events');
         Schema::dropIfExists('wa_notifications');
         Schema::dropIfExists('ticket_activities');
         Schema::dropIfExists('tickets');
-        Schema::table('users', fn (Blueprint $table) => $table->dropColumn(['role', 'initials']));
+        Schema::table('users', fn(Blueprint $table) => $table->dropColumn(['role', 'initials']));
     }
 };

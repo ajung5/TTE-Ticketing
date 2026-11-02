@@ -14,9 +14,13 @@ class WaTemplateController extends Controller {
 
     public function index(Request $request) {
         $this->check($request);
-        $templates = WaMessageTemplate::query()->get()->filter(function (WaMessageTemplate $template) {
-            return (WaMessageTemplate::TEMPLATE_SERVICE_CODES[$template->event_type] ?? null) === $template->service_code;
-        })->keyBy('event_type');
+        $templates = WaMessageTemplate::query()
+            ->get()
+            ->filter(function (WaMessageTemplate $template) {
+                return (WaMessageTemplate::TEMPLATE_SERVICE_CODES[$template->event_type] ?? null) ===
+                    $template->service_code;
+            })
+            ->keyBy('event_type');
         return view('admin.wa-templates', compact('templates'));
     }
 
@@ -24,7 +28,8 @@ class WaTemplateController extends Controller {
         $this->check($request);
         abort_unless(
             (WaMessageTemplate::TEMPLATE_SERVICE_CODES[$template->event_type] ?? null) === $template->service_code,
-            404, 'Preset tidak aktif.'
+            404,
+            'Preset tidak aktif.'
         );
         $data = $request->validate(['body' => ['required', 'string', 'min:40', 'max:3500']]);
         $body = trim($data['body']);
@@ -36,7 +41,9 @@ class WaTemplateController extends Controller {
         preg_match_all('/\{[^{}]+\}/u', $body, $matches);
         $unknown = array_diff($matches[0], WaMessageTemplate::PLACEHOLDERS);
         if ($unknown !== []) {
-            throw ValidationException::withMessages(['body' => 'Placeholder tidak dikenal: '.implode(', ', array_unique($unknown))]);
+            throw ValidationException::withMessages([
+                'body' => 'Placeholder tidak dikenal: ' . implode(', ', array_unique($unknown))
+            ]);
         }
         DB::transaction(function () use ($template, $request, $body) {
             $template->update(['body' => $body, 'updated_by' => $request->user()->id]);
@@ -45,7 +52,8 @@ class WaTemplateController extends Controller {
                 'action' => 'admin_updated_wa_template',
                 'target_type' => 'wa_message_template',
                 'target_id' => $template->id,
-                'created_at' => now(), 'updated_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
         });
         return redirect()->route('admin.templates.index')->with('success', 'Preset WhatsApp berhasil disimpan.');
