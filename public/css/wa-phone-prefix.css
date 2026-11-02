@@ -33,3 +33,74 @@
     .public-request-v5 .wa-phone-prefix { padding: 0 10px; gap: 7px; }
     .public-request-v5 .wa-flag-id { width: 21px; height: 15px; }
 }
+
+/* v14 — keselarasan enam field "Periksa Data Pemohon".
+   Override label flex dari tte.css tanpa mengubah alur/form backend. */
+.public-request-v5 .request-details .public-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 18px;
+    row-gap: 22px;
+    align-items: start;
+}
+.public-request-v5 .request-details .public-fields > label,
+.public-request-v5 .request-details .public-fields .field-group > label {
+    display: block;
+    min-width: 0;
+    min-height: 20px;
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 20px;
+    color: #354765;
+}
+.public-request-v5 .request-details .public-fields > label > input,
+.public-request-v5 .request-details .public-fields .request-email-group > label > input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 46px;
+    min-height: 46px;
+    margin: 7px 0 0;
+    padding: 10px 13px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+.public-request-v5 .request-details .public-fields > .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+.public-request-v5 .request-details .public-fields .field-group > p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.public-request-v5 .request-details .public-fields .wa-phone-input {
+    width: 100%;
+    height: 46px;
+    min-height: 46px;
+}
+.public-request-v5 .request-details .public-fields .required-mark {
+    display: inline;
+    margin-left: 2px;
+    vertical-align: baseline;
+}
+@media (max-width: 760px) {
+    .public-request-v5 .request-details .public-fields {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 18px;
+    }
+}
+@media (max-width: 480px) {
+    .public-request-v5 .request-details .public-fields {
+        row-gap: 16px;
+    }
+    .public-request-v5 .request-details .public-fields > label,
+    .public-request-v5 .request-details .public-fields .field-group > label {
+        font-size: 12px;
+    }
+}
