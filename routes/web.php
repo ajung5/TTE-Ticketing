@@ -11,8 +11,11 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\VerifierManagementController;
 use App\Http\Controllers\WaTemplateController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
-Route::get('/', fn() => redirect()->route(auth()->check() ? 'dashboard' : 'public.form'));
+Route::get('/', function (Request $request) {
+    return redirect()->route($request->user() !== null ? 'dashboard' : 'public.form');
+});
 Route::get('/permohonan', [PublicTicketController::class, 'create'])->name('public.form');
 Route::post('/permohonan', [PublicTicketController::class, 'store'])
     ->middleware('throttle:5,10')

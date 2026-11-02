@@ -125,7 +125,7 @@ it('creates a public ticket from authoritative directory email and stores privat
     expect($ticket->consent_accepted_at)->not->toBeNull();
     expect($ticket->nik)->toBe('3273010101010001');
     expect($ticket->signature_path)->not->toBeNull();
-    Storage::disk('local')->assertExists($ticket->signature_path);
+    expect(Storage::disk('local')->exists($ticket->signature_path))->toBeTrue();
     $verifier = \App\Models\User::factory()->create(['role' => 'verifier']);
     $other = \App\Models\User::factory()->create(['role' => 'verifier']);
     $this->actingAs($other)->get(route('tickets.signature', $ticket))->assertForbidden();

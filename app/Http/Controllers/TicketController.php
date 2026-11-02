@@ -8,6 +8,8 @@ use App\Models\WaNotification;
 use App\Services\WhatsAppMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Storage;
 
 class TicketController extends Controller {
     private function verifier(Request $request): void {
@@ -94,16 +96,18 @@ class TicketController extends Controller {
     }
 
     public function signature(Request $request, Ticket $ticket) {
-        // Signature evidence is private: only the verifier who claimed this ticket may view it.
         $this->owner($request, $ticket);
-        abort_unless(
-            is_string($ticket->signature_path) &&
-                str_starts_with($ticket->signature_path, 'signatures/') &&
-                \Illuminate\Support\Facades\Storage::disk('local')->exists($ticket->signature_path),
-            404
-        );
 
-        return \Illuminate\Support\Facades\Storage::disk('local')->response($ticket->signature_path, null, [
+        $path = $ticket->signature_path;
+
+        abort_unless(is_string($path) && str_starts_with($path, 'signatures/'), 404);
+
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('local');
+
+        abort_unless($disk->exists($path), 404);
+
+        return $disk->response($path, null, [
             'Cache-Control' => 'no-store, private',
             'X-Content-Type-Options' => 'nosniff',
             'Content-Type' => 'image/png'
@@ -202,33 +206,58 @@ class TicketController extends Controller {
 
     public function openServiceWhatsApp(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp) {
         $this->owner($request, $ticket);
+
         abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
-        abort_unless(
-            $ticket->status === 'In Progress' && ($event = $this->serviceEvent($ticket)),
-            409,
-            'Lengkapi pemeriksaan AMS sebelum mengirim notifikasi.'
-        );
+
+        $event = $this->serviceEvent($ticket);
+
+        if ($ticket->status !== 'In Progress' || $event === null) {
+            abort(409, 'Lengkapi pemeriksaan AMS sebelum mengirim notifikasi.');
+        }
+
         $ticket->load('claimant');
+
         $message = $whatsapp->forServiceTicket($ticket, $event);
+
         WaNotification::updateOrCreate(
-            ['ticket_id' => $ticket->id, 'event_type' => $event],
-            ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now()]
+            [
+                'ticket_id' => $ticket->id,
+                'event_type' => $event
+            ],
+            [
+                'verifier_id' => $request->user()->id,
+                'message' => $message,
+                'opened_at' => now()
+            ]
         );
+
         return redirect()->away($whatsapp->url($ticket, $message));
     }
 
     public function confirmServiceWhatsApp(Request $request, Ticket $ticket) {
         $this->owner($request, $ticket);
+
         abort_if($ticket->source === 'simulated', 403);
-        abort_unless($ticket->status === 'In Progress' && ($event = $this->serviceEvent($ticket)), 409);
+
+        $event = $this->serviceEvent($ticket);
+
+        if ($ticket->status !== 'In Progress' || $event === null) {
+            abort(409);
+        }
+
         DB::transaction(function () use ($ticket, $request, $event) {
             $notification = WaNotification::where('ticket_id', $ticket->id)
                 ->where('event_type', $event)
                 ->lockForUpdate()
                 ->first();
+
             abort_unless($notification && $notification->opened_at, 409, 'Buka WhatsApp terlebih dahulu.');
+
             if (!$notification->confirmed_at) {
-                $notification->update(['confirmed_at' => now()]);
+                $notification->update([
+                    'confirmed_at' => now()
+                ]);
+
                 TicketActivity::create([
                     'ticket_id' => $ticket->id,
                     'actor_id' => $request->user()->id,
@@ -237,6 +266,7 @@ class TicketController extends Controller {
                 ]);
             }
         });
+
         return back()->with('success', 'Pengiriman notifikasi dicatat secara manual.');
     }
 
