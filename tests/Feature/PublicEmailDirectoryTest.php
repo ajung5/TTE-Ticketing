@@ -135,3 +135,31 @@ it('shows immutable email and only NIK and service before successful lookup', fu
         ->assertSee('readonly', false)
         ->assertSee('public-request-v5.css');
 });
+
+it('limits active WhatsApp phone input to Indonesian numeric mobile formats', function () {
+    Storage::fake('local');
+    app(EmailDirectorySync::class)->import(directoryRows());
+
+    foreach (['081234567', '081234567890123', '071234567890',
+        '0812abc56789', '0812 3456 7890', '+6281234567890',
+    ] as $invalid) {
+        $data = directFormWithSignature();
+        $data['no_wa'] = $invalid;
+        $this->post(route('public.submit'), $data)->assertSessionHasErrors('no_wa');
+    }
+    expect(Ticket::count())->toBe(0);
+
+    $valid = directFormWithSignature();
+    $valid['no_wa'] = '6281234567890';
+    $this->post(route('public.submit'), $valid)
+        ->assertRedirect(route('public.success'));
+    expect(Ticket::firstOrFail()->no_wa)->toBe('6281234567890');
+});
+
+it('explains that autofilled identity fields can be corrected while email remains readonly', function () {
+    $this->get(route('public.form'))
+        ->assertOk()
+        ->assertSee('Data belum sesuai? Anda bisa memperbaikinya.')
+        ->assertSee('Email Gov')
+        ->assertSee('pattern="(08[0-9]{8,12}|628[0-9]{8,12})"', false);
+});

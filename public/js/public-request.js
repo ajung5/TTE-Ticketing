@@ -1,4 +1,4 @@
-/* v5 public form: NIK directory autofill, editable profile, immutable full email, touch signature. */
+/* v6 public form: NIK directory autofill, editable profile, immutable full email, touch signature. */
 (() => {
   'use strict';
   const form = document.getElementById('tte-public-form');
@@ -6,6 +6,7 @@
 
   const nik = document.getElementById('nik');
   const layanan = document.getElementById('layanan');
+  const whatsapp = document.getElementById('no_wa');
   const email = document.getElementById('email_display');
   const nikStatus = document.getElementById('nik-status');
   const details = document.getElementById('request-details');
@@ -34,7 +35,7 @@
   ctx.lineJoin = 'round';
 
   function refreshSubmit() {
-    submit.disabled = !matched || !signed || !consent.checked || !layanan.value;
+    submit.disabled = !matched || !signed || !consent.checked || !layanan.value || !whatsapp.checkValidity();
   }
   function setMatch(value) {
     matched = value;
@@ -57,6 +58,14 @@
   });
   consent.addEventListener('change', refreshSubmit);
   layanan.addEventListener('change', refreshSubmit);
+
+  // Input numerik saja; 08 dibatasi 14 digit, 628 sampai 15 digit.
+  whatsapp.addEventListener('input', () => {
+    const numeric = whatsapp.value.replace(/\D/g, '');
+    const maxDigits = numeric.startsWith('08') ? 14 : 15;
+    whatsapp.value = numeric.slice(0, maxDigits);
+    refreshSubmit();
+  });
 
   function setProfile(person, preserveExisting) {
     for (const key of profileKeys) {
@@ -163,7 +172,7 @@
     refreshSubmit();
   });
   form.addEventListener('submit', e => {
-    if (!matched || !signed || !consent.checked || !layanan.value) {
+    if (!matched || !signed || !consent.checked || !layanan.value || !whatsapp.checkValidity()) {
       e.preventDefault();
       return;
     }
