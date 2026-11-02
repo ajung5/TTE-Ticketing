@@ -80,7 +80,7 @@ it(
     },
 );
 
-it('switches from SE Belum Terbit to service notice only after verified issuance', function () {
+it('switches from SE Belum Terbit directly to ready for completion after issuance', function () {
     $owner = User::factory()->create(['role' => 'verifier']);
     $ticket = v18Ticket($owner, 'Pembaruan');
     $this->actingAs($owner)
@@ -106,7 +106,7 @@ it('switches from SE Belum Terbit to service notice only after verified issuance
     $this->actingAs($owner)
         ->get(route('tickets.show', $ticket))
         ->assertOk()
-        ->assertSee('Pembaruan Sertifikat');
+        ->assertSee('SE Sudah Terbit — Siap Ditandai Selesai');
     $this->actingAs($owner)->post(route('tickets.complete', $ticket))->assertRedirect();
     expect($ticket->fresh()->status)->toBe('Done');
 });

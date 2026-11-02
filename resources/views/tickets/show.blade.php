@@ -221,6 +221,25 @@
                 </section>
             @endif
 
+            @if ($serviceEvent === 'ready_for_completion')
+                <section class="card">
+                    <div class="section-heading">
+                        <div>
+                            <div class="eyebrow">LANGKAH 2 / HASIL PEMERIKSAAN ULANG</div>
+                            <h2>SE Sudah Terbit — Siap Ditandai Selesai</h2>
+                        </div>
+                    </div>
+                    <div class="note-box">
+                        <strong>Sertifikat Elektronik sudah terbit.</strong>
+                        <p class="small muted">Notifikasi SE Belum Terbit sebelumnya sudah dikonfirmasi.
+                            Anda dapat langsung menekan <strong>Tandai Selesai</strong> tanpa mengirim
+                            notifikasi Reset, Pembaruan, atau Pendaftaran lagi.
+                            Setelah tiket selesai, notifikasi <strong>Selesai + Survei</strong> beserta
+                            tautan penilaian akan tersedia untuk dikirim ke pemohon.</p>
+                    </div>
+                </section>
+            @endif
+
             @if ($serviceMessage && $serviceEvent)
                 <section class="card whatsapp-card">
                     <div class="section-heading">
@@ -345,6 +364,9 @@
                     <hr>
                     @if (!$serviceEvent)
                         <p class="small muted">Lengkapi pemeriksaan AMS di bagian atas sebelum menyelesaikan tiket.</p>
+                    @elseif ($serviceEvent === 'ready_for_completion')
+                        <p class="small muted">SE sudah terbit setelah notifikasi SE Belum Terbit dikonfirmasi.
+                            Klik Tandai Selesai agar notifikasi Selesai + Survei dan tautan penilaian tersedia.</p>
                     @elseif (!in_array($serviceEvent, ['reset', 'renewal', 'registration'], true))
                         <p class="small muted">Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau arahkan
                             pengajuan ulang terlebih dahulu.</p>
@@ -358,7 +380,7 @@
                             catatan.</p>
                     @endif
                     <form method="post" action="{{ route('tickets.complete', $ticket) }}">@csrf
-                        <button type="submit" class="btn btn-primary full" @disabled(!in_array($serviceEvent, ['reset', 'renewal', 'registration'], true))>Tandai Selesai
+                        <button type="submit" class="btn btn-primary full" @disabled(!in_array($serviceEvent, ['reset', 'renewal', 'registration', 'ready_for_completion'], true))>Tandai Selesai
                             ✓</button>
                     </form>
                     @php($canRelease = !$ticket->activities->whereNotIn('action', ['claimed', 'released'])->count())

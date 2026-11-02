@@ -67,6 +67,11 @@ class TicketController extends Controller {
         ) {
             return 'certificate_not_issued';
         }
+        // Sesudah SE Belum Terbit dikonfirmasi dan hasil AMS menyatakan SE terbit,
+        // lewati pesan layanan antara. Tampilkan Selesai + Survei setelah tiket ditutup.
+        if ($this->readyAfterCertificateIssuance($ticket)) {
+            return 'ready_for_completion'; // State internal, BUKAN event WhatsApp.
+        }
         if ($ticket->wa_verification_status === 'verified') {
             if ($ticket->certificate_issuance_status !== 'issued') {
                 return null;
@@ -101,6 +106,20 @@ class TicketController extends Controller {
         return null;
     }
 
+    /** Konfirmasi SE Belum Terbit sebelumnya harus tercatat dalam audit trail. */
+    private function readyAfterCertificateIssuance(Ticket $ticket): bool {
+        if (!$ticket->wa_checked_at ||
+            $ticket->wa_verification_status !== 'verified' ||
+            $ticket->certificate_issuance_status !== 'issued') {
+            return false;
+        }
+        return TicketActivity::query()
+            ->where('ticket_id', $ticket->id)
+            ->where('action', 'wa_service_confirmed')
+            ->where('note', \App\Models\WaMessageTemplate::EVENTS['certificate_not_issued'])
+            ->exists();
+    }
+
     private function hasOnboardingHistory(Ticket $ticket): bool {
         return TicketActivity::query()
             ->where('ticket_id', $ticket->id)
@@ -117,7 +136,11 @@ class TicketController extends Controller {
         abort_unless($ticket->status === 'Open' || $ticket->claimed_by === $request->user()->id, 403);
         $ticket->load(['claimant', 'activities.actor', 'whatsappNotifications']);
         $serviceEvent = $ticket->status === 'In Progress' ? $this->serviceEvent($ticket) : null;
-        $serviceMessage = $serviceEvent ? $whatsapp->forServiceTicket($ticket, $serviceEvent) : null;
+        // ready_for_completion tidak mempunyai preset WhatsApp; pesan akhir baru
+        // muncul ketika tiket benar-benar Done.
+        $serviceMessage = $serviceEvent && $serviceEvent !== 'ready_for_completion'
+            ? $whatsapp->forServiceTicket($ticket, $serviceEvent)
+            : null;
         $serviceNotification = $serviceEvent
             ? $ticket->whatsappNotifications->firstWhere('event_type', $serviceEvent)
             : null;
@@ -320,7 +343,7 @@ class TicketController extends Controller {
         abort_if($ticket->source === 'simulated', 403, 'WhatsApp dinonaktifkan untuk tiket simulasi.');
         $event = $this->serviceEvent($ticket);
         abort_unless(
-            $ticket->status === 'In Progress' && $event !== null,
+            $ticket->status === 'In Progress' && $event !== null && $event !== 'ready_for_completion',
             409,
             'Lengkapi pemeriksaan AMS sebelum mengirim notifikasi.'
         );
@@ -340,7 +363,7 @@ class TicketController extends Controller {
             $record = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
             abort_unless($record->status === 'In Progress' && $record->claimed_by === $request->user()->id, 409);
             $event = $this->serviceEvent($record);
-            abort_unless($event !== null, 409);
+            abort_unless($event !== null && $event !== 'ready_for_completion', 409);
             $notification = WaNotification::where('ticket_id', $record->id)
                 ->where('event_type', $event)
                 ->lockForUpdate()
@@ -401,12 +424,13 @@ class TicketController extends Controller {
             abort_unless($record->claimed_by === $request->user()->id && $record->status === 'In Progress', 409);
             $event = $this->serviceEvent($record);
             abort_unless(
-                in_array($event, ['reset', 'renewal', 'registration'], true),
+                in_array($event, ['reset', 'renewal', 'registration', 'ready_for_completion'], true),
                 409,
                 'Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau pengajuan ulang terlebih dahulu.'
             );
             // Gate utama: hanya reset/renewal/registration; konfirmasi WA bersifat administratif.
             $serviceNotificationConfirmed =
+                $event === 'ready_for_completion' ||
                 $record->source === 'simulated' ||
                 WaNotification::where('ticket_id', $record->id)
                     ->where('event_type', $event)
@@ -417,9 +441,11 @@ class TicketController extends Controller {
                 'ticket_id' => $record->id,
                 'actor_id' => $request->user()->id,
                 'action' => 'completed',
-                'note' => $serviceNotificationConfirmed
-                    ? null
-                    : 'Konfirmasi pengiriman notifikasi layanan belum tercatat pada saat tiket diselesaikan.'
+                'note' => $event === 'ready_for_completion'
+                    ? 'SE telah terbit setelah notifikasi SE Belum Terbit dikonfirmasi; notifikasi Selesai + Survei tersedia.'
+                    : ($serviceNotificationConfirmed
+                        ? null
+                        : 'Konfirmasi pengiriman notifikasi layanan belum tercatat pada saat tiket diselesaikan.')
             ]);
         });
         return back()->with('success', 'Tiket selesai. Notifikasi Selesai + Survei sekarang tersedia.');
