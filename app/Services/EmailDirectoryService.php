@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Models\EmailDirectory;
 use Illuminate\Support\Facades\DB;
 
-class EmailDirectoryService {
-    public function nikHash(string $nik): string {
+class EmailDirectoryService
+{
+    public function nikHash(string $nik): string
+    {
         $key = (string) config('app.key');
         if ($key === '') {
             throw new \RuntimeException('APP_KEY harus dikonfigurasi.');
@@ -15,13 +17,35 @@ class EmailDirectoryService {
         return hash_hmac('sha256', $nik, $key);
     }
 
-    public function find(string $nik): ?EmailDirectory {
+    // Kunci turunan terpisah untuk baris yang hanya mempunyai NIP.
+    public function nipOnlyHash(string $nip): string
+    {
+        return $this->nikHash('nip:'.$nip);
+    }
+
+    public function find(string $nik): ?EmailDirectory
+    {
         return EmailDirectory::where('nik_hash', $this->nikHash($nik))->first();
     }
 
-    public function available(): bool {
+    public function findByIdentifier(string $identifier): ?EmailDirectory
+    {
+        if (preg_match('/\A[0-9]{16}\z/', $identifier)) {
+            return $this->find($identifier);
+        }
+        if (! preg_match('/\A[0-9]{18}\z/', $identifier)) {
+            return null;
+        }
+
+        // Jangan memilih sembarang pegawai jika NIP duplikat dalam dataset lama.
+        $matches = EmailDirectory::where('nip', $identifier)->limit(2)->get();
+        return $matches->count() === 1 ? $matches->first() : null;
+    }
+
+    public function available(): bool
+    {
         $lastSynced = DB::table('email_directories')->max('synced_at');
-        if (!$lastSynced) {
+        if (! $lastSynced) {
             return false;
         }
         $maxAge = max(1, (int) config('email_directory.max_age_hours', 168));
@@ -29,31 +53,25 @@ class EmailDirectoryService {
         return \Illuminate\Support\Carbon::parse($lastSynced)->greaterThanOrEqualTo(now()->subHours($maxAge));
     }
 
-    public function normalizedEmail(?string $raw): ?string {
+    public function normalizedEmail(?string $raw): ?string
+    {
         $raw = strtolower(trim((string) $raw));
-
         if ($raw === '') {
             return null;
         }
-
-        // Tambahkan domain jika hanya username.
-        if (!str_contains($raw, '@')) {
+        if (! str_contains($raw, '@')) {
             $raw .= '@subang.go.id';
         }
-
-        // Hanya huruf, angka, apostrof dan titik pada username.
         $pattern = "/^[a-z0-9]+(?:[.'][a-z0-9]+)*@subang\.go\.id$/D";
-
-        if (!preg_match($pattern, $raw) || filter_var($raw, FILTER_VALIDATE_EMAIL) === false) {
+        if (! preg_match($pattern, $raw) || filter_var($raw, FILTER_VALIDATE_EMAIL) === false) {
             return null;
         }
-
         return $raw;
     }
 
-    public function maskedEmail(string $email): string {
+    public function maskedEmail(string $email): string
+    {
         [$username, $domain] = explode('@', $email, 2);
-
-        return substr($username, 0, min(2, strlen($username))) . '***@' . $domain;
+        return substr($username, 0, min(2, strlen($username))).'***@'.$domain;
     }
 }

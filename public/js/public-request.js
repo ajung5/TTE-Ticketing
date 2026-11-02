@@ -1,4 +1,4 @@
-/* v7 public form: NIK directory autofill, editable profile, immutable full email, touch signature. */
+/* v15 public form: NIK/NIP directory autofill, editable profile, immutable full email, touch signature. */
 (() => {
   'use strict';
   const form = document.getElementById('tte-public-form');
@@ -27,7 +27,7 @@
   let debounce;
   let controller;
   let sequence = 0;
-  let wasRestored = nik.value.length === 16 && profileKeys.some(key => profileInputs[key].value.trim());
+  let wasRestored = [16, 18].includes(nik.value.length) && profileKeys.some(key => profileInputs[key].value.trim());
 
   ctx.strokeStyle = '#173759';
   ctx.lineWidth = 3;
@@ -79,7 +79,7 @@
       if (preserveExisting && profileInputs[key].value.trim()) continue;
       profileInputs[key].value = typeof person[key] === 'string' ? person[key] : '';
     }
-    // No editable or named email field is submitted. The backend resolves it from the NIK again.
+    // No editable or named email field is submitted. The backend resolves it from the identifier again.
     email.value = person.email || '';
   }
 
@@ -90,10 +90,10 @@
     const currentNik = nik.value;
     setMatch(false);
     email.value = '';
-    nikStatus.textContent = currentNik.length === 16
+    nikStatus.textContent = [16, 18].includes(currentNik.length)
       ? 'Memeriksa data pada direktori email...'
-      : 'Masukkan 16 digit NIK untuk mencari data.';
-    if (currentNik.length !== 16) return;
+      : 'Masukkan NIK 16 digit atau NIP 18 digit untuk mencari data.';
+    if (![16, 18].includes(currentNik.length)) return;
 
     debounce = setTimeout(async () => {
       controller = new AbortController();
@@ -118,8 +118,10 @@
           nikStatus.textContent = 'Data ditemukan. Periksa dan koreksi informasi jika diperlukan.';
           setMatch(true);
         } else if (result.status === 'not_found') {
-          nikStatus.textContent = 'NIK atau username Email Gov tidak tersedia.';
-          openModal();
+          nikStatus.textContent = currentNik.length === 16
+            ? 'NIK belum ditemukan. Anda dapat mencoba NIP 18 digit di kolom yang sama.'
+            : 'NIK/NIP atau username Email Gov tidak tersedia.';
+          if (currentNik.length === 18) openModal();
         } else if (response.status === 429) {
           nikStatus.textContent = 'Terlalu banyak pencarian. Silakan coba beberapa saat lagi.';
         } else {
@@ -136,7 +138,7 @@
   }
 
   nik.addEventListener('input', () => {
-    nik.value = nik.value.replace(/\D/g, '').slice(0, 16);
+    nik.value = nik.value.replace(/\D/g, '').slice(0, 18);
     for (const key of profileKeys) profileInputs[key].value = '';
     wasRestored = false;
     if (!modal.hidden) modal.hidden = true;
@@ -187,7 +189,7 @@
     submit.textContent = 'Mengirim permohonan...';
   });
 
-  // A failed POST may redirect back with old input; restore corrections, then recheck the NIK.
-  if (nik.value.length === 16) lookupNik(wasRestored);
+  // A failed POST may redirect back with old input; restore corrections, then recheck NIK/NIP.
+  if ([16, 18].includes(nik.value.length)) lookupNik(wasRestored);
   refreshSubmit();
 })();
