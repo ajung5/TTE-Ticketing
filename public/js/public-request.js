@@ -8,6 +8,8 @@
   const layanan = document.getElementById('layanan');
   const whatsapp = document.getElementById('no_wa');
   const email = document.getElementById('email_display');
+  const uptdField = document.getElementById('uptd-field');
+  const uptdDisplay = document.getElementById('uptd_display');
   const nikStatus = document.getElementById('nik-status');
   const details = document.getElementById('request-details');
   const pending = document.getElementById('request-details-pending');
@@ -73,7 +75,14 @@
     refreshSubmit();
   });
 
+  function setUptd(value) {
+    const name = typeof value === 'string' ? value.trim() : '';
+    uptdDisplay.value = name === '-' ? '' : name;
+    uptdField.hidden = uptdDisplay.value === '';
+  }
+
   function setProfile(person, preserveExisting) {
+    setUptd(person.uptd);
     for (const key of profileKeys) {
       // Old input has priority only after a server-side validation error.
       if (preserveExisting && profileInputs[key].value.trim()) continue;
@@ -90,6 +99,7 @@
     const currentNik = nik.value;
     setMatch(false);
     email.value = '';
+    setUptd('');
     nikStatus.textContent = [16, 18].includes(currentNik.length)
       ? 'Memeriksa data pada direktori email...'
       : 'Masukkan NIK 16 digit atau NIP 18 digit untuk mencari data.';

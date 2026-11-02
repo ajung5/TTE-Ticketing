@@ -14,6 +14,7 @@ class EmailDirectory extends Model {
         'jabatan',
         'nama_unor',
         'unit_kerja',
+        'uptd',
         'status_pengguna',
         'status_sertifikat',
         'sync_batch',

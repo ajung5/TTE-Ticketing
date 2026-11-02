@@ -55,6 +55,12 @@
                         <div class="field-name">Unit Kerja / OPD</div>
                         <div class="field-value">{{ $ticket->opd ?: '-' }}</div>
                     </div>
+                    @if ($applicantUptd !== '')
+                        <div>
+                            <div class="field-name">UPTD</div>
+                            <div class="field-value">{{ $applicantUptd }}</div>
+                        </div>
+                    @endif
                     <div>
                         <div class="field-name">Jabatan</div>
                         <div class="field-value">{{ $ticket->jabatan ?: '-' }}</div>

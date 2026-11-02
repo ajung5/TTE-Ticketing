@@ -126,6 +126,7 @@
 .public-request-v5 .request-details {
     border-color: #cfe0f3;
 }
+.public-request-v5 #uptd-field[hidden],
 .public-request-v5 .request-details[hidden],
 .public-request-v5 .request-pending-note[hidden] {
     display: none !important;

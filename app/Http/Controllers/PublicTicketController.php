@@ -58,7 +58,8 @@ class PublicTicketController extends Controller {
                 'nama_user' => (string) ($record->nama ?? ''),
                 'nip' => (string) ($record->nip ?? ''),
                 'jabatan' => (string) ($record->jabatan ?? ''),
-                'opd' => (string) ($record->unit_kerja ?: $record->nama_unor ?? '')
+                'opd' => (string) ($record->unit_kerja ?: $record->nama_unor ?? ''),
+                'uptd' => trim((string) ($record->uptd ?? ''))
             ])
             ->header('Cache-Control', 'private, no-store, max-age=0')
             ->header('X-Robots-Tag', 'noindex, nofollow');
@@ -148,6 +149,9 @@ class PublicTicketController extends Controller {
                     'email' => $person->email,
                     'no_wa' => $phone,
                     'opd' => $data['opd'],
+                    // Nilai direktori disalin saat pengajuan; input UPTD dari browser diabaikan.
+                    // String kosong berarti pemohon diketahui tidak mempunyai UPTD.
+                    'uptd' => trim((string) ($person->uptd ?? '')),
                     'jabatan' => $data['jabatan'],
                     'keterangan' => $data['keterangan'] ?? null,
                     'layanan' => $data['layanan'],

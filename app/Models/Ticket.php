@@ -20,6 +20,7 @@ class Ticket extends Model {
         'source',
         'nip',
         'opd',
+        'uptd',
         'jabatan',
         'email',
         'keterangan',

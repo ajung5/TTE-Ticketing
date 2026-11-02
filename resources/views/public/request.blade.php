@@ -120,6 +120,13 @@
                                 <input id="opd" name="opd" maxlength="180" required
                                     value="{{ old('opd') }}" placeholder="Unit kerja saat ini">
                             </label>
+                            <div class="field-group" id="uptd-field" hidden>
+                                <label for="uptd_display">UPTD
+                                    <input id="uptd_display" type="text" value="" readonly
+                                        aria-readonly="true" autocomplete="off" aria-describedby="uptd-help">
+                                </label>
+                                <p class="small muted" id="uptd-help">Sesuai data direktori pegawai.</p>
+                            </div>
                             <div class="field-group request-email-group">
                                 <label for="email_display">Email Gov <span class="required-mark">*</span>
                                     <input id="email_display" type="email" value="" readonly
@@ -214,7 +221,7 @@
             </div>
         </div>
     </div>
-    <link rel="stylesheet" href="{{ asset('css/public-request-v5.css') }}?v=5">
+    <link rel="stylesheet" href="{{ asset('css/public-request-v5.css') }}?v=23">
     <link rel="stylesheet" href="{{ asset('css/wa-phone-prefix.css') }}?v=1">
-    <script src="{{ asset('js/public-request.js') }}?v=15" defer></script>
+    <script src="{{ asset('js/public-request.js') }}?v=23" defer></script>
 @endsection

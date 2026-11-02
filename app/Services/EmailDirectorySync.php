@@ -72,6 +72,7 @@ class EmailDirectorySync {
                 'jabatan' => $get($row, 'jabatan') ?: null,
                 'nama_unor' => $get($row, 'nama unor') ?: null,
                 'unit_kerja' => $get($row, 'unit kerja') ?: null,
+                'uptd' => in_array($get($row, 'uptd'), ['', '-'], true) ? null : $get($row, 'uptd'),
                 'status_pengguna' => $get($row, 'status pengguna') ?: null,
                 'status_sertifikat' => $get($row, 'status sertifikat') ?: null
             ];

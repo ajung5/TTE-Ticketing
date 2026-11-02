@@ -135,6 +135,21 @@ class TicketController extends Controller {
         $this->verifier($request);
         abort_unless($ticket->status === 'Open' || $ticket->claimed_by === $request->user()->id, 403);
         $ticket->load(['claimant', 'activities.actor', 'whatsappNotifications']);
+        // NULL hanya untuk tiket lama yang belum menyimpan UPTD saat pengajuan.
+        $applicantUptd = $ticket->uptd;
+        if ($applicantUptd === null && $ticket->source !== 'simulated') {
+            $identifier = trim((string) ($ticket->nik ?: $ticket->nip));
+            $person = app(\App\Services\EmailDirectoryService::class)->findByIdentifier($identifier);
+            // Cocokkan email juga agar NIP yang dikoreksi tidak mengambil UPTD orang lain.
+            if ($person && $ticket->email &&
+                strcasecmp((string) $person->email, (string) $ticket->email) === 0) {
+                $applicantUptd = $person->uptd;
+            }
+        }
+        $applicantUptd = trim((string) $applicantUptd);
+        if ($applicantUptd === '-') {
+            $applicantUptd = '';
+        }
         $serviceEvent = $ticket->status === 'In Progress' ? $this->serviceEvent($ticket) : null;
         // ready_for_completion tidak mempunyai preset WhatsApp; pesan akhir baru
         // muncul ketika tiket benar-benar Done.
@@ -149,7 +164,7 @@ class TicketController extends Controller {
 
         return view(
             'tickets.show',
-            compact('ticket', 'serviceEvent', 'serviceMessage', 'serviceNotification', 'serviceConfirmed', 'waMessage')
+            compact('ticket', 'serviceEvent', 'serviceMessage', 'serviceNotification', 'serviceConfirmed', 'waMessage', 'applicantUptd')
         );
     }
 
