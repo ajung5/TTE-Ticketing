@@ -347,17 +347,15 @@
                         <p class="small muted">Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau arahkan
                             pengajuan ulang terlebih dahulu.</p>
                     @elseif (!$serviceConfirmed && $ticket->source !== 'simulated')
-                        <p class="small muted">Kirim dan konfirmasi notifikasi layanan terlebih dahulu sebelum menandai
-                            tiket selesai.</p>
+                        <p class="small muted">Notifikasi layanan utama sudah tersedia, sehingga tiket dapat ditandai selesai.
+                            Pastikan tindakan layanan telah dilakukan dan kirim notifikasi WhatsApp sebelum menutup tiket.
+                            Jika pengiriman belum dikonfirmasi, hal tersebut akan dicatat pada riwayat aktivitas.</p>
                     @else
                         <p class="small muted">Penanganan telah dicatat. Anda dapat menandai tiket selesai tanpa mengisi
                             catatan.</p>
                     @endif
                     <form method="post" action="{{ route('tickets.complete', $ticket) }}">@csrf
-                        <button type="submit" class="btn btn-primary full" @disabled(
-                            !in_array($serviceEvent, ['reset', 'renewal', 'registration'], true) ||
-                                (!$serviceConfirmed && $ticket->source !== 'simulated')
-                        )>Tandai Selesai
+                        <button type="submit" class="btn btn-primary full" @disabled(!in_array($serviceEvent, ['reset', 'renewal', 'registration'], true))>Tandai Selesai
                             ✓</button>
                     </form>
                     @php($canRelease = !$ticket->activities->whereNotIn('action', ['claimed', 'released'])->count())

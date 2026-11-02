@@ -383,21 +383,19 @@ class TicketController extends Controller {
                 409,
                 'Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau pengajuan ulang terlebih dahulu.'
             );
-            if ($record->source !== 'simulated') {
-                abort_unless(
-                    WaNotification::where('ticket_id', $record->id)
-                        ->where('event_type', $event)
-                        ->whereNotNull('confirmed_at')
-                        ->exists(),
-                    409,
-                    'Kirim dan konfirmasi notifikasi layanan terlebih dahulu.'
-                );
-            }
+            // Gate utama: hanya reset/renewal/registration; konfirmasi WA bersifat administratif.
+            $serviceNotificationConfirmed = $record->source === 'simulated' ||
+                WaNotification::where('ticket_id', $record->id)
+                    ->where('event_type', $event)
+                    ->whereNotNull('confirmed_at')
+                    ->exists();
             $record->update(['status' => 'Done', 'completed_at' => now(), 'resolution_note' => null]);
             TicketActivity::create([
                 'ticket_id' => $record->id,
                 'actor_id' => $request->user()->id,
-                'action' => 'completed'
+                'action' => 'completed',
+                'note' => $serviceNotificationConfirmed ? null :
+                    'Konfirmasi pengiriman notifikasi layanan belum tercatat pada saat tiket diselesaikan.'
             ]);
         });
         return back()->with('success', 'Tiket selesai. Notifikasi Selesai + Survei sekarang tersedia.');

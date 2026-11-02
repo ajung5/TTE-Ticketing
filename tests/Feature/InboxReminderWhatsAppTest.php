@@ -99,7 +99,7 @@ it(
 );
 
 it(
-    'requires manual notification confirmation then allows completion without notes and adds survey link',
+    'allows optional WhatsApp confirmation then completion without notes and adds survey link',
     function () {
         $owner = User::factory()->create(['role' => 'verifier']);
         $ticket = amsTicket(['claimed_by' => $owner->id]);
@@ -109,7 +109,8 @@ it(
                 'wa_verification_status' => 'verified',
             ])
             ->assertRedirect();
-        $this->actingAs($owner)->post(route('tickets.complete', $ticket))->assertStatus(409);
+        // v17.1: setelah notifikasi Reset tersedia, penyelesaian tidak lagi
+        // mensyaratkan konfirmasi WhatsApp. Uji pengiriman manual tetap dilakukan.
         $this->actingAs($owner)
             ->post(route('tickets.whatsapp.service.confirm', $ticket))
             ->assertStatus(409);

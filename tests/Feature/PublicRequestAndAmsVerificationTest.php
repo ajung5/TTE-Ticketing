@@ -76,6 +76,8 @@ it('selects WA-unverified notice, then renewal notice when status changes', func
     $this->actingAs($verifier)
         ->get(route('tickets.show', $ticket))
         ->assertSee('Nomor WA Belum Terverifikasi');
+    // Notifikasi prasyarat WA tidak boleh membuat tiket bisa diselesaikan.
+    $this->actingAs($verifier)->post(route('tickets.complete', $ticket))->assertStatus(409);
     $this->actingAs($verifier)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
     $this->actingAs($verifier)
         ->post(route('tickets.whatsapp.service.confirm', $ticket))
@@ -89,7 +91,8 @@ it('selects WA-unverified notice, then renewal notice when status changes', func
     $this->actingAs($verifier)
         ->get(route('tickets.show', $ticket))
         ->assertSee('Pembaruan Sertifikat');
-    $this->actingAs($verifier)->post(route('tickets.complete', $ticket))->assertStatus(409);
+    // v17.1: notifikasi layanan utama sudah cukup untuk membuka Tandai Selesai.
+    // Alur konfirmasi WA berikutnya tetap diuji sebagai pengiriman opsional.
     $this->actingAs($verifier)->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
     $this->actingAs($verifier)
         ->post(route('tickets.whatsapp.service.confirm', $ticket))
