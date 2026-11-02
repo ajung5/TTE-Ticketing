@@ -377,24 +377,51 @@ class TicketController extends Controller {
                     'action' => 'wa_service_confirmed',
                     'note' => \App\Models\WaMessageTemplate::EVENTS[$event]
                 ]);
-                if ($event === 'service_mismatch') {
-                    // Penutupan administratif bukan keberhasilan layanan; tidak ada survei selesai.
-                    $record->update([
-                        'status' => 'Returned',
-                        'completed_at' => null,
-                        'resolution_note' => 'Pengajuan ulang disarankan: ' . $record->recommended_service
-                    ]);
-                    TicketActivity::create([
-                        'ticket_id' => $record->id,
-                        'actor_id' => $request->user()->id,
-                        'action' => 'returned_for_correction',
-                        'note' =>
-                            'Layanan diajukan: ' . $record->layanan . '; disarankan: ' . $record->recommended_service
-                    ]);
-                }
             }
         });
-        return back()->with('success', 'Notifikasi berhasil dikonfirmasi dan status tiket diperbarui.');
+        return back()->with('success', 'Pengiriman notifikasi dikonfirmasi. Jika layanan tidak sesuai, lanjutkan dengan tombol Kembalikan Permohonan.');
+    }
+
+    /** Kembalikan salah jenis layanan setelah pesan koreksi dikonfirmasi secara manual. */
+    public function returnForCorrection(Request $request, Ticket $ticket) {
+        $this->owner($request, $ticket);
+        abort_if($ticket->source === 'simulated', 403, 'Tiket simulasi tidak dapat dikembalikan melalui alur WhatsApp.');
+        DB::transaction(function () use ($request, $ticket) {
+            $record = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+            abort_unless(
+                $record->status === 'In Progress' && $record->claimed_by === $request->user()->id,
+                409,
+                'Hanya tiket yang sedang Anda tangani dapat dikembalikan.'
+            );
+            abort_unless(
+                $this->serviceEvent($record) === 'service_mismatch' &&
+                in_array($record->recommended_service, ['Pendaftaran', 'Reset Passphrase', 'Pembaruan'], true),
+                409,
+                'Kembalikan permohonan hanya jika pemeriksaan AMS menyatakan jenis layanan tidak sesuai.'
+            );
+            abort_unless(
+                WaNotification::where('ticket_id', $record->id)
+                    ->where('event_type', 'service_mismatch')
+                    ->whereNotNull('confirmed_at')
+                    ->exists(),
+                409,
+                'Kirim dan konfirmasi pesan Perbaikan Jenis Permohonan terlebih dahulu.'
+            );
+            $record->update([
+                'status' => 'Returned',
+                'completed_at' => null,
+                'resolution_note' => 'Pengajuan ulang disarankan: ' . $record->recommended_service
+            ]);
+            TicketActivity::create([
+                'ticket_id' => $record->id,
+                'actor_id' => $request->user()->id,
+                'action' => 'returned_for_correction',
+                'note' => 'Layanan diajukan: ' . $record->layanan .
+                    '; disarankan: ' . $record->recommended_service
+            ]);
+        });
+        return redirect()->route('tickets.show', $ticket)
+            ->with('success', 'Permohonan berhasil dikembalikan. Tiket lama disimpan sebagai Perlu Pengajuan Ulang.');
     }
 
     public function note(Request $request, Ticket $ticket) {

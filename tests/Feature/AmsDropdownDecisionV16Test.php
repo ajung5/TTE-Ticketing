@@ -124,6 +124,10 @@ it('returns a mismatched reset request administratively and never marks it Done'
     $this->actingAs($verifier)
         ->post(route('tickets.whatsapp.service.confirm', $ticket))
         ->assertRedirect();
+    expect($ticket->fresh()->status)->toBe('In Progress');
+    $this->actingAs($verifier)
+        ->post(route('tickets.return-for-correction', $ticket))
+        ->assertRedirect();
     expect($ticket->fresh()->status)->toBe('Returned');
     expect($ticket->fresh()->completed_at)->toBeNull();
     $this->assertDatabaseHas('ticket_activities', [

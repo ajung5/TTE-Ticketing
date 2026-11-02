@@ -252,8 +252,11 @@
                         layanan yang dipilih. Periksa isi pesan sebelum dikirim.</p>
                     @if ($serviceEvent === 'service_mismatch')
                         <div class="note-box" role="alert"><strong>Permohonan perlu diajukan ulang.</strong>
-                            <p>Setelah pesan ini dikirim dan dikonfirmasi oleh verifikator, tiket akan ditutup sebagai
-                                <strong>Perlu Pengajuan Ulang</strong>, bukan dihitung sebagai layanan selesai.
+                            <p>Setelah pesan dikirim, klik <strong>Saya Sudah Mengirim Pesan</strong>.
+                                Selanjutnya gunakan tombol <strong>Kembalikan Permohonan</strong> di bagian
+                                Penanganan Tiket. Konfirmasi pesan tidak otomatis menutup tiket.
+                                Tiket yang dikembalikan berstatus <strong>Perlu Pengajuan Ulang</strong>,
+                                bukan dihitung sebagai layanan selesai.
                                 Rekomendasi:
                                 {{ $ticket->recommended_service === 'Pendaftaran' ? 'Penerbitan Sertifikat Elektronik' : $ticket->recommended_service }}.
                             </p>
@@ -367,6 +370,17 @@
                     @elseif ($serviceEvent === 'ready_for_completion')
                         <p class="small muted">SE sudah terbit setelah notifikasi SE Belum Terbit dikonfirmasi.
                             Klik Tandai Selesai agar notifikasi Selesai + Survei dan tautan penilaian tersedia.</p>
+                    @elseif ($serviceEvent === 'service_mismatch')
+                        @if ($ticket->source === 'simulated')
+                            <p class="small muted">Pengembalian melalui WhatsApp tidak tersedia untuk tiket simulasi.</p>
+                        @elseif (!$serviceConfirmed)
+                            <p class="small muted">Kirim notifikasi Perbaikan Jenis Permohonan, kemudian klik
+                                <strong>Saya Sudah Mengirim Pesan</strong> untuk mengaktifkan tombol pengembalian.</p>
+                        @else
+                            <p class="small muted">Pesan koreksi sudah dikonfirmasi. Klik
+                                <strong>Kembalikan Permohonan</strong> untuk menutup tiket secara administratif.
+                                Tiket ini tidak menjadi Selesai dan tidak mendapatkan survei.</p>
+                        @endif
                     @elseif (!in_array($serviceEvent, ['reset', 'renewal', 'registration'], true))
                         <p class="small muted">Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau arahkan
                             pengajuan ulang terlebih dahulu.</p>
@@ -379,10 +393,18 @@
                         <p class="small muted">Penanganan telah dicatat. Anda dapat menandai tiket selesai tanpa mengisi
                             catatan.</p>
                     @endif
-                    <form method="post" action="{{ route('tickets.complete', $ticket) }}">@csrf
-                        <button type="submit" class="btn btn-primary full" @disabled(!in_array($serviceEvent, ['reset', 'renewal', 'registration', 'ready_for_completion'], true))>Tandai Selesai
-                            ✓</button>
-                    </form>
+                    @if ($serviceEvent === 'service_mismatch')
+                        <form method="post" action="{{ route('tickets.return-for-correction', $ticket) }}">@csrf
+                            <button type="submit" class="btn btn-primary full"
+                                @disabled(!$serviceConfirmed || $ticket->source === 'simulated')>Kembalikan Permohonan</button>
+                        </form>
+                    @else
+                        <form method="post" action="{{ route('tickets.complete', $ticket) }}">@csrf
+                            <button type="submit" class="btn btn-primary full"
+                                @disabled(!in_array($serviceEvent, ['reset', 'renewal', 'registration', 'ready_for_completion'], true))>Tandai Selesai
+                                ✓</button>
+                        </form>
+                    @endif
                     @php($canRelease = !$ticket->activities->whereNotIn('action', ['claimed', 'released'])->count())
                     <form method="post" action="{{ route('tickets.release', $ticket) }}" class="mt">@csrf
                         <button type="submit" class="btn btn-ghost full" @disabled(!$canRelease)>Lepas Tiket (belum
@@ -393,8 +415,9 @@
                     @endunless
                 @elseif ($ticket->status === 'Returned')
                     <div class="note-box"><strong>Perlu Pengajuan Ulang</strong>
-                        <p class="small muted">Notifikasi koreksi telah dikonfirmasi. Tiket ini tidak dihitung sebagai
-                            layanan berhasil dan tidak mengirim survei.</p>
+                        <p class="small muted">Pengiriman notifikasi koreksi telah dikonfirmasi, lalu permohonan
+                            dikembalikan oleh verifikator. Tiket lama dipertahankan dan tidak dihitung sebagai layanan
+                            berhasil maupun dikirimkan survei.</p>
                         <p class="small muted">Layanan diajukan: {{ $ticket->service_label }}. Rekomendasi:
                             {{ $ticket->recommended_service === 'Pendaftaran' ? 'Penerbitan Sertifikat Elektronik' : $ticket->recommended_service }}.
                         </p>
