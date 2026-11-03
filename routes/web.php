@@ -27,10 +27,10 @@ Route::get('/permohonan/berhasil', [PublicTicketController::class, 'success'])->
 // Signed URL 30 hari. Survei publik hanya melalui tautan dari notifikasi selesai.
 Route::get('/survei/terima-kasih', [PublicSurveyController::class, 'thanks'])->name('public.survey.thanks');
 Route::get('/survei/{ticket}', [PublicSurveyController::class, 'show'])
-    ->middleware(['signed', 'throttle:20,1'])
+    ->middleware(['signed', 'throttle:tte-survey-view'])
     ->name('public.survey.show');
 Route::post('/survei/{ticket}', [PublicSurveyController::class, 'store'])
-    ->middleware(['signed', 'throttle:5,10'])
+    ->middleware(['signed', 'throttle:tte-survey-submit'])
     ->name('public.survey.store');
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'form'])->name('login');
