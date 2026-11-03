@@ -1,6 +1,11 @@
 @extends('layouts.app')
 @section('title', 'Statistik Layanan')
 @section('content')
+    <style>
+        .stat-grid.admin-statistics {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+    </style>
     <div class="page-heading">
         <div>
             <div class="eyebrow">OVERVIEW / ADMINISTRATOR</div>
@@ -9,7 +14,7 @@
         </div>
         <span class="pill pill-blue">● Monitoring aktif</span>
     </div>
-    <div class="stat-grid">
+    <div class="stat-grid admin-statistics">
         <div class="stat-card">
             <div class="stat-top"><span class="stat-icon stat-indigo">▤</span><span class="stat-micro">KESELURUHAN</span></div>
             <div class="stat-name">Total Permohonan</div>
@@ -36,6 +41,12 @@
                 {{ $stats['total'] ? number_format(($stats['done'] / $stats['total']) * 100, 1, ',', '.') : 0 }}% dari
                 seluruh
                 tiket</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-top"><span class="stat-icon stat-amber">↩</span><span class="stat-micro">DIKEMBALIKAN</span></div>
+            <div class="stat-name">Perlu Pengajuan Ulang</div>
+            <div class="stat-number">{{ number_format($stats['returned'], 0, ',', '.') }}</div>
+            <div class="stat-foot">Tidak dihitung sebagai tiket selesai</div>
         </div>
     </div>
     <div class="columns overview-columns">
@@ -95,6 +106,7 @@
                         <th>Tiket Ditangani</th>
                         <th>Aktif</th>
                         <th>Selesai</th>
+                        <th>Perlu Pengajuan Ulang</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -112,6 +124,7 @@
                             <td><strong>{{ $c?->total ?? 0 }}</strong></td>
                             <td>{{ $c?->active_count ?? 0 }}</td>
                             <td><span class="pill pill-green">{{ $c?->done_count ?? 0 }} selesai</span></td>
+                            <td>{{ $c?->returned_count ?? 0 }}</td>
                             <td>
                                 <form method="post" action="{{ route('admin.password-reset', $verifier) }}"
                                     onsubmit="return confirm('Kirim tautan reset password untuk akun ini?')">@csrf<button
@@ -119,7 +132,7 @@
                             </td>
                         </tr>
                     @empty <tr>
-                            <td colspan="6" class="empty">Belum ada verifikator.</td>
+                            <td colspan="7" class="empty">Belum ada verifikator.</td>
                         </tr>
                     @endforelse
                 </tbody>

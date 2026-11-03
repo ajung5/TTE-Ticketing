@@ -19,7 +19,8 @@ class AdminController extends Controller {
             'total' => Ticket::count(),
             'new' => Ticket::where('status', 'Open')->count(),
             'active' => Ticket::where('status', 'In Progress')->count(),
-            'done' => Ticket::where('status', 'Done')->count()
+            'done' => Ticket::where('status', 'Done')->count(),
+            'returned' => Ticket::where('status', 'Returned')->count()
         ];
         $services = Ticket::select('layanan')
             ->selectRaw('COUNT(*) as total')
@@ -27,7 +28,7 @@ class AdminController extends Controller {
             ->pluck('total', 'layanan');
         $counts = Ticket::select('claimed_by')
             ->selectRaw(
-                "COUNT(*) as total, SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as active_count"
+                "COUNT(*) as total, SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as active_count, SUM(CASE WHEN status = 'Returned' THEN 1 ELSE 0 END) as returned_count"
             )
             ->whereNotNull('claimed_by')
             ->groupBy('claimed_by')

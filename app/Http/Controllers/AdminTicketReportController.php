@@ -11,6 +11,12 @@ use Illuminate\Validation\Rule;
 
 class AdminTicketReportController extends Controller {
     private const TIMEZONE = 'Asia/Jakarta';
+    private const STATUS_LABELS = [
+        'Open' => 'Belum Diambil',
+        'In Progress' => 'Diproses',
+        'Done' => 'Selesai',
+        'Returned' => 'Perlu Pengajuan Ulang'
+    ];
 
     private function authorizeAdmin(Request $request): void {
         abort_unless($request->user()?->isAdmin(), 403, 'Laporan tiket hanya tersedia untuk administrator.');
@@ -27,7 +33,8 @@ class AdminTicketReportController extends Controller {
             'mode' => ['sometimes', 'required', Rule::in(['month', 'custom'])],
             'month' => ['required_if:mode,month', 'nullable', 'date_format:Y-m'],
             'from' => ['required_if:mode,custom', 'nullable', 'date_format:Y-m-d'],
-            'to' => ['required_if:mode,custom', 'nullable', 'date_format:Y-m-d', 'after_or_equal:from']
+            'to' => ['required_if:mode,custom', 'nullable', 'date_format:Y-m-d', 'after_or_equal:from'],
+            'status' => ['nullable', Rule::in(array_keys(self::STATUS_LABELS))]
         ]);
 
         $mode = $data['mode'] ?? 'month';
@@ -45,12 +52,19 @@ class AdminTicketReportController extends Controller {
             $label = $from->locale('id')->translatedFormat('F Y');
         }
 
+        $filters['status'] = $data['status'] ?? '';
+
         return [$from->utc(), $to->addDay()->utc(), $filters, $label];
     }
 
     /** Semua perhitungan laporan utama berdasarkan tanggal tiket MASUK. */
-    private function incoming(CarbonImmutable $start, CarbonImmutable $endExclusive): Builder {
-        return Ticket::query()->where('created_at', '>=', $start)->where('created_at', '<', $endExclusive);
+    private function incoming(CarbonImmutable $start, CarbonImmutable $endExclusive, ?string $status = null): Builder {
+        $query = Ticket::query()->where('created_at', '>=', $start)->where('created_at', '<', $endExclusive);
+        // Filter status hanya untuk rincian/CSV. Rekap tetap mencakup seluruh tiket masuk periode.
+        if ($status) {
+            $query->where('status', $status);
+        }
+        return $query;
     }
 
     public function index(Request $request) {
@@ -62,13 +76,15 @@ class AdminTicketReportController extends Controller {
                 "COUNT(*) as total,
                 SUM(CASE WHEN status = 'Open' THEN 1 ELSE 0 END) as open_count,
                 SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as progress_count,
-                SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count"
+                SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count,
+                SUM(CASE WHEN status = 'Returned' THEN 1 ELSE 0 END) as returned_count"
             )
             ->first();
 
         // Indikator berbeda: semua tiket yang SELESAI dalam periode,
         // walaupun diterima sebelum periode tersebut.
         $completedDuringPeriod = Ticket::query()
+            ->where('status', 'Done')
             ->whereNotNull('completed_at')
             ->where('completed_at', '>=', $start)
             ->where('completed_at', '<', $endExclusive)
@@ -80,7 +96,8 @@ class AdminTicketReportController extends Controller {
                 "COUNT(*) as total,
                 SUM(CASE WHEN status = 'Open' THEN 1 ELSE 0 END) as open_count,
                 SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as progress_count,
-                SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count"
+                SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count,
+                SUM(CASE WHEN status = 'Returned' THEN 1 ELSE 0 END) as returned_count"
             )
             ->groupBy('layanan')
             ->orderBy('layanan')
@@ -99,7 +116,8 @@ class AdminTicketReportController extends Controller {
             ->selectRaw(
                 "COUNT(*) as total,
                 SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as progress_count,
-                SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count"
+                SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count,
+                SUM(CASE WHEN status = 'Returned' THEN 1 ELSE 0 END) as returned_count"
             )
             ->groupBy('claimed_by')
             ->orderByDesc('total')
@@ -110,7 +128,8 @@ class AdminTicketReportController extends Controller {
             ->get(['id', 'name', 'initials'])
             ->keyBy('id');
 
-        $tickets = $this->incoming($start, $endExclusive)
+        $statusLabels = self::STATUS_LABELS;
+        $tickets = $this->incoming($start, $endExclusive, $filters['status'])
             ->with('claimant:id,name,initials')
             ->orderByDesc('created_at')
             ->orderByDesc('id')
@@ -129,13 +148,14 @@ class AdminTicketReportController extends Controller {
                     'verifiers',
                     'tickets',
                     'filters',
-                    'periodLabel'
+                    'periodLabel',
+                    'statusLabels'
                 )
             )
             ->header('Cache-Control', 'private, no-store');
     }
 
-    /** CSV berisi semua baris dalam periode; data sensitif (NIK/WA/email) tidak diekspor. */
+    /** CSV berisi semua baris sesuai periode dan filter status; data sensitif (NIK/WA/email) tidak diekspor. */
     public function csv(Request $request) {
         $this->authorizeAdmin($request);
         [$start, $endExclusive, $filters] = $this->period($request);
@@ -143,10 +163,11 @@ class AdminTicketReportController extends Controller {
         $filename =
             'laporan-tiket-' .
             ($filters['mode'] === 'month' ? $filters['month'] : $filters['from'] . '_sampai_' . $filters['to']) .
+            ($filters['status'] !== '' ? '-' . strtolower(str_replace(' ', '-', $filters['status'])) : '') .
             '.csv';
 
         return response()->streamDownload(
-            function () use ($start, $endExclusive): void {
+            function () use ($start, $endExclusive, $filters): void {
                 $output = fopen('php://output', 'wb');
                 if ($output === false) {
                     throw new \RuntimeException('Tidak dapat membuat ekspor CSV.');
@@ -173,7 +194,7 @@ class AdminTicketReportController extends Controller {
                 );
 
                 foreach (
-                    $this->incoming($start, $endExclusive)->with('claimant:id,name,initials')->lazyById(500)
+                    $this->incoming($start, $endExclusive, $filters['status'])->with('claimant:id,name,initials')->lazyById(500)
                     as $ticket
                 ) {
                     fputcsv(
@@ -189,7 +210,9 @@ class AdminTicketReportController extends Controller {
                                 $ticket->source,
                                 $ticket->status_label,
                                 $ticket->claimant?->name ?? 'Belum ditangani',
-                                $ticket->completed_at?->timezone(self::TIMEZONE)->format('d/m/Y H:i') ?? '-'
+                                $ticket->status === 'Done'
+                                    ? ($ticket->completed_at?->timezone(self::TIMEZONE)->format('d/m/Y H:i') ?? '-')
+                                    : '-'
                             ]
                         ),
                         ';',

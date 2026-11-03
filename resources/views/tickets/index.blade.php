@@ -8,7 +8,7 @@
             <p class="muted">Lihat antrean, ambil tiket secara mandiri, dan pantau pekerjaan Anda.</p>
         </div><span class="pill pill-blue">● Self-Claim Aktif</span>
     </div>
-    <div class="stat-grid three">
+    <div class="stat-grid">
         <div class="stat-card">
             <div class="stat-top"><span class="stat-icon stat-amber">◷</span><span class="stat-micro">ANTREAN BERSAMA</span>
             </div>
@@ -29,6 +29,12 @@
             <div class="stat-name">Selesai</div>
             <div class="stat-number">{{ number_format($stats['completed'], 0, ',', '.') }}</div>
             <div class="stat-foot">Tiket telah diselesaikan</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-top"><span class="stat-icon stat-amber">↩</span><span class="stat-micro">TIKET SAYA</span></div>
+            <div class="stat-name">Perlu Pengajuan Ulang</div>
+            <div class="stat-number">{{ number_format($stats['returned'], 0, ',', '.') }}</div>
+            <div class="stat-foot"><a href="{{ route('tickets.index', ['status' => 'Returned']) }}">Lihat tiket yang Anda kembalikan →</a></div>
         </div>
     </div>
     <section class="card">

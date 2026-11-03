@@ -13,7 +13,7 @@
 
         .report-controls {
             display: grid;
-            grid-template-columns: minmax(160px, 1fr) repeat(2, minmax(140px, 1fr)) auto;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 13px;
             align-items: end
         }
@@ -52,7 +52,7 @@
 
         .report-metrics {
             display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 12px
         }
 
@@ -246,7 +246,7 @@
 
             .report-metrics {
                 display: grid !important;
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(3, 1fr);
                 gap: 6px;
                 margin: 12px 0
             }
@@ -263,14 +263,39 @@
 
             .report-page>.card,
             .report-page>.report-metrics {
-                break-inside: avoid;
                 margin-bottom: 12px
+            }
+
+            .report-page .table-scroll {
+                overflow: visible
+            }
+
+            .report-table {
+                min-width: 0
+            }
+
+            .report-table thead {
+                display: table-header-group
+            }
+
+            .report-table tfoot {
+                display: table-row-group
+            }
+
+            .report-table tr,
+            .report-page .section-heading {
+                break-inside: avoid
+            }
+
+            .report-page .section-heading {
+                break-after: avoid
             }
 
             .report-table th,
             .report-table td {
-                padding: 7px 8px;
-                font-size: 9pt
+                padding: 6px;
+                font-size: 8.5pt;
+                white-space: normal
             }
 
             .report-info {
@@ -297,7 +322,7 @@
             <div class="section-heading">
                 <div>
                     <div class="eyebrow">FILTER LAPORAN</div>
-                    <h2>Tentukan Periode</h2>
+                    <h2>Periode dan Filter Rincian</h2>
                 </div>
             </div>
             <form method="get" action="{{ route('admin.reports.tickets.index') }}" class="report-controls"
@@ -324,22 +349,35 @@
                             @if ($filters['mode'] === 'custom') required @endif>
                     </label>
                 </div>
+                <label for="report-status">Status rincian &amp; CSV
+                    <select id="report-status" name="status" aria-describedby="report-status-help">
+                        <option value="">Semua Status</option>
+                        @foreach ($statusLabels as $value => $label)
+                            <option value="{{ $value }}" @selected($filters['status'] === $value)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </label>
                 <button type="submit" class="btn btn-primary report-action">Tampilkan Laporan</button>
             </form>
+            <p class="report-period-note" id="report-status-help">Filter status berlaku untuk rincian tiket dan unduhan CSV.
+                Ringkasan serta tabel rekap tetap menampilkan semua status dalam periode.</p>
         </section>
 
         <section class="report-no-print">
             <div class="report-info">
-                <strong>Periode: {{ $periodLabel }}</strong>. Tiket masuk dihitung dari <code>created_at</code> dalam WIB;
-                status adalah kondisi tiket saat laporan dibuka, bukan status historis pada akhir periode.
-                Indikator <strong>selesai selama periode</strong> menggunakan <code>completed_at</code> dan dapat mencakup
-                tiket masuk bulan sebelumnya.
+                <strong>Periode: {{ $periodLabel }}</strong>. Tiket masuk dihitung berdasarkan tanggal diterima dalam WIB.
+                Status mengikuti kondisi saat laporan dibuka, bukan riwayat pada akhir periode.
+                <strong>Perlu Pengajuan Ulang</strong> dipisahkan dari <strong>Selesai</strong>.
+                Indikator <strong>Selesai Selama Periode</strong> berdasarkan tanggal penyelesaian dan dapat mencakup
+                tiket yang masuk sebelum periode ini.
             </div>
         </section>
         <div class="report-print-meta">
             Periode: <strong>{{ $periodLabel }}</strong><br>
             Dicetak: {{ now('Asia/Jakarta')->translatedFormat('d F Y, H:i') }} WIB<br>
-            Sumber: TTE-Ticketing (status sesuai kondisi saat laporan dibuat).
+            Sumber: TTE-Ticketing (status sesuai kondisi saat laporan dibuat).<br>
+            Rekap mencakup seluruh status tiket masuk periode. Perlu Pengajuan Ulang tidak dihitung sebagai Selesai.<br>
+            Selesai Selama Periode berdasarkan tanggal penyelesaian, termasuk tiket masuk periode sebelumnya.
         </div>
 
         <div class="report-metrics">
@@ -358,6 +396,12 @@
                     {{ number_format((int) $summary->done_count, 0, ',', '.') }}
                 </strong>
                 <small>{{ (int) $summary->total > 0 ? number_format((100 * (int) $summary->done_count) / (int) $summary->total, 1, ',', '.') : '0' }}%
+                    dari tiket masuk</small>
+            </div>
+            <div class="report-metric">
+                <small>Perlu Pengajuan Ulang</small>
+                <strong>{{ number_format((int) $summary->returned_count, 0, ',', '.') }}</strong>
+                <small>{{ (int) $summary->total > 0 ? number_format((100 * (int) $summary->returned_count) / (int) $summary->total, 1, ',', '.') : '0' }}%
                     dari tiket masuk</small>
             </div>
             <div class="report-metric">
@@ -386,6 +430,7 @@
                             <th class="num">Belum Diambil</th>
                             <th class="num">Diproses</th>
                             <th class="num">Selesai</th>
+                            <th class="num">Perlu Pengajuan Ulang</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -401,13 +446,24 @@
                                 <td class="num">{{ $service->open_count }}</td>
                                 <td class="num">{{ $service->progress_count }}</td>
                                 <td class="num">{{ $service->done_count }}</td>
+                                <td class="num">{{ $service->returned_count }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6">Tidak ada tiket masuk selama periode ini.</td>
+                                <td colspan="7">Tidak ada tiket masuk selama periode ini.</td>
                             </tr>
                         @endforelse
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="2" scope="row">Total Tiket Masuk</th>
+                            <th class="num">{{ (int) $summary->total }}</th>
+                            <th class="num">{{ (int) $summary->open_count }}</th>
+                            <th class="num">{{ (int) $summary->progress_count }}</th>
+                            <th class="num">{{ (int) $summary->done_count }}</th>
+                            <th class="num">{{ (int) $summary->returned_count }}</th>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </section>
@@ -429,6 +485,7 @@
                             <th class="num">Total Ditangani</th>
                             <th class="num">Diproses</th>
                             <th class="num">Selesai</th>
+                            <th class="num">Perlu Pengajuan Ulang</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -438,10 +495,11 @@
                                 <td class="num">{{ $stat->total }}</td>
                                 <td class="num">{{ $stat->progress_count }}</td>
                                 <td class="num">{{ $stat->done_count }}</td>
+                                <td class="num">{{ $stat->returned_count }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4">Belum ada tiket dalam periode yang diambil verifikator.</td>
+                                <td colspan="5">Belum ada tiket dalam periode yang diambil verifikator.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -488,10 +546,11 @@
                     <div class="eyebrow">DATA PENDUKUNG</div>
                     <h2>Rincian Tiket Masuk</h2>
                 </div>
-                <span class="pill pill-neutral">{{ number_format((int) $summary->total, 0, ',', '.') }} tiket</span>
+                <span class="pill pill-neutral">{{ number_format($tickets->total(), 0, ',', '.') }} tiket sesuai filter</span>
             </div>
-            <p class="report-period-note">Menampilkan 20 baris per halaman. Gunakan <strong>Unduh CSV Lengkap</strong> untuk
-                seluruh tiket periode. NIK, email, dan nomor WA tidak dimasukkan dalam laporan.</p>
+            <p class="report-period-note">Status rincian: <strong>{{ $statusLabels[$filters['status']] ?? 'Semua Status' }}</strong>.
+                Menampilkan 20 baris per halaman. <strong>Unduh CSV Lengkap</strong> memuat seluruh baris sesuai periode dan status,
+                termasuk halaman berikutnya. NIK, email, dan nomor WA tidak dimasukkan dalam laporan.</p>
             <div class="table-scroll">
                 <table class="report-table">
                     <thead>
@@ -516,11 +575,11 @@
                                 <td>{{ $ticket->service_label }}</td>
                                 <td>{{ $ticket->status_label }}</td>
                                 <td>{{ $ticket->claimant?->name ?? 'Belum ditangani' }}</td>
-                                <td>{{ $ticket->completed_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') ?? '-' }}</td>
+                                <td>{{ $ticket->status === 'Done' ? ($ticket->completed_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') ?? '-') : '-' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8">Belum ada tiket untuk periode yang dipilih.</td>
+                                <td colspan="8">Tidak ada tiket yang sesuai dengan periode dan status yang dipilih.</td>
                             </tr>
                         @endforelse
                     </tbody>
