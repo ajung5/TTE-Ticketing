@@ -559,6 +559,7 @@
                             <th>Masuk (WIB)</th>
                             <th>Pemohon</th>
                             <th>Unit Kerja</th>
+                            <th>UPTD</th>
                             <th>Layanan</th>
                             <th>Status</th>
                             <th>Verifikator</th>
@@ -572,6 +573,7 @@
                                 <td>{{ $ticket->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }}</td>
                                 <td>{{ $ticket->nama_user }}</td>
                                 <td>{{ $ticket->opd ?: '-' }}</td>
+                                <td>{{ trim((string) $ticket->uptd) ?: '-' }}</td>
                                 <td>{{ $ticket->service_label }}</td>
                                 <td>{{ $ticket->status_label }}</td>
                                 <td>{{ $ticket->claimant?->name ?? 'Belum ditangani' }}</td>
@@ -579,7 +581,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8">Tidak ada tiket yang sesuai dengan periode dan status yang dipilih.</td>
+                                <td colspan="9">Tidak ada tiket yang sesuai dengan periode dan status yang dipilih.</td>
                             </tr>
                         @endforelse
                     </tbody>
