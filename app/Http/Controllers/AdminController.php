@@ -22,6 +22,17 @@ class AdminController extends Controller {
             'done' => Ticket::where('status', 'Done')->count(),
             'returned' => Ticket::where('status', 'Returned')->count()
         ];
+        // Agregat hasil pemeriksaan terakhir, tanpa akses admin untuk memproses tiket.
+        $ams = Ticket::query()->selectRaw(
+            "COUNT(*) as total,
+            SUM(CASE WHEN activation_status = 'activated' THEN 1 ELSE 0 END) as activated,
+            SUM(CASE WHEN activation_status = 'not_activated' THEN 1 ELSE 0 END) as not_activated,
+            SUM(CASE WHEN activation_status = 'activated' AND wa_verification_status = 'unverified' THEN 1 ELSE 0 END) as wa_unverified,
+            SUM(CASE WHEN activation_status = 'activated' AND wa_verification_status = 'verified' THEN 1 ELSE 0 END) as wa_verified,
+            SUM(CASE WHEN certificate_issuance_status = 'not_issued' THEN 1 ELSE 0 END) as not_issued,
+            SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'active' THEN 1 ELSE 0 END) as cert_active,
+            SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'expired' THEN 1 ELSE 0 END) as cert_expired"
+        )->first();
         $services = Ticket::select('layanan')
             ->selectRaw('COUNT(*) as total')
             ->groupBy('layanan')
@@ -36,7 +47,7 @@ class AdminController extends Controller {
             ->keyBy('claimed_by');
         $verifiers = User::where('role', 'verifier')->orderBy('name')->get();
 
-        return view('admin.dashboard', compact('stats', 'services', 'counts', 'verifiers'));
+        return view('admin.dashboard', compact('stats', 'services', 'counts', 'verifiers', 'ams'));
     }
 
     public function sendResetLink(Request $request, User $user) {

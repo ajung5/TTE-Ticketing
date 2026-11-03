@@ -8,8 +8,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('shows nine active presets and preserves historical templates', function () {
-    expect(WaMessageTemplate::EVENTS)->toHaveCount(9);
+it('shows ten active presets and preserves historical templates', function () {
+    expect(WaMessageTemplate::EVENTS)->toHaveCount(10);
     foreach (WaMessageTemplate::TEMPLATE_SERVICE_CODES as $event => $service) {
         $this->assertDatabaseHas('wa_message_templates', [
             'service_code' => $service,

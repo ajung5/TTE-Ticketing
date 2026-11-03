@@ -37,6 +37,12 @@ class WhatsAppMessage {
         $fallback = [
             'unverified' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nNomor WA Anda belum terverifikasi pada AMS BSrE. Mohon lakukan verifikasi sebelum layanan dilanjutkan.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
+            'activation_required' =>
+                "Yth. Bapak/Ibu {nama_pemohon},
+
+Akun AMS BSrE Anda belum diaktivasi. Mohon lakukan aktivasi sesuai petunjuk BSrE lalu hubungi petugas untuk pemeriksaan ulang pada tiket yang sama: {nomor_tiket}.
+
+Jangan membagikan OTP, password, atau passphrase.",
             'unregistered' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nBerdasarkan pemeriksaan AMS BSrE, sertifikat elektronik aktif belum ditemukan untuk NIK Anda. Silakan hubungi petugas untuk tindak lanjut.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'reset' =>
@@ -69,6 +75,20 @@ Jangan membagikan passphrase, OTP, atau password.',
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPenanganan permohonan {layanan} nomor tiket {nomor_tiket} telah selesai. Mohon mengisi survei kepuasan melalui {survey_url}.\nPetugas: {nama_verifikator}"
         ];
         $templateBody = $template?->body ?? $fallback[$event];
+        if ($event === 'certificate_not_issued' && $ticket->wa_verification_status === 'unverified') {
+            $templateBody .= "
+
+Nomor WhatsApp Anda juga belum terverifikasi pada AMS BSrE. Mohon tindak lanjuti verifikasi WhatsApp sebelum penutupan tiket, di samping proses set passphrase.";
+        }
+        if ($event === 'unregistered' && $ticket->activation_status === 'not_activated') {
+            $templateBody .= "\n\nHasil pemeriksaan AMS: akun belum diaktivasi. Mohon lakukan aktivasi akun sesuai petunjuk resmi sebelum proses dilanjutkan.";
+        }
+        if ($event === 'service_mismatch' && $ticket->certificate_validity_status === 'expired') {
+            $templateBody .= "\n\nHasil pemeriksaan AMS: sertifikat telah kedaluwarsa. Layanan yang sesuai adalah Pembaruan Sertifikat Elektronik.";
+        }
+        if ($event === 'renewal' && $ticket->certificate_validity_status === 'expired') {
+            $templateBody .= "\n\nStatus sertifikat masih kedaluwarsa. Penutupan tiket menunggu pemeriksaan ulang sampai sertifikat aktif.";
+        }
         $verifier = $ticket->claimant;
 
         return strtr($templateBody, [

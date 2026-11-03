@@ -54,79 +54,71 @@ class TicketController extends Controller {
         return view('tickets.index', compact('tickets', 'stats'));
     }
 
-    /** Hanya hasil pemeriksaan manual AMS BSrE yang menentukan pesan layanan. */
+    /** Keputusan hanya berlaku setelah tiga tahap pemeriksaan AMS lengkap dan konsisten. */
     private function serviceEvent(Ticket $ticket): ?string {
-        if (!$ticket->wa_checked_at) {
+        if (!$ticket->wa_checked_at || !in_array($ticket->activation_status, ['activated', 'not_activated'], true)) {
             return null;
         }
-        // Verifikasi WA bukan bukti sertifikat telah terbit.
-        // Pengaturan passphrase pada email BSrE bisa masih tertunda.
-        if (
-            $ticket->certificate_issuance_status === 'not_issued' &&
-            ($ticket->wa_verification_status === 'verified' || $ticket->activation_status === 'activated')
-        ) {
-            // Aktivasi sudah berjalan: lanjutkan set passphrase pada tiket yang sama,
-            // termasuk bila pemohon memilih Reset Passphrase atau Pembaruan.
-            return 'certificate_not_issued';
-        }
-        // Reset dan Pembaruan hanya dapat dibedakan setelah klarifikasi kebutuhan.
-        if ($ticket->certificate_issuance_status === 'issued' &&
-            ($ticket->wa_verification_status === 'verified' || $ticket->activation_status === 'activated') &&
-            in_array($ticket->layanan, ['Reset Passphrase', 'Pembaruan'], true) &&
-            in_array($ticket->recommended_service, ['Reset Passphrase', 'Pembaruan'], true) &&
-            $ticket->recommended_service !== $ticket->layanan) {
-            return 'service_mismatch';
-        }
-        // Sesudah SE Belum Terbit dikonfirmasi dan hasil AMS menyatakan SE terbit,
-        // lewati pesan layanan antara. Tampilkan Selesai + Survei setelah tiket ditutup.
-        if ($this->readyAfterCertificateIssuance($ticket)) {
-            return 'ready_for_completion'; // State internal, BUKAN event WhatsApp.
-        }
-        if ($ticket->wa_verification_status === 'verified') {
-            if ($ticket->certificate_issuance_status !== 'issued') {
-                return null;
-            }
-            if ($ticket->layanan === 'Pendaftaran') {
-                return $this->hasOnboardingHistory($ticket) ? 'registration' : 'service_mismatch';
-            }
-            return match ($ticket->layanan) {
-                'Reset Passphrase' => 'reset',
-                'Pembaruan' => 'renewal',
-                default => null
-            };
-        }
-        if ($ticket->wa_verification_status !== 'unverified') {
-            return null;
-        }
+        // Tahap 1: akun belum diaktivasi. Pandu aktivasi tanpa memaksa pengajuan ulang.
         if ($ticket->activation_status === 'not_activated') {
-            return $ticket->layanan === 'Pendaftaran' ? 'unregistered' : 'service_mismatch';
+            return 'activation_required';
         }
-        if ($ticket->activation_status !== 'activated') {
+        // Tahap 2 diperiksa eksplisit, tetapi WA belum verified tidak menghentikan pemeriksaan SE.
+        if (!in_array($ticket->wa_verification_status, ['verified', 'unverified'], true)) {
             return null;
         }
+        // Prioritas kasus khusus: akun aktif + SE belum terbit -> set passphrase
+        // pada tiket yang sama, SEKALIPUN nomor WA belum terverifikasi.
         if ($ticket->certificate_issuance_status === 'not_issued') {
             return 'certificate_not_issued';
         }
-        if ($ticket->certificate_issuance_status === 'issued') {
-            if ($ticket->layanan === 'Pendaftaran' && !$this->hasOnboardingHistory($ticket)) {
-                return 'service_mismatch';
-            }
+        if ($ticket->certificate_issuance_status !== 'issued' ||
+            !in_array($ticket->certificate_validity_status, ['active', 'expired'], true)) {
+            return null;
+        }
+        // Untuk SE yang telah terbit, urus verifikasi WA sebelum layanan utama.
+        if ($ticket->wa_verification_status === 'unverified') {
             return 'unverified';
         }
-        return null;
+        if ($ticket->certificate_validity_status === 'expired') {
+            // Reset tidak memperpanjang sertifikat kedaluwarsa; Pendaftaran bukan penerbitan baru.
+            return $ticket->layanan === 'Pembaruan' ? 'renewal' : 'service_mismatch';
+        }
+        // Rekomendasi koreksi harus lebih tinggi prioritasnya dari siap-selesai.
+        if (in_array($ticket->recommended_service, ['Reset Passphrase', 'Pembaruan'], true) &&
+            $ticket->recommended_service !== $ticket->layanan) {
+            return 'service_mismatch';
+        }
+        // Aktif setelah pemberitahuan SE belum terbit atau pembaruan kedaluwarsa.
+        if ($this->readyAfterCertificateIssuance($ticket)) {
+            return 'ready_for_completion'; // Internal, tidak memiliki preset WA.
+        }
+        if ($ticket->layanan === 'Pendaftaran') {
+            return $this->hasOnboardingHistory($ticket) ? 'registration' : 'service_mismatch';
+        }
+        return match ($ticket->layanan) {
+            'Reset Passphrase' => 'reset',
+            'Pembaruan' => 'renewal',
+            default => null
+        };
     }
 
-    /** Konfirmasi SE Belum Terbit sebelumnya harus tercatat dalam audit trail. */
+    /** Bukti pesan sebelumnya + status SE aktif dari AMS; tidak boleh hanya "pernah terbit". */
     private function readyAfterCertificateIssuance(Ticket $ticket): bool {
-        if (!$ticket->wa_checked_at ||
+        if ($ticket->activation_status !== 'activated' ||
             $ticket->wa_verification_status !== 'verified' ||
-            $ticket->certificate_issuance_status !== 'issued') {
+            $ticket->certificate_issuance_status !== 'issued' ||
+            $ticket->certificate_validity_status !== 'active') {
             return false;
+        }
+        $notes = [\App\Models\WaMessageTemplate::EVENTS['certificate_not_issued']];
+        if ($ticket->layanan === 'Pembaruan') {
+            $notes[] = \App\Models\WaMessageTemplate::EVENTS['renewal'];
         }
         return TicketActivity::query()
             ->where('ticket_id', $ticket->id)
             ->where('action', 'wa_service_confirmed')
-            ->where('note', \App\Models\WaMessageTemplate::EVENTS['certificate_not_issued'])
+            ->whereIn('note', $notes)
             ->exists();
     }
 
@@ -136,6 +128,7 @@ class TicketController extends Controller {
             ->where('action', 'wa_service_confirmed')
             ->whereIn('note', [
                 \App\Models\WaMessageTemplate::EVENTS['unregistered'],
+                \App\Models\WaMessageTemplate::EVENTS['activation_required'],
                 \App\Models\WaMessageTemplate::EVENTS['certificate_not_issued']
             ])
             ->exists();
@@ -161,6 +154,11 @@ class TicketController extends Controller {
             $applicantUptd = '';
         }
         $serviceEvent = $ticket->status === 'In Progress' ? $this->serviceEvent($ticket) : null;
+        $completionReady = in_array($serviceEvent, ['reset', 'renewal', 'registration', 'ready_for_completion'], true) &&
+            $ticket->activation_status === 'activated' &&
+            $ticket->wa_verification_status === 'verified' &&
+            $ticket->certificate_issuance_status === 'issued' &&
+            $ticket->certificate_validity_status === 'active';
         // ready_for_completion tidak mempunyai preset WhatsApp; pesan akhir baru
         // muncul ketika tiket benar-benar Done.
         $serviceMessage = $serviceEvent && $serviceEvent !== 'ready_for_completion'
@@ -174,7 +172,7 @@ class TicketController extends Controller {
 
         return view(
             'tickets.show',
-            compact('ticket', 'serviceEvent', 'serviceMessage', 'serviceNotification', 'serviceConfirmed', 'waMessage', 'applicantUptd')
+            compact('ticket', 'serviceEvent', 'serviceMessage', 'serviceNotification', 'serviceConfirmed', 'waMessage', 'applicantUptd', 'completionReady')
         );
     }
 
@@ -243,111 +241,107 @@ class TicketController extends Controller {
         return redirect()->route('tickets.index')->with('success', 'Tiket dikembalikan ke antrean.');
     }
 
-    /** Catat status sertifikat dan WA berdasarkan pemeriksaan manual pada AMS BSrE. */
+    /** Urutan wajib: aktivasi akun -> WA -> penerbitan SE -> aktif/kedaluwarsa. */
     public function verifyWhatsApp(Request $request, Ticket $ticket) {
         $this->owner($request, $ticket);
         $data = $request->validate([
-            'wa_verification_status' => ['required', Rule::in(['verified', 'unverified'])],
-            'activation_status' => ['nullable', Rule::in(['activated', 'not_activated'])],
+            'activation_status' => ['required', Rule::in(['activated', 'not_activated'])],
+            'wa_verification_status' => ['nullable', Rule::in(['verified', 'unverified'])],
             'certificate_issuance_status' => ['nullable', Rule::in(['issued', 'not_issued'])],
+            'certificate_validity_status' => ['nullable', Rule::in(['active', 'expired'])],
             'recommended_service' => ['nullable', Rule::in(['Reset Passphrase', 'Pembaruan'])],
             'wa_verification_note' => ['nullable', 'string', 'max:500'],
-            // Kompatibilitas request pengujian/klien internal versi sebelumnya.
-            'certificate_status' => ['nullable', Rule::in(['active', 'inactive'])]
         ]);
+        $activation = $data['activation_status'];
+        $wa = $data['wa_verification_status'] ?? null;
+        $issuance = $data['certificate_issuance_status'] ?? null;
+        $validity = $data['certificate_validity_status'] ?? null;
 
-        $wa = $data['wa_verification_status'];
-        $activation = null;
-        $issuance = null;
-        if ($wa === 'verified') {
-            // Status penerbitan SE harus diperiksa secara eksplisit, bahkan ketika WA sudah verified.
-            $issuance = $data['certificate_issuance_status'] ?? null;
+        if ($activation === 'not_activated') {
+            if ($wa === 'verified' || $issuance !== null || $validity !== null) {
+                throw ValidationException::withMessages([
+                    'activation_status' => 'Akun belum aktivasi: status WA dan sertifikat tidak boleh disimpulkan.'
+                ]);
+            }
+            $wa = 'unchecked'; // Tampilkan sebagai belum diperiksa, bukan belum terverifikasi.
+        } else {
+            if ($wa === null) {
+                throw ValidationException::withMessages([
+                    'wa_verification_status' => 'Periksa verifikasi nomor WA setelah memastikan akun aktif.'
+                ]);
+            }
             if ($issuance === null) {
                 throw ValidationException::withMessages([
-                    'certificate_issuance_status' =>
-                        'Periksa status penerbitan SE meskipun nomor WA sudah terverifikasi.'
+                    'certificate_issuance_status' => 'Periksa apakah sertifikat sudah/pernah terbit.'
                 ]);
             }
-        } elseif ($wa === 'unverified') {
-            $activation = $data['activation_status'] ?? null;
-            $issuance = $data['certificate_issuance_status'] ?? null;
-            if ($activation === null && isset($data['certificate_status'])) {
-                $activation = $data['certificate_status'] === 'active' ? 'activated' : 'not_activated';
-                $issuance = $activation === 'activated' ? 'issued' : null;
-            }
-            if ($activation === null) {
+            if ($issuance === 'issued' && $validity === null) {
                 throw ValidationException::withMessages([
-                    'activation_status' => 'Status aktivasi akun wajib dipilih jika WA belum terverifikasi.'
+                    'certificate_validity_status' => 'Periksa apakah sertifikat masih aktif atau sudah kedaluwarsa.'
                 ]);
             }
-            if ($activation === 'activated' && $issuance === null) {
+            if ($issuance === 'not_issued' && $validity !== null) {
                 throw ValidationException::withMessages([
-                    'certificate_issuance_status' => 'Status penerbitan SE wajib dipilih jika akun sudah aktivasi.'
+                    'certificate_validity_status' => 'Sertifikat yang belum terbit tidak memiliki masa berlaku.'
                 ]);
-            }
-            if ($activation === 'not_activated') {
-                $issuance = null;
             }
         }
 
-        DB::transaction(function () use ($request, $ticket, $data, $wa, $activation, $issuance) {
+        DB::transaction(function () use ($request, $ticket, $data, $activation, $wa, $issuance, $validity) {
             $record = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
             abort_unless($record->claimed_by === $request->user()->id && $record->status === 'In Progress', 409);
-            $previousEvent = $this->serviceEvent($record);
-            // Akun sudah aktivasi tetapi SE belum terbit cukup melanjutkan proses,
-            // bukan pengajuan ulang. Koreksi ke Penerbitan hanya untuk akun belum aktivasi.
-            $mismatch = in_array($record->layanan, ['Reset Passphrase', 'Pembaruan'], true) &&
-                $wa === 'unverified' && $activation === 'not_activated';
-            $mismatch =
-                $mismatch ||
-                ($record->layanan === 'Pendaftaran' &&
-                    ($issuance === 'issued' &&
-                        ($wa === 'verified' || ($wa === 'unverified' && $activation === 'activated'))) &&
+            $priorCheck = TicketActivity::query()->where('ticket_id', $record->id)
+                ->where('action', 'ams_checked')->exists();
+            $priorIssuance = $record->certificate_issuance_status;
+            $priorValidity = $record->certificate_validity_status;
+            $isExisting = in_array($record->layanan, ['Reset Passphrase', 'Pembaruan'], true);
+            $issuedVerified = $activation === 'activated' && $wa === 'verified' && $issuance === 'issued';
+            // Akun belum aktivasi bukan bukti jenis layanan salah; lanjutkan aktivasi lalu evaluasi ulang.
+            $mismatch = ($issuedVerified && $validity === 'expired' && $record->layanan !== 'Pembaruan') ||
+                ($issuedVerified && $validity === 'active' && $record->layanan === 'Pendaftaran' &&
                     !$this->hasOnboardingHistory($record));
             $recommended = null;
             if ($mismatch) {
-                if ($record->layanan === 'Pendaftaran') {
+                if ($record->layanan !== 'Pembaruan' && $issuedVerified && $validity === 'expired') {
+                    $recommended = 'Pembaruan';
+                } elseif ($record->layanan === 'Pendaftaran') {
                     $recommended = $data['recommended_service'] ?? null;
                     if ($recommended === null) {
                         throw ValidationException::withMessages([
-                            'recommended_service' =>
-                                'Pilih layanan yang disarankan setelah klarifikasi kebutuhan pemohon.'
+                            'recommended_service' => 'Pilih layanan setelah klarifikasi kebutuhan pemohon.'
                         ]);
                     }
                 } else {
                     $recommended = 'Pendaftaran';
                 }
-            }
-            if (!$mismatch && $issuance === 'issued' &&
-                in_array($record->layanan, ['Reset Passphrase', 'Pembaruan'], true)) {
+            } elseif ($issuedVerified && $validity === 'active' && $isExisting) {
                 $recommended = $data['recommended_service'] ?? null;
-                if ($recommended === $record->layanan) {
+                if ($recommended !== null && $recommended === $record->layanan) {
                     throw ValidationException::withMessages([
-                        'recommended_service' => 'Pilih Layanan sudah sesuai, atau layanan lain setelah klarifikasi.'
+                        'recommended_service' => 'Pilih layanan yang berbeda, atau kosongkan jika sudah sesuai.'
                     ]);
                 }
             }
-            // Kolom legacy mengikuti status penerbitan; bukan pemeriksaan masa berlaku SE.
-            $legacyCertificate = $issuance === 'issued' ? 'active' : 'inactive';
-            $changed =
+            // Legacy: 'active' hanya jika masa berlaku benar-benar aktif; jangan samakan 'issued' dengan 'active'.
+            $legacyCertificate = $issuance === 'issued' && $validity === 'active' ? 'active' : 'inactive';
+            $changed = $record->activation_status !== $activation ||
                 $record->wa_verification_status !== $wa ||
-                $record->activation_status !== $activation ||
                 $record->certificate_issuance_status !== $issuance ||
+                $record->certificate_validity_status !== $validity ||
                 $record->recommended_service !== $recommended;
-            $record
-                ->forceFill([
-                    'wa_verification_status' => $wa,
-                    'activation_status' => $activation,
-                    'certificate_issuance_status' => $issuance,
-                    'certificate_status' => $legacyCertificate,
-                    'recommended_service' => $recommended,
-                    'wa_verification_note' => $data['wa_verification_note'] ?? null,
-                    'wa_checked_at' => now(),
-                    'wa_checked_by' => $request->user()->id
-                ])
-                ->save();
+            $record->forceFill([
+                'activation_status' => $activation,
+                'wa_verification_status' => $wa,
+                'certificate_issuance_status' => $issuance,
+                'certificate_validity_status' => $validity,
+                'certificate_status' => $legacyCertificate,
+                'recommended_service' => $recommended,
+                'wa_verification_note' => $data['wa_verification_note'] ?? null,
+                'wa_checked_at' => now(),
+                'wa_checked_by' => $request->user()->id
+            ])->save();
             if ($changed) {
-                // Konfirmasi notifikasi lama tidak berlaku sesudah hasil pemeriksaan berubah.
+                // Hasil AMS berubah: buka/kirim/konfirmasi pesan harus dievaluasi ulang.
                 WaNotification::where('ticket_id', $record->id)
                     ->whereIn('event_type', array_keys(\App\Models\WaMessageTemplate::EVENTS))
                     ->update(['opened_at' => null, 'confirmed_at' => null]);
@@ -356,23 +350,20 @@ class TicketController extends Controller {
                 'ticket_id' => $record->id,
                 'actor_id' => $request->user()->id,
                 'action' => 'ams_checked',
-                'note' =>
-                    'WA: ' .
-                    ($wa === 'verified' ? 'Terverifikasi' : 'Belum terverifikasi') .
-                    '; Aktivasi: ' .
-                    ($activation ?? 'Dilewati (inferensi)') .
-                    '; SE: ' .
-                    ($issuance ?? 'Dilewati') .
-                    '; Keputusan: ' .
-                    ($this->serviceEvent($record) ?? 'Belum ada') .
-                    ($recommended ? '; Disarankan: ' . $recommended : '') .
+                'note' => ($priorCheck ? 'Pemeriksaan ulang' : 'Pemeriksaan awal') .
+                    '; Aktivasi: ' . $activation . '; WA: ' . $wa .
+                    '; Penerbitan SE: ' . ($issuance ?? 'Belum diperiksa') .
+                    '; Masa berlaku: ' . ($validity ?? 'Belum diperiksa') .
+                    ($priorIssuance === 'not_issued' && $issuance === 'issued' && $validity === 'active'
+                        ? '; Perubahan SE: belum terbit menjadi aktif pada tiket yang sama' : '') .
+                    ($priorIssuance === 'issued' && $priorValidity === 'expired' && $validity === 'active'
+                        ? '; Perubahan SE: kedaluwarsa menjadi aktif pada tiket yang sama' : '') .
+                    '; Keputusan: ' . ($this->serviceEvent($record) ?? 'Belum tersedia') .
+                    ($recommended ? '; Layanan disarankan: ' . $recommended : '') .
                     (!empty($data['wa_verification_note']) ? '; ' . $data['wa_verification_note'] : '')
             ]);
         });
-        return back()->with(
-            'success',
-            'Pemeriksaan AMS berhasil disimpan. Jenis notifikasi disesuaikan dengan kondisi akun.'
-        );
+        return back()->with('success', 'Pemeriksaan AMS tersimpan: aktivasi akun, verifikasi WA, penerbitan dan masa berlaku SE.');
     }
 
     public function openServiceWhatsApp(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp) {
@@ -497,7 +488,16 @@ class TicketController extends Controller {
                 409,
                 'Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau pengajuan ulang terlebih dahulu.'
             );
-            // Gate utama: hanya reset/renewal/registration; konfirmasi WA bersifat administratif.
+            // Status aktif wajib dibuktikan pada pemeriksaan AMS terakhir, bukan cukup 'pernah terbit'.
+            abort_unless(
+                $record->activation_status === 'activated' &&
+                $record->wa_verification_status === 'verified' &&
+                $record->certificate_issuance_status === 'issued' &&
+                $record->certificate_validity_status === 'active',
+                409,
+                'Sertifikat harus aktif dan WA terverifikasi sebelum tiket diselesaikan.'
+            );
+            // Konfirmasi pesan layanan merupakan catatan administratif, bukan bukti layanan berhasil.
             $serviceNotificationConfirmed =
                 $event === 'ready_for_completion' ||
                 $record->source === 'simulated' ||

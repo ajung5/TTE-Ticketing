@@ -21,6 +21,7 @@ class WaMessageTemplate extends Model {
         'registration' => 'Pendaftaran Diproses',
         'completed' => 'Selesai + Survei',
         'unregistered' => 'User Belum Terdaftar',
+        'activation_required' => 'Aktivasi Akun Diperlukan',
         'certificate_not_issued' => 'SE Belum Terbit',
         'service_mismatch' => 'Perbaikan Jenis Permohonan',
         'issuance_required' => 'Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)'
@@ -33,6 +34,7 @@ class WaMessageTemplate extends Model {
         'registration' => 'Pendaftaran',
         'completed' => '*',
         'unregistered' => '*',
+        'activation_required' => '*',
         'certificate_not_issued' => '*',
         'service_mismatch' => '*',
         'issuance_required' => '*'

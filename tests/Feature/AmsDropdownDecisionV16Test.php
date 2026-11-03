@@ -24,10 +24,10 @@ function amsV16Ticket(User $verifier, string $service = 'Reset Passphrase'): Tic
     ]);
 }
 
-it('keeps the verification UI dropdown-only and registers exactly nine templates', function () {
+it('keeps the verification UI dropdown-only and registers ten templates', function () {
     $verifier = User::factory()->create(['role' => 'verifier']);
     $ticket = amsV16Ticket($verifier);
-    expect(WaMessageTemplate::EVENTS)->toHaveCount(9);
+    expect(WaMessageTemplate::EVENTS)->toHaveCount(10);
     $this->actingAs($verifier)
         ->get(route('tickets.show', $ticket))
         ->assertOk()

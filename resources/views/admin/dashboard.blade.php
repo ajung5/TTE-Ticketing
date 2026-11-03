@@ -49,6 +49,33 @@
             <div class="stat-foot">Tidak dihitung sebagai tiket selesai</div>
         </div>
     </div>
+    <section class="card mt">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow">PEMANTAUAN AMS BSrE</div>
+                <h2>Hasil Pemeriksaan Akun dan Sertifikat</h2>
+                <p class="small muted">Hasil pemeriksaan manual terakhir; bukan pemantauan real-time AMS.
+                    Setiap indikator dihitung secara independen sehingga tidak dijumlahkan menjadi total tiket.</p>
+            </div>
+        </div>
+        <div class="stat-grid admin-statistics">
+            @foreach ([
+                'Akun Sudah Aktivasi' => $ams->activated,
+                'Akun Belum Aktivasi' => $ams->not_activated,
+                'WA Belum Terverifikasi' => $ams->wa_unverified,
+                'WA Terverifikasi' => $ams->wa_verified,
+                'SE Belum Terbit' => $ams->not_issued,
+                'SE Aktif' => $ams->cert_active,
+                'SE Kedaluwarsa' => $ams->cert_expired,
+            ] as $label => $total)
+                <div class="stat-card">
+                    <div class="stat-name">{{ $label }}</div>
+                    <div class="stat-number">{{ number_format((int) $total, 0, ',', '.') }}</div>
+                    <div class="stat-foot">Berdasarkan data pemeriksaan AMS</div>
+                </div>
+            @endforeach
+        </div>
+    </section>
     <div class="columns overview-columns">
         <section class="card">
             <div class="section-heading">
@@ -80,8 +107,8 @@
             </div>
             <p class="muted">Atur isi pesan otomatis yang disiapkan bagi pemohon saat tiket ditindaklanjuti atau
                 diselesaikan.</p>
-            <div class="note-box"><strong>6 preset siap dikelola</strong>
-                <p class="small muted">Tiga jenis layanan × dua tahap pemberitahuan. Pesan mencantumkan identitas
+            <div class="note-box"><strong>{{ count(\App\Models\WaMessageTemplate::EVENTS) }} jenis notifikasi siap dikelola</strong>
+                <p class="small muted">Notifikasi disesuaikan dengan hasil pemeriksaan AMS, layanan, dan penutupan tiket. Pesan mencantumkan identitas
                     verifikator dari akun login.</p>
             </div>
             <a class="btn btn-primary full mt" href="{{ route('admin.templates.index') }}">Kelola Preset WhatsApp <span

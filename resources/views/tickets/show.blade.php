@@ -114,7 +114,7 @@
                                     'released' => 'Tiket dilepas',
                                     'note' => 'Catatan tindak lanjut',
                                     'completed' => 'Tiket diselesaikan',
-                                    'ams_checked' => 'Pemeriksaan status sertifikat dan WA pada AMS BSrE',
+                                    'ams_checked' => 'Pemeriksaan akun, WA, penerbitan dan masa berlaku SE di AMS',
                                     'wa_service_confirmed' => 'Pengiriman notifikasi layanan dikonfirmasi',
                                     'wa_confirmed' => 'Notifikasi selesai + survei dikonfirmasi',
                                     default => $entry->action
@@ -142,6 +142,7 @@
                         ->where('action', 'wa_service_confirmed')
                         ->whereIn('note', [
                             \App\Models\WaMessageTemplate::EVENTS['unregistered'],
+                            \App\Models\WaMessageTemplate::EVENTS['activation_required'],
                             \App\Models\WaMessageTemplate::EVENTS['certificate_not_issued']
                         ])
                         ->isNotEmpty();
@@ -150,76 +151,76 @@
                     <div class="section-heading">
                         <div>
                             <div class="eyebrow">LANGKAH 1 / PEMERIKSAAN AMS</div>
-                            <h2>Verifikasi Akun TTE dan Nomor WA</h2>
+                            <h2>Pemeriksaan Akun, WhatsApp, dan Sertifikat</h2>
                         </div>
                     </div>
                     <div class="verification-panel">
                         <div class="verification-tag">
                             <strong class="verification-status">
-                                {{ $ticket->wa_verification_label }}
-                                @if ($ticket->certificate_issuance_status === 'not_issued')
-                                    · SE belum terbit
-                                @elseif ($ticket->certificate_issuance_status === 'issued')
-                                    · SE sudah terbit
-                                @elseif ($ticket->activation_status === 'not_activated')
-                                    · Akun belum aktivasi
-                                @elseif ($ticket->wa_checked_at)
-                                    · Status penerbitan SE belum diperiksa
-                                @endif
+                                Akun: {{ $ticket->activation_label }} ·
+                                WA: {{ $ticket->wa_verification_label }} ·
+                                {{ $ticket->certificate_status_label }}
                             </strong>
                             @if ($ticket->wa_checked_at)
-                                <div class="small muted">Diperiksa
+                                <div class="small muted">Pemeriksaan terakhir:
                                     {{ $ticket->wa_checked_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</div>
                             @endif
                         </div>
-                        <p class="small muted">Periksa status nomor WhatsApp pada AMS BSrE. Jika WA sudah
-                            terverifikasi, lewati aktivasi akun tetapi <strong>tetap periksa penerbitan SE</strong>.
-                            SE bisa belum terbit bila pemohon belum melakukan set passphrase melalui email BSrE.
-                            Pilih <strong>Sudah/pernah terbit</strong> bila SE pernah diterbitkan, termasuk bila
-                            kedaluwarsa. Pilih <strong>Belum pernah terbit</strong> hanya jika belum ada SE yang pernah diterbitkan.</p>
+                        <p class="small muted">Urutan pemeriksaan pada <strong>AMS BSrE</strong>:
+                            <strong>1. Aktivasi akun</strong>, <strong>2. Verifikasi WhatsApp</strong>,
+                            <strong>3. Penerbitan Sertifikat Elektronik</strong>, lalu
+                            <strong>4. Masa berlaku (Aktif/Kedaluwarsa)</strong> jika SE sudah terbit.
+                            Status "sudah terbit" tidak otomatis berarti sertifikat masih aktif.
+                            Setiap hasil harus diperiksa langsung pada AMS, bukan disimpulkan dari status lain.</p>
                         <form method="post" action="{{ route('tickets.verify-whatsapp', $ticket) }}" class="stack"
                             id="ams-verification-form" data-requested-service="{{ $ticket->layanan }}"
                             data-onboarding-history="{{ $onboardingHistory ? '1' : '0' }}"
                             data-issuance-notice-confirmed="{{ $issuanceNoticeConfirmed ? '1' : '0' }}">
                             @csrf
-                            <label for="ams-wa-status">1. Status verifikasi nomor WhatsApp pada AMS BSrE
-                                <select id="ams-wa-status" name="wa_verification_status" required>
-                                    <option value="">Pilih status WA</option>
-                                    <option value="verified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'verified')>Sudah terverifikasi</option>
-                                    <option value="unverified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'unverified')>Belum terverifikasi</option>
+                            <label for="ams-activation-status">1. Status aktivasi akun pada AMS BSrE
+                                <select id="ams-activation-status" name="activation_status" required>
+                                    <option value="">Pilih status aktivasi akun</option>
+                                    <option value="activated" @selected(old('activation_status', $ticket->activation_status) === 'activated')>Sudah aktivasi</option>
+                                    <option value="not_activated" @selected(old('activation_status', $ticket->activation_status) === 'not_activated')>Belum aktivasi</option>
                                 </select>
                             </label>
-                            <div class="ams-conditional" id="ams-activation-block" hidden>
-                                <label for="ams-activation-status">2. Status aktivasi akun pada AMS BSrE
-                                    <select id="ams-activation-status" name="activation_status" disabled>
-                                        <option value="">Pilih status aktivasi</option>
-                                        <option value="activated" @selected(old('activation_status', $ticket->activation_status) === 'activated')>Sudah aktivasi</option>
-                                        <option value="not_activated" @selected(old('activation_status', $ticket->activation_status) === 'not_activated')>Belum aktivasi</option>
+                            <div class="ams-conditional" id="ams-wa-block" hidden>
+                                <label for="ams-wa-status">2. Status verifikasi nomor WhatsApp
+                                    <select id="ams-wa-status" name="wa_verification_status" disabled>
+                                        <option value="">Pilih status verifikasi WA</option>
+                                        <option value="verified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'verified')>Sudah terverifikasi</option>
+                                        <option value="unverified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'unverified')>Belum terverifikasi</option>
                                     </select>
                                 </label>
                             </div>
                             <div class="ams-conditional" id="ams-certificate-block" hidden>
-                                <label for="ams-certificate-status">3. Status penerbitan Sertifikat Elektronik (wajib
-                                    diperiksa walaupun WA terverifikasi)
+                                <label for="ams-certificate-status">3. Status penerbitan Sertifikat Elektronik
                                     <select id="ams-certificate-status" name="certificate_issuance_status" disabled>
                                         <option value="">Pilih status penerbitan</option>
-                                        <option value="issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'issued')>Sudah/pernah terbit (termasuk kedaluwarsa)</option>
+                                        <option value="issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'issued')>Sudah/pernah terbit</option>
                                         <option value="not_issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'not_issued')>Belum pernah terbit</option>
                                     </select>
                                 </label>
                             </div>
-                            <div class="ams-conditional" id="ams-recommendation-block" hidden>
-                                <label for="ams-recommended-service">Layanan yang disarankan setelah klarifikasi dengan
-                                    pemohon
-                                    <select id="ams-recommended-service" name="recommended_service" disabled>
-                                        <option value="">{{ $ticket->layanan === 'Pendaftaran' ? 'Pilih layanan yang benar' : 'Layanan sudah sesuai' }}</option>
-                                        <option value="Reset Passphrase" @selected(old('recommended_service', $ticket->recommended_service) === 'Reset Passphrase')>Reset Passphrase
-                                        </option>
-                                        <option value="Pembaruan" @selected(old('recommended_service', $ticket->recommended_service) === 'Pembaruan')>Pembaruan Sertifikat
-                                            Elektronik</option>
+                            <div class="ams-conditional" id="ams-validity-block" hidden>
+                                <label for="ams-validity-status">4. Masa berlaku Sertifikat Elektronik
+                                    <select id="ams-validity-status" name="certificate_validity_status" disabled>
+                                        <option value="">Pilih masa berlaku SE</option>
+                                        <option value="active" @selected(old('certificate_validity_status', $ticket->certificate_validity_status) === 'active')>Aktif / masih berlaku</option>
+                                        <option value="expired" @selected(old('certificate_validity_status', $ticket->certificate_validity_status) === 'expired')>Kedaluwarsa / expired</option>
                                     </select>
                                 </label>
-                                <p class="small muted">Untuk Reset/Pembaruan, pilih layanan lain hanya setelah klarifikasi. Status AMS saja tidak menentukan kebutuhan pemohon.</p>
+                            </div>
+                            <div class="ams-conditional" id="ams-recommendation-block" hidden>
+                                <label for="ams-recommended-service">Layanan yang disarankan (hasil klarifikasi pemohon)
+                                    <select id="ams-recommended-service" name="recommended_service" disabled>
+                                        <option value="">{{ $ticket->layanan === 'Pendaftaran' ? 'Pilih layanan yang sesuai' : 'Layanan sudah sesuai' }}</option>
+                                        <option value="Reset Passphrase" @selected(old('recommended_service', $ticket->recommended_service) === 'Reset Passphrase')>Reset Passphrase</option>
+                                        <option value="Pembaruan" @selected(old('recommended_service', $ticket->recommended_service) === 'Pembaruan')>Pembaruan Sertifikat Elektronik</option>
+                                    </select>
+                                </label>
+                                <p class="small muted">Layanan lain dipilih jika kebutuhan pemohon sudah diklarifikasi.
+                                    Sertifikat kedaluwarsa secara otomatis diarahkan ke Pembaruan.</p>
                             </div>
                             <div id="ams-decision-preview" class="ams-decision-preview small muted" role="status"
                                 aria-live="polite">Lengkapi hasil pemeriksaan AMS.</div>
@@ -242,10 +243,10 @@
                         </div>
                     </div>
                     <div class="note-box">
-                        <strong>Sertifikat Elektronik sudah terbit.</strong>
-                        <p class="small muted">Notifikasi SE Belum Terbit sebelumnya sudah dikonfirmasi.
+                        <strong>Sertifikat Elektronik telah dikonfirmasi aktif.</strong>
+                        <p class="small muted">Notifikasi tindak lanjut sebelumnya sudah dikonfirmasi.
                             Anda dapat langsung menekan <strong>Tandai Selesai</strong> tanpa mengirim
-                            notifikasi Reset, Pembaruan, atau Pendaftaran lagi.
+                            notifikasi layanan antara lagi.
                             Setelah tiket selesai, notifikasi <strong>Selesai + Survei</strong> beserta
                             tautan penilaian akan tersedia untuk dikirim ke pemohon.</p>
                     </div>
@@ -260,8 +261,8 @@
                             <h2>{{ \App\Models\WaMessageTemplate::EVENTS[$serviceEvent] }}</h2>
                         </div><span class="wa-mark">WA</span>
                     </div>
-                    <p class="small muted">Sistem menentukan jenis notifikasi dari status sertifikat, verifikasi WA, dan
-                        layanan yang dipilih. Periksa isi pesan sebelum dikirim.</p>
+                    <p class="small muted">Notifikasi mengikuti hasil pemeriksaan aktivasi akun, verifikasi WA,
+                        penerbitan dan masa berlaku SE. Periksa isi pesan sebelum dikirim.</p>
                     @if (in_array($serviceEvent, \App\Models\WaMessageTemplate::CORRECTION_EVENTS, true))
                         <div class="note-box" role="alert"><strong>Permohonan perlu diajukan ulang.</strong>
                             <p>Setelah pesan dikirim, klik <strong>Saya Sudah Mengirim Pesan</strong>.
@@ -273,12 +274,20 @@
                                 {{ $ticket->recommended_service === 'Pendaftaran' ? 'Penerbitan Sertifikat Elektronik' : $ticket->recommended_service }}.
                             </p>
                         </div>
+                    @elseif ($ticket->certificate_validity_status === 'expired')
+                        <div class="note-box"><strong>Sertifikat kedaluwarsa.</strong>
+                            <p>Jalankan proses Pembaruan, lalu periksa ulang AMS sampai status menjadi aktif.
+                                <strong>Tandai Selesai</strong> tidak tersedia selama sertifikat masih kedaluwarsa.</p>
+                        </div>
                     @elseif ($serviceEvent === 'certificate_not_issued')
                         <div class="note-box"><strong>Menunggu set passphrase.</strong>
                             <p>Pemohon cukup melanjutkan set passphrase melalui petunjuk email BSrE.
                                 Gunakan tiket ini; <strong>tidak perlu mengisi permohonan baru</strong>.
                                 Setelah selesai, periksa ulang AMS. Tiket belum dapat diselesaikan sebelum
-                                SE terbit dan nomor WA terverifikasi.</p>
+                                SE terbit dan nomor WA terverifikasi.
+                                @if ($ticket->wa_verification_status === 'unverified')
+                                    Nomor WA juga belum terverifikasi dan harus ditindaklanjuti sebelum tiket diselesaikan.
+                                @endif</p>
                         </div>
                     @endif
                     <div class="message-box">
@@ -382,8 +391,8 @@
                     @if (!$serviceEvent)
                         <p class="small muted">Lengkapi pemeriksaan AMS di bagian atas sebelum menyelesaikan tiket.</p>
                     @elseif ($serviceEvent === 'ready_for_completion')
-                        <p class="small muted">SE sudah terbit setelah notifikasi SE Belum Terbit dikonfirmasi.
-                            Klik Tandai Selesai agar notifikasi Selesai + Survei dan tautan penilaian tersedia.</p>
+                        <p class="small muted">SE sudah terbit dan aktif setelah tindak lanjut sebelumnya dikonfirmasi.
+                            Klik Tandai Selesai agar notifikasi Selesai + Survei tersedia.</p>
                     @elseif (in_array($serviceEvent, \App\Models\WaMessageTemplate::CORRECTION_EVENTS, true))
                         @if ($ticket->source === 'simulated')
                             <p class="small muted">Pengembalian melalui WhatsApp tidak tersedia untuk tiket simulasi.</p>
@@ -395,6 +404,9 @@
                                 <strong>Kembalikan Permohonan</strong> untuk menutup tiket secara administratif.
                                 Tiket ini tidak menjadi Selesai dan tidak mendapatkan survei.</p>
                         @endif
+                    @elseif (!$completionReady)
+                        <p class="small muted">Sertifikat Elektronik harus berstatus <strong>aktif</strong> di AMS
+                            dan nomor WA terverifikasi sebelum tiket dapat diselesaikan. Pemeriksaan ulang diperlukan.</p>
                     @elseif (!in_array($serviceEvent, ['reset', 'renewal', 'registration'], true))
                         <p class="small muted">Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau arahkan
                             pengajuan ulang terlebih dahulu.</p>
@@ -415,7 +427,7 @@
                     @else
                         <form method="post" action="{{ route('tickets.complete', $ticket) }}">@csrf
                             <button type="submit" class="btn btn-primary full"
-                                @disabled(!in_array($serviceEvent, ['reset', 'renewal', 'registration', 'ready_for_completion'], true))>Tandai Selesai
+                                @disabled(!$completionReady)>Tandai Selesai
                                 ✓</button>
                         </form>
                     @endif
@@ -446,6 +458,6 @@
         </div>
     </div>
     <link rel="stylesheet" href="{{ asset('css/ams-workflow.css') }}?v=16">
-    <script src="{{ asset('js/ams-workflow.js') }}?v=25" defer></script>
+    <script src="{{ asset('js/ams-workflow.js') }}?v=27" defer></script>
     <script src="{{ asset('js/whatsapp-open-refresh.js') }}?v=1" defer></script>
 @endsection

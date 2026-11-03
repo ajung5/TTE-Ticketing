@@ -31,6 +31,7 @@ class Ticket extends Model {
         'nik',
         'activation_status',
         'certificate_issuance_status',
+        'certificate_validity_status',
         'recommended_service',
         'wa_verification_status',
         'wa_verification_note',
@@ -74,6 +75,40 @@ class Ticket extends Model {
             'unverified' => 'Belum terverifikasi di AMS BSrE',
             default => 'Belum diperiksa'
         };
+    }
+
+    public function getActivationLabelAttribute(): string {
+        return match ($this->activation_status) {
+            'activated' => 'Sudah aktivasi',
+            'not_activated' => 'Belum aktivasi',
+            default => 'Belum diperiksa'
+        };
+    }
+
+    public function getCertificateStatusLabelAttribute(): string {
+        return match (true) {
+            $this->certificate_issuance_status === 'not_issued' => 'SE belum pernah terbit',
+            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'active' => 'SE aktif',
+            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'expired' => 'SE kedaluwarsa',
+            $this->certificate_issuance_status === 'issued' => 'Masa berlaku belum diperiksa',
+            default => 'Belum diperiksa'
+        };
+    }
+
+    public function getAmsSummaryLabelAttribute(): string {
+        if (!$this->wa_checked_at || !$this->activation_status) {
+            return 'Belum diperiksa';
+        }
+        if ($this->activation_status === 'not_activated') {
+            return 'Akun belum aktivasi';
+        }
+        if ($this->wa_verification_status === 'unverified') {
+            return 'WA belum terverifikasi';
+        }
+        if ($this->wa_verification_status !== 'verified') {
+            return 'WA belum diperiksa';
+        }
+        return $this->certificate_status_label;
     }
 
     public function getServiceLabelAttribute(): string {

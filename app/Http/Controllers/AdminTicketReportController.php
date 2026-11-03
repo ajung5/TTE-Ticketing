@@ -81,6 +81,18 @@ class AdminTicketReportController extends Controller {
             )
             ->first();
 
+        // Status hasil pemeriksaan terakhir untuk tiket yang MASUK pada periode.
+        $amsSummary = $this->incoming($start, $endExclusive)->selectRaw(
+            "COUNT(*) as total,
+            SUM(CASE WHEN activation_status = 'activated' THEN 1 ELSE 0 END) as activated,
+            SUM(CASE WHEN activation_status = 'not_activated' THEN 1 ELSE 0 END) as not_activated,
+            SUM(CASE WHEN activation_status = 'activated' AND wa_verification_status = 'unverified' THEN 1 ELSE 0 END) as wa_unverified,
+            SUM(CASE WHEN activation_status = 'activated' AND wa_verification_status = 'verified' THEN 1 ELSE 0 END) as wa_verified,
+            SUM(CASE WHEN certificate_issuance_status = 'not_issued' THEN 1 ELSE 0 END) as not_issued,
+            SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'active' THEN 1 ELSE 0 END) as cert_active,
+            SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'expired' THEN 1 ELSE 0 END) as cert_expired"
+        )->first();
+
         // Indikator berbeda: semua tiket yang SELESAI dalam periode,
         // walaupun diterima sebelum periode tersebut.
         $completedDuringPeriod = Ticket::query()
@@ -141,6 +153,7 @@ class AdminTicketReportController extends Controller {
                 'admin.ticket-reports',
                 compact(
                     'summary',
+                    'amsSummary',
                     'completedDuringPeriod',
                     'byService',
                     'bySource',
@@ -184,6 +197,9 @@ class AdminTicketReportController extends Controller {
                         'Unit Kerja/OPD',
                         'UPTD',
                         'Jenis Layanan',
+                        'Aktivasi Akun',
+                        'Verifikasi WhatsApp',
+                        'Status Sertifikat Elektronik',
                         'Sumber',
                         'Status Saat Ekspor',
                         'Verifikator',
@@ -209,6 +225,9 @@ class AdminTicketReportController extends Controller {
                                 $ticket->opd ?: '-',
                                 trim((string) $ticket->uptd) ?: '-',
                                 $ticket->service_label,
+                                $ticket->activation_label,
+                                $ticket->wa_verification_label,
+                                $ticket->certificate_status_label,
                                 $ticket->source,
                                 $ticket->status_label,
                                 $ticket->claimant?->name ?? 'Belum ditangani',

@@ -416,6 +416,32 @@
         <section class="card">
             <div class="section-heading">
                 <div>
+                    <div class="eyebrow">PEMERIKSAAN AMS</div>
+                    <h2>Aktivasi, WhatsApp, dan Sertifikat</h2>
+                </div>
+            </div>
+            <p class="small muted">Jumlah tiket masuk pada periode laporan berdasarkan hasil AMS terakhir.
+                Indikator dapat saling beririsan dan tidak untuk dijumlahkan. Data lama yang belum diverifikasi ulang
+                tidak dianggap otomatis aktif.</p>
+            <div class="report-metrics">
+                @foreach ([
+                    'Akun Sudah Aktivasi' => $amsSummary->activated,
+                    'Akun Belum Aktivasi' => $amsSummary->not_activated,
+                    'WA Terverifikasi' => $amsSummary->wa_verified,
+                    'WA Belum Terverifikasi' => $amsSummary->wa_unverified,
+                    'SE Belum Terbit' => $amsSummary->not_issued,
+                    'SE Aktif' => $amsSummary->cert_active,
+                    'SE Kedaluwarsa' => $amsSummary->cert_expired,
+                ] as $label => $count)
+                    <div class="report-metric"><small>{{ $label }}</small><strong>{{ number_format((int) $count, 0, ',', '.') }}</strong>
+                        <small>Hasil pemeriksaan terakhir</small></div>
+                @endforeach
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-heading">
+                <div>
                     <div class="eyebrow">REKAPITULASI</div>
                     <h2>Per Jenis Layanan</h2>
                 </div>
@@ -561,6 +587,9 @@
                             <th>Unit Kerja</th>
                             <th>UPTD</th>
                             <th>Layanan</th>
+                            <th>Aktivasi</th>
+                            <th>Verifikasi WA</th>
+                            <th>Sertifikat</th>
                             <th>Status</th>
                             <th>Verifikator</th>
                             <th>Selesai (WIB)</th>
@@ -575,13 +604,16 @@
                                 <td>{{ $ticket->opd ?: '-' }}</td>
                                 <td>{{ trim((string) $ticket->uptd) ?: '-' }}</td>
                                 <td>{{ $ticket->service_label }}</td>
+                                <td>{{ $ticket->activation_label }}</td>
+                                <td>{{ $ticket->wa_verification_label }}</td>
+                                <td>{{ $ticket->certificate_status_label }}</td>
                                 <td>{{ $ticket->status_label }}</td>
                                 <td>{{ $ticket->claimant?->name ?? 'Belum ditangani' }}</td>
                                 <td>{{ $ticket->status === 'Done' ? ($ticket->completed_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') ?? '-') : '-' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9">Tidak ada tiket yang sesuai dengan periode dan status yang dipilih.</td>
+                                <td colspan="12">Tidak ada tiket yang sesuai dengan periode dan status yang dipilih.</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -70,6 +70,7 @@
                         <th>Tiket / Tanggal</th>
                         <th>Pemohon / Unit</th>
                         <th>Layanan</th>
+                        <th>Hasil AMS</th>
                         <th>Status</th>
                         <th>Verifikator</th>
                         <th>Aksi</th>
@@ -89,6 +90,7 @@
                                 <div class="small muted">{{ $ticket->opd ?: 'Belum ada unit kerja' }}</div>
                             </td>
                             <td><span class="service-chip">{{ $ticket->service_label }}</span></td>
+                            <td><span class="small muted">{{ $ticket->ams_summary_label }}</span></td>
                             <td><span
                                     class="pill {{ $ticket->status === 'Open' ? 'pill-neutral' : ($ticket->status === 'Done' ? 'pill-green' : 'pill-blue') }}">{{ $ticket->status_label }}</span>
                             </td>
@@ -105,7 +107,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="empty">Tidak ada tiket yang sesuai dengan filter.</td>
+                            <td colspan="7" class="empty">Tidak ada tiket yang sesuai dengan filter.</td>
                         </tr>
                     @endforelse
                 </tbody>

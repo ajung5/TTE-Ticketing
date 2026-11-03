@@ -157,7 +157,7 @@ it('lets only admins edit the added preset and renders that customization', func
     $body = 'Kustom {nama_pemohon}, tiket {nomor_tiket}. Petugas {nama_verifikator}. Ajukan {layanan_disarankan} melalui {form_url}.';
     $this->actingAs($owner)->put(route('admin.templates.update', $template), ['body' => $body])->assertForbidden();
     $this->actingAs($admin)->get(route('admin.templates.index'))->assertOk()
-        ->assertSee('Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)')->assertSee('9 jenis notifikasi');
+        ->assertSee('Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)')->assertSee('10 jenis notifikasi');
     $this->put(route('admin.templates.update', $template), ['body' => $body])->assertRedirect()->assertSessionHasNoErrors();
     $ticket = amsV24Ticket($owner, 'Pembaruan');
     $ticket->forceFill(['recommended_service' => 'Pendaftaran'])->save();
