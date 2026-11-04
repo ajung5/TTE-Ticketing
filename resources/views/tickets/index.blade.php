@@ -35,8 +35,7 @@
             </div>
             <div class="stat-name">Perlu Pengajuan Ulang</div>
             <div class="stat-number">{{ number_format($stats['returned'], 0, ',', '.') }}</div>
-            <div class="stat-foot"><a href="{{ route('tickets.index', ['status' => 'Returned']) }}">Lihat tiket yang Anda
-                    kembalikan →</a></div>
+            <div class="stat-foot"><a href="{{ route('tickets.index', ['status' => 'Returned']) }}">Lihat tiket yang Anda kembalikan →</a></div>
         </div>
     </div>
     <section class="card">
