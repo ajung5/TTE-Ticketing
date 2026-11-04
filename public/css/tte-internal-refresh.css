@@ -350,3 +350,77 @@
 @media (prefers-reduced-motion: reduce) {
     .tte-internal .tte-toggle-chevron { transition: none; }
 }
+
+/* TTE v53: centered outer-edge toggle and consistent T Verified identity. */
+.tte-internal .tte-sidebar-head .brand-icon {
+    display: grid;
+    place-items: center;
+    background: transparent;
+    box-shadow: none;
+    overflow: hidden;
+}
+.tte-internal .tte-sidebar-head .brand-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 11px;
+}
+@media (min-width: 681px) {
+    .tte-internal .sidebar {
+        overflow: visible;
+        z-index: 5;
+    }
+    /* The toggle is a direct child of .sidebar, anchored to its outer edge.
+       Its vertical center is identical in both expanded and collapsed states. */
+    .tte-internal.tte-sidebar-ready .sidebar > .tte-sidebar-edge-toggle {
+        display: grid;
+        place-items: center;
+        position: absolute;
+        top: 50%;
+        right: -18px;
+        transform: translateY(-50%);
+        flex: none;
+        width: 36px;
+        min-width: 36px;
+        height: 50px;
+        min-height: 50px;
+        margin: 0;
+        padding: 0;
+        border: 1px solid #c7d6e3;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 4px 14px rgba(17, 39, 62, .15);
+        color: #294c68;
+        z-index: 30;
+        cursor: pointer;
+    }
+    .tte-internal.tte-sidebar-ready .sidebar > .tte-sidebar-edge-toggle:hover {
+        background: #f0f6fa;
+        border-color: #8fb0c5;
+        color: #173a57;
+    }
+    .tte-internal.tte-sidebar-ready .sidebar > .tte-sidebar-edge-toggle:focus-visible {
+        outline: 3px solid #85cce5;
+        outline-offset: 3px;
+    }
+    .tte-internal .sidebar > .tte-sidebar-edge-toggle .tte-sidebar-toggle-icon {
+        display: block;
+        width: 19px;
+        height: 19px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+    .tte-internal.tte-sidebar-collapsed .tte-sidebar-head { gap: 0; }
+    /* Keep the icon flip from v52. No new JS needed: aria-label and preference
+       continue to be updated by the existing v51 sidebar controller. */
+}
+@media (max-width: 680px) {
+    .tte-internal .sidebar > .tte-sidebar-edge-toggle { display: none !important; }
+}
+@media print {
+    .tte-internal .sidebar > .tte-sidebar-edge-toggle { display: none !important; }
+}

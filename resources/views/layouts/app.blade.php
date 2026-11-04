@@ -7,10 +7,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#14243b">
     <title>@yield('title', 'Layanan TTE') · TTE Ticketing</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=53" sizes="any">
+    <link rel="icon" href="{{ asset('favicon.svg') }}?v=53" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('favicon-32x32.png') }}?v=53" type="image/png" sizes="32x32">
+    <link rel="icon" href="{{ asset('favicon-16x16.png') }}?v=53" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=53" sizes="180x180">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=53">
     <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/tte-ui-fixes.css') }}?v=1">
     @auth
-        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=52">
+        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=53">
         <script src="{{ asset('js/tte-internal-refresh.js') }}?v=51" defer></script>
     @endauth
     <script src="{{ asset('js/tte.js') }}?v=3" defer></script>
@@ -59,19 +65,19 @@
             <aside class="sidebar">
                 <div class="tte-sidebar-head">
                     <a href="{{ route('dashboard') }}" class="brand" aria-label="Dashboard TTE Ticketing">
-                        <span class="brand-icon">T</span>
+                        <span class="brand-icon" aria-hidden="true"><img src="{{ asset('favicon.svg') }}?v=53" alt="" width="42" height="42"></span>
                         <span>TTE Ticketing<small>Layanan Sertifikat Elektronik</small></span>
                     </a>
-                    <button type="button" class="tte-sidebar-toggle" data-sidebar-toggle
-                        aria-controls="tte-sidebar-menu" aria-pressed="false"
-                        aria-label="Perkecil menu samping" title="Perkecil menu samping">
-                        <svg class="tte-sidebar-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <rect x="3.5" y="4" width="17" height="16" rx="2" />
-                            <path d="M9.5 4v16" />
-                            <path class="tte-toggle-chevron" d="m15 9-3 3 3 3" />
-                        </svg>
-                    </button>
                 </div>
+                <button type="button" class="tte-sidebar-toggle tte-sidebar-edge-toggle" data-sidebar-toggle
+                    aria-controls="tte-sidebar-menu" aria-pressed="false"
+                    aria-label="Perkecil menu samping" title="Perkecil menu samping">
+                    <svg class="tte-sidebar-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <rect x="3.5" y="4" width="17" height="16" rx="2" />
+                        <path d="M9.5 4v16" />
+                        <path class="tte-toggle-chevron" d="m15 9-3 3 3 3" />
+                    </svg>
+                </button>
                 <button type="button" class="tte-mobile-menu-toggle" data-menu-toggle
                     aria-controls="tte-sidebar-menu" aria-expanded="false">
                     <span>Menu Navigasi</span><span aria-hidden="true" class="tte-menu-chevron">▾</span>
