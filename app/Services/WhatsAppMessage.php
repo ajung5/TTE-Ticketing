@@ -100,7 +100,9 @@ class WhatsAppMessage {
                 default => 'Hubungi petugas'
             },
             '{proses_aktual}' => $ticket->actual_process_label,
-            '{hasil_aktual}' => $ticket->service_outcome ? $ticket->service_outcome_label : 'Penanganan tiket diselesaikan',
+            '{hasil_aktual}' => $ticket->service_outcome
+                ? $ticket->service_outcome_label
+                : 'belum tercatat (layanan yang diajukan: ' . $ticket->service_label . ')',
             '{form_url}' => route('public.form'),
             '{nama_verifikator}' => (string) ($verifier?->name ?? 'Tim Verifikator TTE'),
             '{inisial_verifikator}' => (string) ($verifier?->initials ?: '-'),

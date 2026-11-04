@@ -4,13 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/** Skema final tiket TTE, tanpa migration add-column historis. */
 return new class extends Migration {
     public function up(): void {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('role', 20)->default('verifier');
-            $table->string('initials', 12)->nullable();
-        });
-
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->string('ticket_number', 36)->nullable()->unique();
@@ -22,6 +18,8 @@ return new class extends Migration {
             $table->string('source', 20)->default('zoho');
             $table->string('nip', 32)->nullable();
             $table->string('opd', 180)->nullable();
+            // NULL: data lama belum mencatat UPTD; kosong: pemohon tanpa UPTD.
+            $table->text('uptd')->nullable();
             $table->string('jabatan', 180)->nullable();
             $table->string('email', 180)->nullable();
             $table->text('keterangan')->nullable();
@@ -29,6 +27,22 @@ return new class extends Migration {
             $table->timestamp('claimed_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->text('resolution_note')->nullable();
+            // NIK disimpan encrypted melalui cast model, bukan plaintext.
+            $table->text('nik')->nullable();
+            $table->string('wa_verification_status', 20)->default('unchecked');
+            $table->string('wa_verification_note', 500)->nullable();
+            $table->timestamp('wa_checked_at')->nullable();
+            $table->foreignId('wa_checked_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('certificate_status', 20)->default('unchecked');
+            $table->string('activation_status', 20)->nullable();
+            $table->string('certificate_issuance_status', 20)->nullable();
+            $table->string('certificate_validity_status', 20)->nullable();
+            $table->string('recommended_service', 40)->nullable();
+            $table->string('service_alignment_status', 20)->nullable();
+            $table->string('actual_process', 40)->nullable();
+            $table->string('service_outcome', 40)->nullable();
+            $table->timestamp('consent_accepted_at')->nullable();
+            $table->string('signature_path', 255)->nullable();
             $table->timestamps();
             $table->index(['status', 'claimed_by']);
         });
@@ -79,6 +93,5 @@ return new class extends Migration {
         Schema::dropIfExists('wa_notifications');
         Schema::dropIfExists('ticket_activities');
         Schema::dropIfExists('tickets');
-        Schema::table('users', fn(Blueprint $table) => $table->dropColumn(['role', 'initials']));
     }
 };

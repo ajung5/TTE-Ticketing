@@ -5,8 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 
 /**
- * Default: hanya baseline operasional; tidak pernah membuat tiket contoh.
- * Pengujian demo hanya dengan php artisan db:seed --class=DemoTicketsSeeder.
+ * Bootstrap operasional: hanya akun admin/verifikator dan preset WhatsApp aktif.
+ * Direktori pegawai diimpor secara terpisah; tiket dan survei dimulai kosong.
  */
 class DatabaseSeeder extends Seeder
 {

@@ -9,6 +9,7 @@ return new class extends Migration {
         Schema::create('service_survey_responses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ticket_id')->unique()->constrained('tickets')->cascadeOnDelete();
+            $table->string('respondent_name', 160)->nullable();
             $table->unsignedTinyInteger('overall_rating');
             $table->unsignedTinyInteger('staff_rating');
             $table->unsignedTinyInteger('clarity_rating');
@@ -17,6 +18,7 @@ return new class extends Migration {
             $table->timestamps();
         });
     }
+
     public function down(): void {
         Schema::dropIfExists('service_survey_responses');
     }

@@ -80,6 +80,12 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
+        // Migration baru hanya membuat skema. Test memakai preset asli dari seeder
+        // tanpa membuat akun awal (DB SQLite :memory: sudah dipaksa saat bootstrap).
+        if (\Illuminate\Support\Facades\Schema::hasTable('wa_message_templates')) {
+            $this->seed(\Database\Seeders\WaTemplatePresetsSeeder::class);
+        }
+
         // Only TestCase's HTTP requests skip CSRF; production still enforces it.
         // Authentication, authorization, signed URLs and throttling stay active.
         $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class);

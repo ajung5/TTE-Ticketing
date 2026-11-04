@@ -5,31 +5,8 @@
          colors="true"
 >
     <testsuites>
-        <testsuite name="Unit">
-            <directory>tests/Unit</directory>
-        </testsuite>
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
-            <!--
-                TEST REBASELINE 2026-11-04 (baseline ce4f6d1):
-                Files below are superseded historical specifications, not ignored defects.
-                They remain in the repository for traceability and can be executed via
-                phpunit.all-including-legacy.xml. Current rules are exercised under
-                tests/Feature/Current/, alongside the retained passing feature tests.
-                DO NOT remove these exclusions until the legacy assertions are migrated.
-            -->
-            <exclude>tests/Feature/ActivatedPendingIssuanceV25Test.php</exclude>
-            <exclude>tests/Feature/AmsCertificateIssuanceV18Test.php</exclude>
-            <exclude>tests/Feature/AmsCompletionGateV17Test.php</exclude>
-            <exclude>tests/Feature/AmsDropdownDecisionV16Test.php</exclude>
-            <exclude>tests/Feature/AmsIssuanceCompletionV19Test.php</exclude>
-            <exclude>tests/Feature/AmsServiceCorrectionV24Test.php</exclude>
-            <exclude>tests/Feature/InboxReminderWhatsAppTest.php</exclude>
-            <exclude>tests/Feature/PublicRequestAndAmsVerificationTest.php</exclude>
-            <exclude>tests/Feature/ReturnForCorrectionV21Test.php</exclude>
-            <exclude>tests/Feature/TteManagementTest.php</exclude>
-            <exclude>tests/Feature/WaTemplateManagementTest.php</exclude>
-            <exclude>tests/Feature/WhatsAppWebLinkTest.php</exclude>
         </testsuite>
     </testsuites>
     <source>
