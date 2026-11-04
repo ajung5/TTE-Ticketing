@@ -49,15 +49,15 @@
             <div class="stat-foot">Tidak dihitung sebagai tiket selesai</div>
         </div>
     </div>
-    <section class="card mt">
-        <div class="section-heading">
+    <details class="card mt tte-collapsible tte-ams-disclosure">
+        <summary class="section-heading tte-disclosure-heading">
             <div>
                 <div class="eyebrow">PEMANTAUAN AMS BSrE</div>
                 <h2>Hasil Pemeriksaan Akun dan Sertifikat</h2>
                 <p class="small muted">Hasil pemeriksaan manual terakhir; bukan pemantauan real-time AMS.
                     Setiap indikator dihitung secara independen sehingga tidak dijumlahkan menjadi total tiket.</p>
             </div>
-        </div>
+        </summary>
         <div class="stat-grid admin-statistics">
             @foreach ([
             'Akun Sudah Aktivasi' => $ams->activated,
@@ -76,7 +76,7 @@
                 </div>
             @endforeach
         </div>
-    </section>
+    </details>
     <div class="columns overview-columns">
         <section class="card">
             <div class="section-heading">
@@ -106,7 +106,7 @@
                     <h2>Komunikasi WhatsApp</h2>
                 </div><span class="stat-icon stat-emerald">✉</span>
             </div>
-            <p class="muted">Atur isi pesan otomatis yang disiapkan bagi pemohon saat tiket ditindaklanjuti atau
+            <p class="muted">Atur isi pesan yang disiapkan bagi pemohon saat tiket ditindaklanjuti atau
                 diselesaikan.</p>
             <div class="note-box"><strong>{{ count(\App\Models\WaMessageTemplate::EVENTS) }} jenis notifikasi siap
                     dikelola</strong>
@@ -117,21 +117,22 @@
             <p class="small muted mt">Admin tidak dapat mengambil atau memproses tiket.</p>
         </section>
     </div>
-    <section class="card mt">
-        <div class="section-heading">
+    <details class="card mt tte-collapsible tte-outcome-disclosure">
+        <summary class="section-heading tte-disclosure-heading">
             <div>
                 <div class="eyebrow">HASIL AKTUAL</div>
                 <h2>Pelayanan yang Benar-Benar Diselesaikan</h2>
                 <p class="small muted">Dihitung berdasarkan hasil akhir pelayanan, bukan jenis layanan awal pemohon.
                     Tiket lama tanpa hasil terstruktur tidak disimpulkan otomatis.</p>
             </div>
-        </div>
+        </summary>
         <div class="stat-grid admin-statistics">
             @foreach ([
             'Reset Passphrase Selesai' => $outcomes['passphrase_reset'] ?? 0,
             'SE Baru Terbit' => $outcomes['certificate_issued'] ?? 0,
             'SE Diperbarui' => $outcomes['certificate_renewed'] ?? 0,
-            'SE Diterbitkan Ulang' => $outcomes['certificate_reissued'] ?? 0
+            'SE Diterbitkan Ulang' => $outcomes['certificate_reissued'] ?? 0,
+            'Pendaftaran Diproses (Administratif)' => $outcomes['registration_processed'] ?? 0
         ] as $label => $total)
                 <div class="stat-card">
                     <div class="stat-name">{{ $label }}</div>
@@ -140,7 +141,7 @@
                 </div>
             @endforeach
         </div>
-    </section>
+    </details>
     <section class="card mt">
         <div class="section-heading">
             <div>

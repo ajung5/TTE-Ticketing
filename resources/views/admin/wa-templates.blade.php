@@ -14,12 +14,13 @@
         <p class="small muted">Preset untuk Reset, Pembaruan, dan Pendaftaran dipisahkan. Tautan survei internal otomatis
             ditambahkan ke notifikasi Selesai. Jangan meminta OTP, password, atau passphrase.</p>
     </div>
+    <p class="small muted tte-preset-hint">Pilih satu jenis notifikasi untuk membuka editor pesan.</p>
     <div class="columns template-columns">
         <section class="stack">
             @foreach (\App\Models\WaMessageTemplate::EVENTS as $eventCode => $eventLabel)
                 @php($template = $templates->get($eventCode))
-                <div class="card template-card">
-                    <div class="section-heading">
+                <details class="card template-card tte-preset-detail" name="tte-wa-preset" @if ($loop->first) open @endif>
+                    <summary class="section-heading tte-preset-summary">
                         <div>
                             <div class="eyebrow">NOTIFIKASI {{ $loop->iteration }}</div>
                             <h2>{{ $eventLabel }}</h2>
@@ -27,7 +28,7 @@
                         <span class="pill {{ $eventCode === 'completed' ? 'pill-green' : 'pill-blue' }}">
                             {{ \App\Models\WaMessageTemplate::TEMPLATE_SERVICE_CODES[$eventCode] === '*' ? 'Semua Layanan' : \App\Models\WaMessageTemplate::TEMPLATE_SERVICE_CODES[$eventCode] }}
                         </span>
-                    </div>
+                    </summary>
                     @if ($template)
                         <form method="post" action="{{ route('admin.templates.update', $template) }}" class="stack">
                             @csrf @method('PUT')
@@ -41,9 +42,9 @@
                             </div>
                         </form>
                     @else
-                        <div class="alert error">Preset belum tersedia. Jalankan <code>php artisan migrate</code>.</div>
+                        <div class="alert error">Preset belum tersedia. Jalankan <code>php artisan db:seed --class=WaTemplatePresetsSeeder --force</code>.</div>
                     @endif
-                </div>
+                </details>
             @endforeach
         </section>
         <aside class="stack">

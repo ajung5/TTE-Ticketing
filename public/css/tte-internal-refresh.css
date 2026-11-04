@@ -1,0 +1,111 @@
+/* TTE internal UI v47-v49: role-safe, responsive presentation layer. */
+.tte-internal { --tte-accent:#1e6754; --tte-accent-soft:#eaf5f0; --tte-ink:#203249; }
+.tte-internal .page-heading h1 { line-height:1.2; letter-spacing:-.55px; }
+.tte-internal .page-heading .eyebrow { letter-spacing:.085em; }
+.tte-internal .stat-card { transition:border-color .15s ease, box-shadow .15s ease; }
+.tte-internal .stat-card:hover { border-color:#bfd9d0; box-shadow:0 7px 24px rgba(19,57,65,.07); }
+.tte-internal .stat-foot { line-height:1.5; }
+.tte-internal .pill.tte-pill-returned { background:#fff1dc; color:#855313; }
+.tte-internal .stat-grid.admin-statistics { grid-template-columns:repeat(auto-fit,minmax(172px,1fr)); }
+/* Secondary panels stay accessible without competing with operational KPIs. */
+.tte-collapsible { padding:0!important; overflow:hidden; }
+.tte-collapsible > .tte-disclosure-heading { list-style:none; cursor:pointer; padding:22px 25px; margin:0; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.tte-collapsible > .tte-disclosure-heading::-webkit-details-marker { display:none; }
+.tte-collapsible > .tte-disclosure-heading::after { content:'⌄'; font-size:24px; color:#617c96; font-weight:400; margin-left:auto; flex:0 0 auto; }
+.tte-collapsible[open] > .tte-disclosure-heading::after { transform:rotate(180deg); }
+.tte-collapsible > .stat-grid,.tte-collapsible > form { margin:0 23px 22px; }
+.tte-collapsible > .tte-disclosure-heading:focus-visible { outline:3px solid #7ba69e; outline-offset:-3px; }
+.tte-internal .tte-collapsible .stat-card { box-shadow:none; }
+.tte-internal .tte-collapsible .stat-card .stat-foot { font-size:11px; }
+.tte-create-verifier > form { padding-top:4px; }
+/* Compact verifier queue tabs. */
+.tte-queue-tabs,.tte-report-jumps { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 18px; }
+.tte-queue-tabs a,.tte-report-jumps a { border:1px solid #d6e3eb; background:white; color:#385d76; text-decoration:none; border-radius:11px; padding:10px 13px; font-size:13px; font-weight:650; line-height:1.2; }
+.tte-queue-tabs a strong { margin-left:6px; font-variant-numeric:tabular-nums; }
+.tte-queue-tabs a:hover,.tte-report-jumps a:hover { border-color:#6d9d91; background:#f4faf7; color:#1f604f; }
+.tte-queue-tabs a.is-active { background:#205f50; border-color:#205f50; color:white; }
+.tte-queue-tabs a:focus-visible,.tte-report-jumps a:focus-visible { outline:3px solid #5c9f90; outline-offset:2px; }
+/* Ticket detail: show current context immediately, keep long history optional. */
+.tte-ticket-context { display:flex; flex-wrap:wrap; gap:9px 18px; border:1px solid #d9e6e8; background:#f9fcfb; border-radius:12px; padding:12px 16px; margin:-6px 0 20px; color:#28445b; font-size:13px; }
+.tte-ticket-context strong { color:#597184; font-weight:700; margin-right:6px; }
+.tte-history-details { padding:0!important; overflow:hidden; }
+.tte-history-details > summary { cursor:pointer; list-style:none; padding:20px 24px; margin:0; }
+.tte-history-details > summary::-webkit-details-marker { display:none; }
+.tte-history-details > summary::after { content:'⌄'; color:#647f94; margin-left:8px; font-size:20px; }
+.tte-history-details[open] > summary::after { transform:rotate(180deg); }
+.tte-history-details > .timeline { padding:12px 25px 22px 38px; margin:0 20px 12px; }
+.tte-history-details > summary:focus-visible { outline:3px solid #7ba69e; outline-offset:-3px; }
+/* Account editing in native dialogs, outside overflowing tables. */
+.tte-verifier-dialog { width:min(720px,calc(100% - 30px)); max-height:min(86vh,850px); border:1px solid #d8e5eb; border-radius:17px; box-shadow:0 22px 90px rgba(17,35,51,.28); padding:24px; color:var(--tte-ink); background:#fff; }
+.tte-verifier-dialog::backdrop { background:rgba(14,31,49,.55); }
+.tte-verifier-dialog .tte-dialog-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; border-bottom:1px solid #e6eef2; padding-bottom:14px; margin-bottom:16px; }
+.tte-verifier-dialog h2 { font-size:19px; margin:0 0 5px; }
+.tte-verifier-dialog .verifier-form-grid { margin-top:6px; }
+.tte-verifier-dialog form { gap:15px; }
+/* Show one WhatsApp preset editor at a time. */
+.tte-preset-hint { margin:4px 0 13px; }
+.tte-preset-detail { padding:0!important; overflow:hidden; }
+.tte-preset-detail > .tte-preset-summary { list-style:none; cursor:pointer; margin:0!important; padding:18px 22px; align-items:center; }
+.tte-preset-detail > .tte-preset-summary::-webkit-details-marker { display:none; }
+.tte-preset-detail > .tte-preset-summary::after { content:'⌄'; font-size:23px; color:#6b8293; margin-left:7px; }
+.tte-preset-detail[open] > .tte-preset-summary::after { transform:rotate(180deg); }
+.tte-preset-detail > .stack,.tte-preset-detail > .alert { margin:0 22px 22px; padding-top:14px; border-top:1px solid #e9f0f5; }
+.tte-preset-detail > summary:focus-visible { outline:3px solid #7ba69e; outline-offset:-3px; }
+/* Ratings, report navigation and readable dense tabular data. */
+.tte-rating { background:#eaf4ee; color:#1d7157; border-radius:7px; padding:4px 8px; font-weight:750; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.tte-report-jumps { margin-top:-5px; }
+.tte-internal .report-table { font-size:13px; }
+.tte-internal .report-metric small { font-size:12px; }
+.tte-internal .report-page section[id],.tte-internal .report-page [id='tte-report-summary'] { scroll-margin-top:22px; }
+.tte-mobile-menu-toggle { display:none; }
+@media(max-width:860px) {
+  /* Put work steps before the lengthy person/history column on narrow screens. */
+  .tte-internal .detail-columns { display:flex; flex-direction:column; }
+  .tte-internal .detail-columns > .stack:first-child { order:2; }
+  .tte-internal .detail-columns > .stack:last-child { order:1; }
+}
+@media(max-width:760px) {
+  .tte-internal .page-heading h1 { font-size:clamp(21px,5vw,29px); }
+  .tte-internal .ticket-table { min-width:0; display:block; }
+  .tte-internal .ticket-table thead { display:none; }
+  .tte-internal .ticket-table tbody { display:grid; gap:13px; }
+  .tte-internal .ticket-table tr { display:grid; grid-template-columns:1fr; padding:11px 14px 14px; border:1px solid #e1e9ef; border-radius:12px; background:#fff; }
+  .tte-internal .ticket-table td { display:flex; align-items:flex-start; gap:8px; justify-content:space-between; padding:9px 0; border-bottom:1px solid #edf2f5; white-space:normal; font-size:13px; }
+  .tte-internal .ticket-table td:last-child { border-bottom:0; }
+  .tte-internal .ticket-table td::before { content:attr(data-label); flex:0 0 90px; font-size:11px; font-weight:700; color:#708197; padding-top:2px; }
+  .tte-internal .ticket-table td > :not(:first-child) { max-width:100%; }
+  .tte-internal .ticket-table td[data-label='Aksi'] { justify-content:flex-end; }
+  .tte-internal .ticket-table td[data-label='Aksi']::before { margin-right:auto; }
+  .tte-internal .ticket-table .empty { grid-column:1/-1; }
+  .tte-internal .ticket-table td[colspan]::before { display:none; }
+  .tte-internal .tte-survey-response-table { min-width:0; display:block; }
+  .tte-internal .tte-survey-response-table thead { display:none; }
+  .tte-internal .tte-survey-response-table tbody { display:grid; gap:12px; }
+  .tte-internal .tte-survey-response-table tr { display:grid; border:1px solid #e1e9ef; border-radius:12px; padding:10px 14px; }
+  .tte-internal .tte-survey-response-table td { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; padding:9px 0; font-size:13px; border-bottom:1px solid #edf2f5; overflow-wrap:anywhere; }
+  .tte-internal .tte-survey-response-table td:last-child { border:0; }
+  .tte-internal .tte-survey-response-table td::before { content:attr(data-label); flex:0 0 98px; color:#74869a; font-size:11px; font-weight:700; }
+  .tte-internal .tte-survey-response-table td[colspan]::before { display:none; }
+}
+@media(max-width:680px) {
+  .tte-internal .sidebar { position:relative; }
+  .tte-mobile-menu-toggle { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:42px; border:1px solid #47607a; background:#1b3550; color:#edf6ff; padding:9px 13px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; }
+  .tte-internal .sidebar.ui-menu-ready:not(.ui-menu-open) .sidebar-group,
+  .tte-internal .sidebar.ui-menu-ready:not(.ui-menu-open) .sidebar-bottom { display:none; }
+  .tte-internal .sidebar.ui-menu-open .sidebar-group { display:flex; }
+  .tte-internal .sidebar.ui-menu-open .sidebar-bottom { display:flex; }
+  .tte-internal .sidebar.ui-menu-open .tte-menu-chevron { transform:rotate(180deg); }
+  .tte-internal .tte-queue-tabs { flex-wrap:nowrap; overflow-x:auto; padding:2px 0 8px; scrollbar-width:thin; }
+  .tte-internal .tte-queue-tabs a { white-space:nowrap; flex:0 0 auto; }
+  .tte-internal .tte-disclosure-heading,.tte-internal .tte-preset-summary { padding:17px 16px; }
+  .tte-verifier-dialog { padding:17px 14px; }
+  .tte-verifier-dialog .verifier-form-grid { grid-template-columns:1fr; }
+  .tte-verifier-dialog .verifier-form-grid .full-span { grid-column:auto; }
+}
+@media print {
+  .tte-mobile-menu-toggle,.tte-report-jumps,.tte-verifier-dialog { display:none!important; }
+  .tte-internal .report-page .report-table { font-size:8.5pt; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .tte-internal .stat-card { transition:none; }
+}

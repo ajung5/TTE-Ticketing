@@ -51,8 +51,8 @@
         <h2>Masukan Pemohon</h2>
         <p class="small muted">Nama pengisi survei dan tanggapannya hanya dapat dilihat oleh administrator. Respons lama
             yang tidak mencatat nama ditampilkan sebagai "Belum dicatat".</p>
-        <div class="table-scroll">
-            <table>
+        <div class="table-scroll tte-survey-scroll">
+            <table class="tte-survey-response-table">
                 <thead>
                     <tr>
                         <th>Waktu</th>
@@ -65,11 +65,11 @@
                 <tbody>
                     @forelse ($responses as $response)
                         <tr>
-                            <td>{{ $response->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</td>
-                            <td>{{ $response->ticket?->ticket_number ?? '-' }}</td>
-                            <td>{{ $response->respondent_name ?: 'Belum dicatat' }}</td>
-                            <td>{{ $response->overall_rating }}/5</td>
-                            <td class="survey-comment">{{ $response->feedback ?: '-' }}</td>
+                            <td data-label="Waktu">{{ $response->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</td>
+                            <td data-label="Nomor Tiket">{{ $response->ticket?->ticket_number ?? '-' }}</td>
+                            <td data-label="Nama Pengisi">{{ $response->respondent_name ?: 'Belum dicatat' }}</td>
+                            <td data-label="Nilai"><span class="tte-rating">{{ $response->overall_rating }}/5</span></td>
+                            <td data-label="Saran / Masukan" class="survey-comment">{{ $response->feedback ?: '-' }}</td>
                         </tr>
                     @empty
                         <tr>

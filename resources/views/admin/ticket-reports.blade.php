@@ -318,7 +318,12 @@
             </div>
         </div>
 
-        <section class="card report-filter-card">
+        <nav class="tte-report-jumps report-no-print" aria-label="Navigasi bagian laporan">
+            <a href="#tte-report-filters">Periode</a><a href="#tte-report-summary">Ringkasan</a>
+            <a href="#tte-report-ams">Pemeriksaan AMS</a><a href="#tte-report-services">Jenis Layanan</a>
+            <a href="#tte-report-details">Rincian Tiket</a>
+        </nav>
+        <section class="card report-filter-card" id="tte-report-filters">
             <div class="section-heading">
                 <div>
                     <div class="eyebrow">FILTER LAPORAN</div>
@@ -380,7 +385,7 @@
             Selesai Selama Periode berdasarkan tanggal penyelesaian, termasuk tiket masuk periode sebelumnya.
         </div>
 
-        <div class="report-metrics">
+        <div class="report-metrics" id="tte-report-summary">
             <div class="report-metric"><small>Tiket
                     Masuk</small><strong>{{ number_format((int) $summary->total, 0, ',', '.') }}</strong><small>Dalam
                     periode</small></div>
@@ -413,7 +418,7 @@
             </div>
         </div>
 
-        <section class="card">
+        <section class="card" id="tte-report-ams">
             <div class="section-heading">
                 <div>
                     <div class="eyebrow">PEMERIKSAAN AMS</div>
@@ -441,7 +446,7 @@
             </div>
         </section>
 
-        <section class="card">
+        <section class="card" id="tte-report-services">
             <div class="section-heading">
                 <div>
                     <div class="eyebrow">REKAPITULASI</div>
@@ -568,7 +573,7 @@
                 sebelum menggunakan hasil untuk laporan resmi.</p>
         </section>
 
-        <section class="card report-detail-card">
+        <section class="card report-detail-card" id="tte-report-details">
             <div class="section-heading">
                 <div>
                     <div class="eyebrow">DATA PENDUKUNG</div>

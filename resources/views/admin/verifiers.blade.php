@@ -107,13 +107,13 @@
         <span class="pill pill-blue">{{ $verifiers->count() }} verifikator aktif</span>
     </div>
 
-    <section class="card">
-        <div class="section-heading">
+    <details class="card tte-collapsible tte-create-verifier">
+        <summary class="section-heading tte-disclosure-heading">
             <div>
                 <div class="eyebrow">AKUN BARU</div>
                 <h2>Tambah Verifikator</h2>
             </div>
-        </div>
+        </summary>
         <form method="post" action="{{ route('admin.verifiers.store') }}" class="stack" autocomplete="off">
             @csrf
             <div class="verifier-form-grid">
@@ -143,7 +143,7 @@
                 simbol. Akun baru otomatis berperan sebagai verifikator, bukan admin.</p>
             <button class="btn btn-primary" type="submit">Tambah Verifikator</button>
         </form>
-    </section>
+    </details>
 
     <section class="card mt">
         <div class="section-heading">
@@ -153,7 +153,7 @@
             </div>
             <span class="pill pill-neutral">{{ $verifiers->count() }} akun</span>
         </div>
-        <p class="small muted">Klik <strong>Edit Akun</strong> untuk memperbarui identitas atau mengganti password. Password
+        <p class="small muted">Gunakan <strong>Edit Akun</strong> untuk memperbarui identitas atau mengganti password. Password
             lama tidak dapat ditampilkan.</p>
         <div class="table-scroll">
             <table class="verifier-table">
@@ -185,8 +185,45 @@
                                     aktif</span></td>
                             <td>
                                 <div class="verifier-actions">
-                                    <details class="verifier-edit" @if ((string) old('_edit_id') === (string) $verifier->id) open @endif>
-                                        <summary>Edit Akun</summary>
+                                    <button type="button" class="btn btn-outline btn-small"
+                                        data-open-dialog="tte-edit-verifier-{{ $verifier->id }}">Edit Akun</button>
+                                    <form method="post" action="{{ route('admin.verifiers.destroy', $verifier) }}"
+                                        onsubmit="return confirm('Nonaktifkan akun verifikator ini? Akun tidak dapat login lagi, tetapi histori tiket tetap tersimpan.')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-small verifier-danger"
+                                            @disabled($activeCount > 0)
+                                            title="{{ $activeCount ? 'Selesaikan tiket aktif terlebih dahulu.' : 'Nonaktifkan akun dan simpan historinya.' }}">Nonaktifkan</button>
+                                    </form>
+                                </div>
+                                @if ($activeCount > 0)
+                                    <p class="verifier-help">Selesaikan {{ $activeCount }} tiket aktif sebelum menonaktifkan
+                                        akun.</p>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="empty">Belum ada akun verifikator. Tambahkan melalui form di atas.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {{-- Editor ditempatkan di luar tabel agar tabel tidak melebar saat edit. --}}
+    @foreach ($verifiers as $verifier)
+                                    <dialog class="tte-verifier-dialog" id="tte-edit-verifier-{{ $verifier->id }}"
+                                        aria-labelledby="tte-edit-title-{{ $verifier->id }}"
+                                        @if ((string) old('_edit_id') === (string) $verifier->id) data-auto-open @endif>
+                                        <div class="tte-dialog-heading">
+                                            <div><h2 id="tte-edit-title-{{ $verifier->id }}">Edit Verifikator</h2>
+                                                <p class="small muted">{{ $verifier->name }}</p></div>
+                                            <button type="button" class="btn btn-outline btn-small" data-close-dialog>
+                                                Tutup
+                                            </button>
+                                        </div>
                                         <form method="post" action="{{ route('admin.verifiers.update', $verifier) }}"
                                             class="stack" autocomplete="off">
                                             @csrf
@@ -222,30 +259,6 @@
                                             </div>
                                             <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                                         </form>
-                                    </details>
-                                    <form method="post" action="{{ route('admin.verifiers.destroy', $verifier) }}"
-                                        onsubmit="return confirm('Hapus akun verifikator ini? Akun tidak dapat login lagi, tetapi histori tiket tetap tersimpan.')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-small verifier-danger"
-                                            @disabled($activeCount > 0)
-                                            title="{{ $activeCount ? 'Selesaikan tiket aktif terlebih dahulu.' : 'Nonaktifkan akun dan simpan historinya.' }}">Hapus</button>
-                                    </form>
-                                </div>
-                                @if ($activeCount > 0)
-                                    <p class="verifier-help">Selesaikan {{ $activeCount }} tiket aktif sebelum menghapus
-                                        akun.</p>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="empty">Belum ada akun verifikator. Tambahkan melalui form di atas.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </section>
+                                    </dialog>
+    @endforeach
 @endsection

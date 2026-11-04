@@ -38,7 +38,9 @@
     const button = event.target.closest('[data-insert-token]');
     if (!button) return;
     const token = button.getAttribute('data-insert-token');
-    const textarea = focusedPresetEditor || document.querySelector('.template-textarea');
+    const activeEditor = focusedPresetEditor?.closest('details')?.open ? focusedPresetEditor : null;
+    const textarea = activeEditor || document.querySelector('.tte-preset-detail[open] .template-textarea')
+      || document.querySelector('.template-textarea');
     if (!textarea || !token) return;
     const start = textarea.selectionStart, end = textarea.selectionEnd;
     textarea.setRangeText(token, start, end, 'end');

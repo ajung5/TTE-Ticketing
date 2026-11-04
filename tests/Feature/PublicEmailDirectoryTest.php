@@ -246,7 +246,7 @@ it(
             ->assertSee('Email Gov')
             ->assertSee('pattern="8[0-9]{8,12}"', false)
             ->assertSee('class="wa-phone-prefix"', false)
-            ->assertSee('Kode negara');
+            ->assertSee('class="wa-phone-code">+62</span>', false);
     },
 );
 

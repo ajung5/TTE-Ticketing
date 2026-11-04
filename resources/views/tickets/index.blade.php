@@ -38,6 +38,18 @@
             <div class="stat-foot"><a href="{{ route('tickets.index', ['status' => 'Returned']) }}">Lihat tiket yang Anda kembalikan →</a></div>
         </div>
     </div>
+    <nav class="tte-queue-tabs" aria-label="Filter cepat status tiket">
+        <a href="{{ route('tickets.index') }}" @class(['is-active' => !request('status')])
+            @if (!request('status')) aria-current="page" @endif>Semua Tiket</a>
+        <a href="{{ route('tickets.index', ['status' => 'Open']) }}" @class(['is-active' => request('status') === 'Open'])
+            @if (request('status') === 'Open') aria-current="page" @endif>Baru <strong>{{ $stats['new'] }}</strong></a>
+        <a href="{{ route('tickets.index', ['status' => 'In Progress']) }}" @class(['is-active' => request('status') === 'In Progress'])
+            @if (request('status') === 'In Progress') aria-current="page" @endif>Milik Saya <strong>{{ $stats['mine'] }}</strong></a>
+        <a href="{{ route('tickets.index', ['status' => 'Done']) }}" @class(['is-active' => request('status') === 'Done'])
+            @if (request('status') === 'Done') aria-current="page" @endif>Selesai <strong>{{ $stats['completed'] }}</strong></a>
+        <a href="{{ route('tickets.index', ['status' => 'Returned']) }}" @class(['is-active' => request('status') === 'Returned'])
+            @if (request('status') === 'Returned') aria-current="page" @endif>Pengajuan Ulang <strong>{{ $stats['returned'] }}</strong></a>
+    </nav>
     <section class="card">
         <div class="section-heading">
             <div>
@@ -80,23 +92,23 @@
                 <tbody>
                     @forelse($tickets as $ticket)
                         <tr>
-                            <td><strong class="ticket-number">{{ $ticket->ticket_number ?? '#' . $ticket->id }}</strong>
+                            <td data-label="Nomor Tiket"><strong class="ticket-number">{{ $ticket->ticket_number ?? '#' . $ticket->id }}</strong>
                                 <div class="small muted">
                                     {{ $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y · H:i') }}</div>
                                 @if ($ticket->source === 'simulated')
                                     <span class="demo-label">DATA SIMULASI</span>
                                 @endif
                             </td>
-                            <td><strong>{{ $ticket->nama_user }}</strong>
+                            <td data-label="Pemohon"><strong>{{ $ticket->nama_user }}</strong>
                                 <div class="small muted">{{ $ticket->opd ?: 'Belum ada unit kerja' }}</div>
                             </td>
-                            <td><span class="service-chip">{{ $ticket->service_label }}</span></td>
-                            <td><span class="small muted">{{ $ticket->ams_summary_label }}</span></td>
-                            <td><span
-                                    class="pill {{ $ticket->status === 'Open' ? 'pill-neutral' : ($ticket->status === 'Done' ? 'pill-green' : 'pill-blue') }}">{{ $ticket->status_label }}</span>
+                            <td data-label="Layanan"><span class="service-chip">{{ $ticket->service_label }}</span></td>
+                            <td data-label="Hasil AMS"><span class="small muted">{{ $ticket->ams_summary_label }}</span></td>
+                            <td data-label="Status"><span
+                                    class="pill {{ $ticket->status === 'Open' ? 'pill-neutral' : ($ticket->status === 'Done' ? 'pill-green' : ($ticket->status === 'Returned' ? 'tte-pill-returned' : 'pill-blue')) }}">{{ $ticket->status_label }}</span>
                             </td>
-                            <td>{{ $ticket->claimant?->name ?? 'Belum ada' }}</td>
-                            <td>
+                            <td data-label="Verifikator">{{ $ticket->claimant?->name ?? 'Belum ada' }}</td>
+                            <td data-label="Aksi">
                                 @if ($ticket->status === 'Open')
                                     <form method="post" action="{{ route('tickets.claim', $ticket) }}">@csrf<button
                                             class="btn btn-primary btn-small" type="submit">Ambil Tiket →</button></form>

@@ -8,11 +8,16 @@
             <p class="muted">Layanan diajukan: {{ $ticket->service_label }}</p>
         </div>
         <div class="heading-right"><span
-                class="pill {{ $ticket->status === 'Done' ? 'pill-green' : ($ticket->status === 'Open' ? 'pill-neutral' : 'pill-blue') }}">{{ $ticket->status_label }}</span>
+                class="pill {{ $ticket->status === 'Done' ? 'pill-green' : ($ticket->status === 'Open' ? 'pill-neutral' : ($ticket->status === 'Returned' ? 'tte-pill-returned' : 'pill-blue')) }}">{{ $ticket->status_label }}</span>
             @if ($ticket->source === 'simulated')
                 <span class="demo-label">DATA SIMULASI</span>
             @endif
         </div>
+    </div>
+    <div class="tte-ticket-context" aria-label="Ringkasan tiket">
+        <span><strong>Pemohon</strong> {{ $ticket->nama_user }}</span>
+        <span><strong>Unit Kerja</strong> {{ $ticket->opd ?: '-' }}</span>
+        <span><strong>Verifikator</strong> {{ $ticket->claimant?->name ?? 'Belum diambil' }}</span>
     </div>
     @if ($ticket->source === 'simulated')
         <div class="alert warn" role="status"><strong>Mode simulasi:</strong> Tiket ini menggunakan data dan nomor WhatsApp
@@ -122,14 +127,14 @@
                     </div>
                 @endif
             </section>
-            <section class="card">
-                <div class="section-heading">
+            <details class="card tte-history-details">
+                <summary class="section-heading tte-disclosure-heading">
                     <div>
                         <div class="eyebrow">JEJAK AKTIVITAS</div>
                         <h2>Riwayat Penanganan</h2>
                     </div>
                     <span class="pill pill-neutral">{{ $ticket->activities->count() }} aktivitas</span>
-                </div>
+                </summary>
                 <div class="timeline">
                     @forelse($ticket->activities as $entry)
                         <div class="timeline-item">
@@ -155,7 +160,7 @@
                         <p class="muted">Belum ada aktivitas.</p>
                     @endforelse
                 </div>
-            </section>
+            </details>
         </div>
         <div class="stack">
             @if ($ticket->status === 'In Progress')
