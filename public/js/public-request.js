@@ -101,8 +101,8 @@
     email.value = '';
     setUptd('');
     nikStatus.textContent = [16, 18].includes(currentNik.length)
-      ? 'Memeriksa data pada direktori email...'
-      : 'Masukkan NIK 16 digit atau NIP 18 digit untuk mencari data.';
+      ? 'Memeriksa data...'
+      : 'Masukkan NIK/NIP untuk mencari data.';
     if (![16, 18].includes(currentNik.length)) return;
 
     debounce = setTimeout(async () => {
@@ -125,11 +125,11 @@
 
         if (response.ok && result.status === 'found' && result.email) {
           setProfile(result, preserveExisting);
-          nikStatus.textContent = 'Data ditemukan. Periksa dan koreksi informasi jika diperlukan.';
+          nikStatus.textContent = 'Data pegawai ditemukan.';
           setMatch(true);
         } else if (result.status === 'not_found') {
           nikStatus.textContent = currentNik.length === 16
-            ? 'NIK belum ditemukan. Anda dapat mencoba NIP 18 digit di kolom yang sama.'
+            ? 'NIK tidak ditemukan. Coba gunakan NIP 18 digit.'
             : 'NIK/NIP atau username Email Gov tidak tersedia.';
           if (currentNik.length === 18) openModal();
         } else if (response.status === 429) {
