@@ -32,25 +32,34 @@ class AppServiceProvider extends ServiceProvider {
                 if ($request->isMethod('post')) {
                     // Simpan hanya isian survei, tanpa token atau input lain.
                     $request->flashOnly([
-                        'respondent_name', 'overall_rating', 'staff_rating',
-                        'clarity_rating', 'speed_rating', 'feedback'
+                        'respondent_name',
+                        'overall_rating',
+                        'staff_rating',
+                        'clarity_rating',
+                        'speed_rating',
+                        'feedback'
                     ]);
                 } else {
                     $request->session()->keep('_old_input');
                 }
             }
 
-            return response()->view('public.survey-rate-limited', [
-                'retryAfter' => $retryAfter,
-                'retryUrl' => $request->fullUrl(),
-                'isSubmission' => $request->isMethod('post')
-            ], 429, $headers);
+            return response()->view(
+                'public.survey-rate-limited',
+                [
+                    'retryAfter' => $retryAfter,
+                    'retryUrl' => $request->fullUrl(),
+                    'isSubmission' => $request->isMethod('post')
+                ],
+                429,
+                $headers
+            );
         };
 
         RateLimiter::for('tte-survey-view', function (Request $request) use ($surveyLimitResponse) {
             // Throttle dapat berjalan sebelum middleware signed/binding.
             // Tautan tidak valid dibatasi terpisah agar tidak menghabiskan kuota tiket.
-            if (! $request->hasValidSignature()) {
+            if (!$request->hasValidSignature()) {
                 return Limit::perMinute(20)->by('invalid-ip:' . $request->ip());
             }
             $ticket = $request->route('ticket');
@@ -62,7 +71,7 @@ class AppServiceProvider extends ServiceProvider {
         });
 
         RateLimiter::for('tte-survey-submit', function (Request $request) use ($surveyLimitResponse) {
-            if (! $request->hasValidSignature()) {
+            if (!$request->hasValidSignature()) {
                 return Limit::perMinutes(10, 5)->by('invalid-ip:' . $request->ip());
             }
             $ticket = $request->route('ticket');

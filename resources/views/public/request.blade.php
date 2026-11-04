@@ -122,8 +122,8 @@
                             </label>
                             <div class="field-group" id="uptd-field" hidden>
                                 <label for="uptd_display">UPTD
-                                    <input id="uptd_display" type="text" value="" readonly
-                                        aria-readonly="true" autocomplete="off" aria-describedby="uptd-help">
+                                    <input id="uptd_display" type="text" value="" readonly aria-readonly="true"
+                                        autocomplete="off" aria-describedby="uptd-help">
                                 </label>
                                 <p class="small muted" id="uptd-help">Sesuai data direktori pegawai.</p>
                             </div>

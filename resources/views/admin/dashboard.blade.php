@@ -37,10 +37,13 @@
             <div class="stat-top"><span class="stat-icon stat-emerald">✓</span><span class="stat-micro">SELESAI</span></div>
             <div class="stat-name">Tiket Selesai</div>
             <div class="stat-number">{{ number_format($stats['done'], 0, ',', '.') }}</div>
-            <div class="stat-foot">{{ $stats['total'] ? number_format(($stats['done'] / $stats['total']) * 100, 1, ',', '.') : 0 }}% dari seluruh tiket</div>
+            <div class="stat-foot">
+                {{ $stats['total'] ? number_format(($stats['done'] / $stats['total']) * 100, 1, ',', '.') : 0 }}% dari
+                seluruh tiket</div>
         </div>
         <div class="stat-card">
-            <div class="stat-top"><span class="stat-icon stat-amber">↩</span><span class="stat-micro">DIKEMBALIKAN</span></div>
+            <div class="stat-top"><span class="stat-icon stat-amber">↩</span><span class="stat-micro">DIKEMBALIKAN</span>
+            </div>
             <div class="stat-name">Perlu Pengajuan Ulang</div>
             <div class="stat-number">{{ number_format($stats['returned'], 0, ',', '.') }}</div>
             <div class="stat-foot">Tidak dihitung sebagai tiket selesai</div>
@@ -57,15 +60,15 @@
         </div>
         <div class="stat-grid admin-statistics">
             @foreach ([
-                'Akun Sudah Aktivasi' => $ams->activated,
-                'Akun Belum Aktivasi' => $ams->not_activated,
-                'WA Belum Terverifikasi' => $ams->wa_unverified,
-                'WA Terverifikasi' => $ams->wa_verified,
-                'SE Belum Terbit' => $ams->not_issued,
-                'SE Aktif' => $ams->cert_active,
-                'SE Kedaluwarsa' => $ams->cert_expired,
-                'SE Revoke (Penerbitan Ulang)' => $ams->cert_revoked,
-            ] as $label => $total)
+            'Akun Sudah Aktivasi' => $ams->activated,
+            'Akun Belum Aktivasi' => $ams->not_activated,
+            'WA Belum Terverifikasi' => $ams->wa_unverified,
+            'WA Terverifikasi' => $ams->wa_verified,
+            'SE Belum Terbit' => $ams->not_issued,
+            'SE Aktif' => $ams->cert_active,
+            'SE Kedaluwarsa' => $ams->cert_expired,
+            'SE Revoke (Penerbitan Ulang)' => $ams->cert_revoked
+        ] as $label => $total)
                 <div class="stat-card">
                     <div class="stat-name">{{ $label }}</div>
                     <div class="stat-number">{{ number_format((int) $total, 0, ',', '.') }}</div>
@@ -89,7 +92,9 @@
                     <div class="bar-item">
                         <div class="bar-label"><span>{{ $label }}</span><span><strong>{{ $count }}</strong>
                                 <small class="muted">({{ $percent }}%)</small></span></div>
-                        <div class="bar-track"><div class="bar-value" style="width:{{ $percent }}%"></div></div>
+                        <div class="bar-track">
+                            <div class="bar-value" style="width:{{ $percent }}%"></div>
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -101,11 +106,14 @@
                     <h2>Komunikasi WhatsApp</h2>
                 </div><span class="stat-icon stat-emerald">✉</span>
             </div>
-            <p class="muted">Atur isi pesan otomatis yang disiapkan bagi pemohon saat tiket ditindaklanjuti atau diselesaikan.</p>
-            <div class="note-box"><strong>{{ count(\App\Models\WaMessageTemplate::EVENTS) }} jenis notifikasi siap dikelola</strong>
+            <p class="muted">Atur isi pesan otomatis yang disiapkan bagi pemohon saat tiket ditindaklanjuti atau
+                diselesaikan.</p>
+            <div class="note-box"><strong>{{ count(\App\Models\WaMessageTemplate::EVENTS) }} jenis notifikasi siap
+                    dikelola</strong>
                 <p class="small muted">Notifikasi mengikuti kondisi AMS, termasuk Revoke dan hasil aktual pelayanan.</p>
             </div>
-            <a class="btn btn-primary full mt" href="{{ route('admin.templates.index') }}">Kelola Preset WhatsApp <span aria-hidden="true">→</span></a>
+            <a class="btn btn-primary full mt" href="{{ route('admin.templates.index') }}">Kelola Preset WhatsApp <span
+                    aria-hidden="true">→</span></a>
             <p class="small muted mt">Admin tidak dapat mengambil atau memproses tiket.</p>
         </section>
     </div>
@@ -120,11 +128,11 @@
         </div>
         <div class="stat-grid admin-statistics">
             @foreach ([
-                'Reset Passphrase Selesai' => $outcomes['passphrase_reset'] ?? 0,
-                'SE Baru Terbit' => $outcomes['certificate_issued'] ?? 0,
-                'SE Diperbarui' => $outcomes['certificate_renewed'] ?? 0,
-                'SE Diterbitkan Ulang' => $outcomes['certificate_reissued'] ?? 0,
-            ] as $label => $total)
+            'Reset Passphrase Selesai' => $outcomes['passphrase_reset'] ?? 0,
+            'SE Baru Terbit' => $outcomes['certificate_issued'] ?? 0,
+            'SE Diperbarui' => $outcomes['certificate_renewed'] ?? 0,
+            'SE Diterbitkan Ulang' => $outcomes['certificate_reissued'] ?? 0
+        ] as $label => $total)
                 <div class="stat-card">
                     <div class="stat-name">{{ $label }}</div>
                     <div class="stat-number">{{ number_format((int) $total, 0, ',', '.') }}</div>
@@ -143,27 +151,45 @@
         </div>
         <div class="table-scroll">
             <table>
-                <thead><tr>
-                    <th>Verifikator</th><th>Inisial</th><th>Tiket Ditangani</th><th>Aktif</th>
-                    <th>Selesai</th><th>Perlu Pengajuan Ulang</th><th>Aksi</th>
-                </tr></thead>
+                <thead>
+                    <tr>
+                        <th>Verifikator</th>
+                        <th>Inisial</th>
+                        <th>Tiket Ditangani</th>
+                        <th>Aktif</th>
+                        <th>Selesai</th>
+                        <th>Perlu Pengajuan Ulang</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
                 <tbody>
                     @forelse($verifiers as $verifier)
                         @php($c = $counts[$verifier->id] ?? null)
                         <tr>
-                            <td><div class="person-row"><span class="person-avatar">{{ strtoupper(substr($verifier->initials ?: $verifier->name, 0, 2)) }}</span>
-                                <span><strong>{{ $verifier->name }}</strong><div class="small muted">{{ $verifier->email }}</div></span></div></td>
+                            <td>
+                                <div class="person-row"><span
+                                        class="person-avatar">{{ strtoupper(substr($verifier->initials ?: $verifier->name, 0, 2)) }}</span>
+                                    <span><strong>{{ $verifier->name }}</strong>
+                                        <div class="small muted">{{ $verifier->email }}</div>
+                                    </span>
+                                </div>
+                            </td>
                             <td>{{ $verifier->initials ?: '-' }}</td>
                             <td><strong>{{ $c?->total ?? 0 }}</strong></td>
                             <td>{{ $c?->active_count ?? 0 }}</td>
                             <td><span class="pill pill-green">{{ $c?->done_count ?? 0 }} selesai</span></td>
                             <td>{{ $c?->returned_count ?? 0 }}</td>
-                            <td><form method="post" action="{{ route('admin.password-reset', $verifier) }}"
-                                onsubmit="return confirm('Kirim tautan reset password untuk akun ini?')">@csrf
-                                <button class="btn btn-outline btn-small" type="submit">Reset Password</button></form></td>
+                            <td>
+                                <form method="post" action="{{ route('admin.password-reset', $verifier) }}"
+                                    onsubmit="return confirm('Kirim tautan reset password untuk akun ini?')">@csrf
+                                    <button class="btn btn-outline btn-small" type="submit">Reset Password</button>
+                                </form>
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="empty">Belum ada verifikator.</td></tr>
+                        <tr>
+                            <td colspan="7" class="empty">Belum ada verifikator.</td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>

@@ -61,10 +61,11 @@ class WhatsAppMessage {
         if ($event === 'registration' && $ticket->activation_status === 'not_activated') {
             // Tahapan aktivasi disampaikan di dalam notifikasi Pendaftaran Diproses,
             // bukan mengganti jenis notifikasi ataupun mengklaim SE sudah terbit.
-            $templateBody .= "\n\nBerdasarkan pemeriksaan AMS BSrE, akun Anda belum diaktivasi. "
-                . "Mohon lakukan aktivasi akun sesuai petunjuk resmi BSrE agar proses Penerbitan "
-                . "Sertifikat Elektronik dapat dilanjutkan. Setelah aktivasi berhasil, "
-                . "hubungi petugas untuk pemeriksaan ulang. Tidak perlu mengajukan tiket baru.";
+            $templateBody .=
+                "\n\nBerdasarkan pemeriksaan AMS BSrE, akun Anda belum diaktivasi. " .
+                'Mohon lakukan aktivasi akun sesuai petunjuk resmi BSrE agar proses Penerbitan ' .
+                'Sertifikat Elektronik dapat dilanjutkan. Setelah aktivasi berhasil, ' .
+                'hubungi petugas untuk pemeriksaan ulang. Tidak perlu mengajukan tiket baru.';
         }
         // Preset lama menggunakan {layanan} sebagai nama layanan pengajuan.
         // Untuk tiket baru yang mempunyai hasil aktual, ubah kalimat bakunya
@@ -77,19 +78,24 @@ class WhatsAppMessage {
             );
         }
         if ($event === 'certificate_not_issued' && $ticket->wa_verification_status === 'unverified') {
-            $templateBody .= "\n\nNomor WhatsApp Anda juga belum terverifikasi pada AMS BSrE. Mohon tindak lanjuti verifikasi WhatsApp sebelum penutupan tiket, di samping proses set passphrase.";
+            $templateBody .=
+                "\n\nNomor WhatsApp Anda juga belum terverifikasi pada AMS BSrE. Mohon tindak lanjuti verifikasi WhatsApp sebelum penutupan tiket, di samping proses set passphrase.";
         }
         if ($event === 'certificate_revoked' && $ticket->wa_verification_status === 'unverified') {
-            $templateBody .= "\n\nNomor WhatsApp Anda juga belum terverifikasi. Selesaikan verifikasi WA sebelum penutupan tiket.";
+            $templateBody .=
+                "\n\nNomor WhatsApp Anda juga belum terverifikasi. Selesaikan verifikasi WA sebelum penutupan tiket.";
         }
         if ($event === 'unregistered' && $ticket->activation_status === 'not_activated') {
-            $templateBody .= "\n\nHasil pemeriksaan AMS: akun belum diaktivasi. Mohon lakukan aktivasi akun sesuai petunjuk resmi sebelum proses dilanjutkan.";
+            $templateBody .=
+                "\n\nHasil pemeriksaan AMS: akun belum diaktivasi. Mohon lakukan aktivasi akun sesuai petunjuk resmi sebelum proses dilanjutkan.";
         }
         if ($event === 'service_mismatch' && $ticket->certificate_validity_status === 'expired') {
-            $templateBody .= "\n\nHasil pemeriksaan AMS: sertifikat telah kedaluwarsa. Layanan yang sesuai adalah Pembaruan Sertifikat Elektronik.";
+            $templateBody .=
+                "\n\nHasil pemeriksaan AMS: sertifikat telah kedaluwarsa. Layanan yang sesuai adalah Pembaruan Sertifikat Elektronik.";
         }
         if ($event === 'renewal' && $ticket->certificate_validity_status === 'expired') {
-            $templateBody .= "\n\nStatus sertifikat masih kedaluwarsa. Penutupan tiket menunggu pemeriksaan ulang sampai sertifikat aktif.";
+            $templateBody .=
+                "\n\nStatus sertifikat masih kedaluwarsa. Penutupan tiket menunggu pemeriksaan ulang sampai sertifikat aktif.";
         }
         $verifier = $ticket->claimant;
         // Jangan menyebut layanan awal sebagai hasil selesai. Pada tiket historis tanpa outcome,

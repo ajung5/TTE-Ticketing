@@ -425,16 +425,18 @@
                 tidak dianggap otomatis aktif.</p>
             <div class="report-metrics">
                 @foreach ([
-                    'Akun Sudah Aktivasi' => $amsSummary->activated,
-                    'Akun Belum Aktivasi' => $amsSummary->not_activated,
-                    'WA Terverifikasi' => $amsSummary->wa_verified,
-                    'WA Belum Terverifikasi' => $amsSummary->wa_unverified,
-                    'SE Belum Terbit' => $amsSummary->not_issued,
-                    'SE Aktif' => $amsSummary->cert_active,
-                    'SE Kedaluwarsa' => $amsSummary->cert_expired,
-                ] as $label => $count)
-                    <div class="report-metric"><small>{{ $label }}</small><strong>{{ number_format((int) $count, 0, ',', '.') }}</strong>
-                        <small>Hasil pemeriksaan terakhir</small></div>
+            'Akun Sudah Aktivasi' => $amsSummary->activated,
+            'Akun Belum Aktivasi' => $amsSummary->not_activated,
+            'WA Terverifikasi' => $amsSummary->wa_verified,
+            'WA Belum Terverifikasi' => $amsSummary->wa_unverified,
+            'SE Belum Terbit' => $amsSummary->not_issued,
+            'SE Aktif' => $amsSummary->cert_active,
+            'SE Kedaluwarsa' => $amsSummary->cert_expired
+        ] as $label => $count)
+                    <div class="report-metric">
+                        <small>{{ $label }}</small><strong>{{ number_format((int) $count, 0, ',', '.') }}</strong>
+                        <small>Hasil pemeriksaan terakhir</small>
+                    </div>
                 @endforeach
             </div>
         </section>
@@ -572,10 +574,13 @@
                     <div class="eyebrow">DATA PENDUKUNG</div>
                     <h2>Rincian Tiket Masuk</h2>
                 </div>
-                <span class="pill pill-neutral">{{ number_format($tickets->total(), 0, ',', '.') }} tiket sesuai filter</span>
+                <span class="pill pill-neutral">{{ number_format($tickets->total(), 0, ',', '.') }} tiket sesuai
+                    filter</span>
             </div>
-            <p class="report-period-note">Status rincian: <strong>{{ $statusLabels[$filters['status']] ?? 'Semua Status' }}</strong>.
-                Menampilkan 20 baris per halaman. <strong>Unduh CSV Lengkap</strong> memuat seluruh baris sesuai periode dan status,
+            <p class="report-period-note">Status rincian:
+                <strong>{{ $statusLabels[$filters['status']] ?? 'Semua Status' }}</strong>.
+                Menampilkan 20 baris per halaman. <strong>Unduh CSV Lengkap</strong> memuat seluruh baris sesuai periode dan
+                status,
                 termasuk halaman berikutnya. NIK, email, dan nomor WA tidak dimasukkan dalam laporan.</p>
             <div class="table-scroll">
                 <table class="report-table">
@@ -609,7 +614,8 @@
                                 <td>{{ $ticket->certificate_status_label }}</td>
                                 <td>{{ $ticket->status_label }}</td>
                                 <td>{{ $ticket->claimant?->name ?? 'Belum ditangani' }}</td>
-                                <td>{{ $ticket->status === 'Done' ? ($ticket->completed_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') ?? '-') : '-' }}</td>
+                                <td>{{ $ticket->status === 'Done' ? $ticket->completed_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') ?? '-' : '-' }}
+                                </td>
                             </tr>
                         @empty
                             <tr>

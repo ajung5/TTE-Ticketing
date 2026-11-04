@@ -67,10 +67,25 @@ class WaMessageTemplate extends Model {
     ];
 
     public const PLACEHOLDERS = [
-        '{nama_pemohon}', '{nomor_tiket}', '{layanan}', '{layanan_diajukan}',
-        '{layanan_disarankan}', '{proses_aktual}', '{hasil_aktual}', '{form_url}',
-        '{email}', '{nik}', '{nip}', '{nomor_wa}', '{jabatan}', '{opd}',
-        '{keterangan}', '{status_verifikasi_wa}', '{nama_verifikator}',
-        '{inisial_verifikator}', '{nama_instansi}', '{survey_url}'
+        '{nama_pemohon}',
+        '{nomor_tiket}',
+        '{layanan}',
+        '{layanan_diajukan}',
+        '{layanan_disarankan}',
+        '{proses_aktual}',
+        '{hasil_aktual}',
+        '{form_url}',
+        '{email}',
+        '{nik}',
+        '{nip}',
+        '{nomor_wa}',
+        '{jabatan}',
+        '{opd}',
+        '{keterangan}',
+        '{status_verifikasi_wa}',
+        '{nama_verifikator}',
+        '{inisial_verifikator}',
+        '{nama_instansi}',
+        '{survey_url}'
     ];
 }

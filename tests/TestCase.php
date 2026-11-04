@@ -23,7 +23,7 @@ abstract class TestCase extends BaseTestCase
         // Never bootstrap cached production configuration in a test process.
         if (is_file(dirname(__DIR__) . '/bootstrap/cache/config.php')) {
             throw new \RuntimeException(
-                'TTE TEST SAFETY: config cache ditemukan. Jalankan php artisan config:clear sebelum test.'
+                'TTE TEST SAFETY: config cache ditemukan. Jalankan php artisan config:clear sebelum test.',
             );
         }
 
@@ -46,9 +46,9 @@ abstract class TestCase extends BaseTestCase
         }
 
         $application = parent::createApplication();
-        if (! $application->environment('testing')) {
+        if (!$application->environment('testing')) {
             throw new \RuntimeException(
-                'TTE TEST SAFETY: Laravel tidak berjalan pada APP_ENV=testing. Database tidak boleh dimigrasi.'
+                'TTE TEST SAFETY: Laravel tidak berjalan pada APP_ENV=testing. Database tidak boleh dimigrasi.',
             );
         }
 
@@ -65,11 +65,13 @@ abstract class TestCase extends BaseTestCase
         $settings->set('mail.default', 'array');
         $application->make('db')->purge('sqlite');
 
-        if ($settings->get('database.default') !== 'sqlite' ||
+        if (
+            $settings->get('database.default') !== 'sqlite' ||
             $settings->get('database.connections.sqlite.database') !== ':memory:' ||
-            $settings->get('database.connections.sqlite.url') !== null) {
+            $settings->get('database.connections.sqlite.url') !== null
+        ) {
             throw new \RuntimeException(
-                'TTE TEST SAFETY: koneksi SQLite :memory: tidak dapat dijamin. Test dibatalkan.'
+                'TTE TEST SAFETY: koneksi SQLite :memory: tidak dapat dijamin. Test dibatalkan.',
             );
         }
 
@@ -88,6 +90,8 @@ abstract class TestCase extends BaseTestCase
 
         // Only TestCase's HTTP requests skip CSRF; production still enforces it.
         // Authentication, authorization, signed URLs and throttling stay active.
-        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class);
+        $this->withoutMiddleware(
+            \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+        );
     }
 }

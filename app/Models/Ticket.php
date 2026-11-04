@@ -11,14 +11,37 @@ class Ticket extends Model {
     use HasFactory;
 
     protected $fillable = [
-        'nama_user', 'no_wa', 'layanan', 'status', 'ticket_number',
-        'external_submission_id', 'source', 'nip', 'opd', 'uptd', 'jabatan',
-        'email', 'keterangan', 'claimed_by', 'claimed_at', 'completed_at',
-        'resolution_note', 'nik', 'activation_status',
-        'certificate_issuance_status', 'certificate_validity_status',
-        'recommended_service', 'service_alignment_status', 'actual_process',
-        'service_outcome', 'wa_verification_status', 'wa_verification_note',
-        'wa_checked_at', 'wa_checked_by', 'consent_accepted_at', 'signature_path'
+        'nama_user',
+        'no_wa',
+        'layanan',
+        'status',
+        'ticket_number',
+        'external_submission_id',
+        'source',
+        'nip',
+        'opd',
+        'uptd',
+        'jabatan',
+        'email',
+        'keterangan',
+        'claimed_by',
+        'claimed_at',
+        'completed_at',
+        'resolution_note',
+        'nik',
+        'activation_status',
+        'certificate_issuance_status',
+        'certificate_validity_status',
+        'recommended_service',
+        'service_alignment_status',
+        'actual_process',
+        'service_outcome',
+        'wa_verification_status',
+        'wa_verification_note',
+        'wa_checked_at',
+        'wa_checked_by',
+        'consent_accepted_at',
+        'signature_path'
     ];
 
     protected function casts(): array {
@@ -67,9 +90,12 @@ class Ticket extends Model {
     public function getCertificateStatusLabelAttribute(): string {
         return match (true) {
             $this->certificate_issuance_status === 'not_issued' => 'SE belum pernah terbit',
-            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'active' => 'SE aktif',
-            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'expired' => 'SE kedaluwarsa',
-            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'revoked' => 'SE dicabut (Revoke)',
+            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'active'
+                => 'SE aktif',
+            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'expired'
+                => 'SE kedaluwarsa',
+            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'revoked'
+                => 'SE dicabut (Revoke)',
             $this->certificate_issuance_status === 'issued' => 'Masa berlaku belum diperiksa',
             default => 'Belum diperiksa'
         };
@@ -126,7 +152,8 @@ class Ticket extends Model {
         return match ($this->service_outcome) {
             'passphrase_reset' => 'Reset Passphrase selesai',
             'certificate_issued' => 'Sertifikat Elektronik berhasil diterbitkan',
-            'registration_processed' => 'Permohonan Penerbitan SE telah diproses (bukan konfirmasi sertifikat telah terbit)',
+            'registration_processed'
+                => 'Permohonan Penerbitan SE telah diproses (bukan konfirmasi sertifikat telah terbit)',
             'certificate_renewed' => 'Sertifikat Elektronik berhasil diperbarui',
             'certificate_reissued' => 'Sertifikat Elektronik berhasil diterbitkan ulang',
             default => 'Hasil belum ditetapkan'

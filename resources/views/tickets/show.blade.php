@@ -28,8 +28,14 @@
                     </div><span class="pill pill-neutral">{{ strtoupper($ticket->source) }}</span>
                 </div>
                 <div class="detail-grid">
-                    <div><div class="field-name">Nama Pemohon</div><div class="field-value">{{ $ticket->nama_user }}</div></div>
-                    <div><div class="field-name">Nomor WhatsApp</div><div class="field-value">{{ $ticket->no_wa }}</div></div>
+                    <div>
+                        <div class="field-name">Nama Pemohon</div>
+                        <div class="field-value">{{ $ticket->nama_user }}</div>
+                    </div>
+                    <div>
+                        <div class="field-name">Nomor WhatsApp</div>
+                        <div class="field-value">{{ $ticket->no_wa }}</div>
+                    </div>
                     <div>
                         <div class="field-name">NIK</div>
                         @if ($ticket->claimed_by !== null && $ticket->claimed_by === auth()->id())
@@ -41,28 +47,61 @@
                             @endif
                         @endif
                     </div>
-                    <div><div class="field-name">NIP</div><div class="field-value">{{ $ticket->nip ?: '-' }}</div></div>
-                    <div><div class="field-name">Unit Kerja / OPD</div><div class="field-value">{{ $ticket->opd ?: '-' }}</div></div>
+                    <div>
+                        <div class="field-name">NIP</div>
+                        <div class="field-value">{{ $ticket->nip ?: '-' }}</div>
+                    </div>
+                    <div>
+                        <div class="field-name">Unit Kerja / OPD</div>
+                        <div class="field-value">{{ $ticket->opd ?: '-' }}</div>
+                    </div>
                     @if ($applicantUptd !== '')
-                        <div><div class="field-name">UPTD</div><div class="field-value">{{ $applicantUptd }}</div></div>
+                        <div>
+                            <div class="field-name">UPTD</div>
+                            <div class="field-value">{{ $applicantUptd }}</div>
+                        </div>
                     @endif
-                    <div><div class="field-name">Jabatan</div><div class="field-value">{{ $ticket->jabatan ?: '-' }}</div></div>
-                    <div><div class="field-name">Email Dinas</div><div class="field-value">{{ $ticket->email ?: '-' }}</div></div>
+                    <div>
+                        <div class="field-name">Jabatan</div>
+                        <div class="field-value">{{ $ticket->jabatan ?: '-' }}</div>
+                    </div>
+                    <div>
+                        <div class="field-name">Email Dinas</div>
+                        <div class="field-value">{{ $ticket->email ?: '-' }}</div>
+                    </div>
                     <div>
                         <div class="field-name">Tanggal Masuk</div>
-                        <div class="field-value">{{ $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i') }}</div>
+                        <div class="field-value">{{ $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i') }}
+                        </div>
                     </div>
-                    <div><div class="field-name">Penanggung Jawab</div><div class="field-value">{{ $ticket->claimant?->name ?? 'Belum diambil' }}</div></div>
+                    <div>
+                        <div class="field-name">Penanggung Jawab</div>
+                        <div class="field-value">{{ $ticket->claimant?->name ?? 'Belum diambil' }}</div>
+                    </div>
                 </div>
                 <div class="note-box mt">
                     <strong>Pemeriksaan dan Hasil Pelayanan</strong>
                     <div class="detail-grid mt">
-                        <div><div class="field-name">Layanan Diajukan</div><div class="field-value">{{ $ticket->service_label }}</div></div>
-                        <div><div class="field-name">Kesesuaian</div><div class="field-value">{{ $ticket->service_alignment_label }}</div></div>
-                        <div><div class="field-name">Proses Aktual</div><div class="field-value">{{ $ticket->actual_process_label }}</div></div>
-                        <div><div class="field-name">Hasil Akhir</div><div class="field-value">{{ $ticket->status === 'Done' ? $ticket->service_outcome_label : 'Belum selesai' }}</div></div>
+                        <div>
+                            <div class="field-name">Layanan Diajukan</div>
+                            <div class="field-value">{{ $ticket->service_label }}</div>
+                        </div>
+                        <div>
+                            <div class="field-name">Kesesuaian</div>
+                            <div class="field-value">{{ $ticket->service_alignment_label }}</div>
+                        </div>
+                        <div>
+                            <div class="field-name">Proses Aktual</div>
+                            <div class="field-value">{{ $ticket->actual_process_label }}</div>
+                        </div>
+                        <div>
+                            <div class="field-name">Hasil Akhir</div>
+                            <div class="field-value">
+                                {{ $ticket->status === 'Done' ? $ticket->service_outcome_label : 'Belum selesai' }}</div>
+                        </div>
                     </div>
-                    <p class="small muted mt">Layanan awal tidak ditimpa. Proses dan hasil sebenarnya dicatat terpisah demi ketepatan notifikasi serta laporan.</p>
+                    <p class="small muted mt">Layanan awal tidak ditimpa. Proses dan hasil sebenarnya dicatat terpisah demi
+                        ketepatan notifikasi serta laporan.</p>
                 </div>
                 @if ($ticket->signature_path && $ticket->claimed_by === auth()->id())
                     <div class="note-box mt">
@@ -77,31 +116,40 @@
                     </div>
                 @endif
                 @if ($ticket->keterangan)
-                    <div class="note-box"><div class="field-name">Keterangan pemohon</div>
-                        <div class="pre-wrap">{{ $ticket->keterangan }}</div></div>
+                    <div class="note-box">
+                        <div class="field-name">Keterangan pemohon</div>
+                        <div class="pre-wrap">{{ $ticket->keterangan }}</div>
+                    </div>
                 @endif
             </section>
             <section class="card">
                 <div class="section-heading">
-                    <div><div class="eyebrow">JEJAK AKTIVITAS</div><h2>Riwayat Penanganan</h2></div>
+                    <div>
+                        <div class="eyebrow">JEJAK AKTIVITAS</div>
+                        <h2>Riwayat Penanganan</h2>
+                    </div>
                     <span class="pill pill-neutral">{{ $ticket->activities->count() }} aktivitas</span>
                 </div>
                 <div class="timeline">
                     @forelse($ticket->activities as $entry)
                         <div class="timeline-item">
-                            <div><strong>{{ match ($entry->action) {
-                                'claimed' => 'Tiket diambil',
-                                'released' => 'Tiket dilepas',
-                                'note' => 'Catatan tindak lanjut',
-                                'completed' => 'Tiket diselesaikan',
-                                'ams_checked' => 'Pemeriksaan akun, WA, penerbitan, dan status SE di AMS',
-                                'wa_service_confirmed' => 'Pengiriman notifikasi layanan dikonfirmasi',
-                                'wa_confirmed' => 'Notifikasi selesai + survei dikonfirmasi',
-                                default => $entry->action
-                            } }}</strong>
+                            <div>
+                                <strong>{{ match ($entry->action) {
+                                    'claimed' => 'Tiket diambil',
+                                    'released' => 'Tiket dilepas',
+                                    'note' => 'Catatan tindak lanjut',
+                                    'completed' => 'Tiket diselesaikan',
+                                    'ams_checked' => 'Pemeriksaan akun, WA, penerbitan, dan status SE di AMS',
+                                    'wa_service_confirmed' => 'Pengiriman notifikasi layanan dikonfirmasi',
+                                    'wa_confirmed' => 'Notifikasi selesai + survei dikonfirmasi',
+                                    default => $entry->action
+                                } }}</strong>
                                 <div class="small muted">{{ $entry->actor?->name ?? 'Sistem' }} ·
-                                    {{ $entry->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</div></div>
-                            @if ($entry->note)<p class="pre-wrap">{{ $entry->note }}</p>@endif
+                                    {{ $entry->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</div>
+                            </div>
+                            @if ($entry->note)
+                                <p class="pre-wrap">{{ $entry->note }}</p>
+                            @endif
                         </div>
                     @empty
                         <p class="muted">Belum ada aktivitas.</p>
@@ -118,7 +166,8 @@
                             \App\Models\WaMessageTemplate::EVENTS['certificate_not_issued'],
                             \App\Models\WaMessageTemplate::EVENTS['certificate_revoked'],
                             \App\Models\WaMessageTemplate::EVENTS['renewal']
-                        ])->isNotEmpty();
+                        ])
+                        ->isNotEmpty();
                     $onboardingHistory = $ticket->activities
                         ->where('action', 'wa_service_confirmed')
                         ->whereIn('note', [
@@ -126,19 +175,22 @@
                             \App\Models\WaMessageTemplate::EVENTS['activation_required'],
                             \App\Models\WaMessageTemplate::EVENTS['certificate_not_issued'],
                             \App\Models\WaMessageTemplate::EVENTS['certificate_revoked']
-                        ])->isNotEmpty();
+                        ])
+                        ->isNotEmpty();
                 @endphp
                 <section class="card">
-                    <div class="section-heading"><div>
-                        <div class="eyebrow">LANGKAH 1 / PEMERIKSAAN AMS</div>
-                        <h2>Pemeriksaan Akun, WhatsApp, Sertifikat, dan Layanan</h2>
-                    </div></div>
+                    <div class="section-heading">
+                        <div>
+                            <div class="eyebrow">LANGKAH 1 / PEMERIKSAAN AMS</div>
+                            <h2>Pemeriksaan Akun, WhatsApp, Sertifikat, dan Layanan</h2>
+                        </div>
+                    </div>
                     <div class="verification-panel">
                         <div class="verification-tag"><strong class="verification-status">
-                            Akun: {{ $ticket->activation_label }} ·
-                            WA: {{ $ticket->wa_verification_label }} ·
-                            {{ $ticket->certificate_status_label }}
-                        </strong>
+                                Akun: {{ $ticket->activation_label }} ·
+                                WA: {{ $ticket->wa_verification_label }} ·
+                                {{ $ticket->certificate_status_label }}
+                            </strong>
                             @if ($ticket->wa_checked_at)
                                 <div class="small muted">Pemeriksaan terakhir:
                                     {{ $ticket->wa_checked_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</div>
@@ -149,7 +201,8 @@
                             <strong>3. Penerbitan Sertifikat Elektronik</strong>,
                             <strong>4. Status SE (Aktif, Expired, Revoke)</strong>, dan
                             <strong>5. Kesesuaian pilihan layanan</strong>.
-                            Status sudah terbit tidak otomatis berarti sertifikat aktif.</p>
+                            Status sudah terbit tidak otomatis berarti sertifikat aktif.
+                        </p>
                         <form method="post" action="{{ route('tickets.verify-whatsapp', $ticket) }}" class="stack"
                             id="ams-verification-form" data-requested-service="{{ $ticket->layanan }}"
                             data-onboarding-history="{{ $onboardingHistory ? '1' : '0' }}"
@@ -163,30 +216,32 @@
                                 </select>
                             </label>
                             <div class="ams-conditional" id="ams-wa-block" hidden><label for="ams-wa-status">
-                                2. Status verifikasi nomor WhatsApp
-                                <select id="ams-wa-status" name="wa_verification_status" disabled>
-                                    <option value="">Pilih status verifikasi WA</option>
-                                    <option value="verified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'verified')>Sudah terverifikasi</option>
-                                    <option value="unverified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'unverified')>Belum terverifikasi</option>
-                                </select>
-                            </label></div>
-                            <div class="ams-conditional" id="ams-certificate-block" hidden><label for="ams-certificate-status">
-                                3. Status penerbitan Sertifikat Elektronik
-                                <select id="ams-certificate-status" name="certificate_issuance_status" disabled>
-                                    <option value="">Pilih status penerbitan</option>
-                                    <option value="issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'issued')>Sudah/pernah terbit</option>
-                                    <option value="not_issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'not_issued')>Belum pernah terbit</option>
-                                </select>
-                            </label></div>
+                                    2. Status verifikasi nomor WhatsApp
+                                    <select id="ams-wa-status" name="wa_verification_status" disabled>
+                                        <option value="">Pilih status verifikasi WA</option>
+                                        <option value="verified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'verified')>Sudah terverifikasi</option>
+                                        <option value="unverified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'unverified')>Belum terverifikasi</option>
+                                    </select>
+                                </label></div>
+                            <div class="ams-conditional" id="ams-certificate-block" hidden><label
+                                    for="ams-certificate-status">
+                                    3. Status penerbitan Sertifikat Elektronik
+                                    <select id="ams-certificate-status" name="certificate_issuance_status" disabled>
+                                        <option value="">Pilih status penerbitan</option>
+                                        <option value="issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'issued')>Sudah/pernah terbit</option>
+                                        <option value="not_issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'not_issued')>Belum pernah terbit
+                                        </option>
+                                    </select>
+                                </label></div>
                             <div class="ams-conditional" id="ams-validity-block" hidden><label for="ams-validity-status">
-                                4. Status Sertifikat Elektronik
-                                <select id="ams-validity-status" name="certificate_validity_status" disabled>
-                                    <option value="">Pilih status sertifikat</option>
-                                    <option value="active" @selected(old('certificate_validity_status', $ticket->certificate_validity_status) === 'active')>Aktif / masih berlaku</option>
-                                    <option value="expired" @selected(old('certificate_validity_status', $ticket->certificate_validity_status) === 'expired')>Kedaluwarsa / Expired</option>
-                                    <option value="revoked" @selected(old('certificate_validity_status', $ticket->certificate_validity_status) === 'revoked')>Dicabut / Revoke</option>
-                                </select>
-                            </label></div>
+                                    4. Status Sertifikat Elektronik
+                                    <select id="ams-validity-status" name="certificate_validity_status" disabled>
+                                        <option value="">Pilih status sertifikat</option>
+                                        <option value="active" @selected(old('certificate_validity_status', $ticket->certificate_validity_status) === 'active')>Aktif / masih berlaku</option>
+                                        <option value="expired" @selected(old('certificate_validity_status', $ticket->certificate_validity_status) === 'expired')>Kedaluwarsa / Expired</option>
+                                        <option value="revoked" @selected(old('certificate_validity_status', $ticket->certificate_validity_status) === 'revoked')>Dicabut / Revoke</option>
+                                    </select>
+                                </label></div>
                             <div class="ams-conditional" id="ams-service-alignment-block" hidden>
                                 <label for="ams-service-alignment">5. Kesesuaian pilihan layanan
                                     <select id="ams-service-alignment" name="service_alignment_status" disabled>
@@ -201,12 +256,17 @@
                             <div class="ams-conditional" id="ams-recommendation-block" hidden>
                                 <label for="ams-recommended-service">Layanan yang disarankan (setelah klarifikasi)
                                     <select id="ams-recommended-service" name="recommended_service" disabled>
-                                        <option value="">{{ $ticket->layanan === 'Pendaftaran' ? 'Pilih layanan yang sesuai' : 'Layanan sudah sesuai' }}</option>
-                                        <option value="Reset Passphrase" @selected(old('recommended_service', $ticket->recommended_service) === 'Reset Passphrase')>Reset Passphrase</option>
-                                        <option value="Pembaruan" @selected(old('recommended_service', $ticket->recommended_service) === 'Pembaruan')>Pembaruan Sertifikat Elektronik</option>
+                                        <option value="">
+                                            {{ $ticket->layanan === 'Pendaftaran' ? 'Pilih layanan yang sesuai' : 'Layanan sudah sesuai' }}
+                                        </option>
+                                        <option value="Reset Passphrase" @selected(old('recommended_service', $ticket->recommended_service) === 'Reset Passphrase')>Reset Passphrase
+                                        </option>
+                                        <option value="Pembaruan" @selected(old('recommended_service', $ticket->recommended_service) === 'Pembaruan')>Pembaruan Sertifikat
+                                            Elektronik</option>
                                     </select>
                                 </label>
-                                <p class="small muted">SE Expired diarahkan ke Pembaruan; SE Revoke diarahkan ke Penerbitan Ulang.</p>
+                                <p class="small muted">SE Expired diarahkan ke Pembaruan; SE Revoke diarahkan ke Penerbitan
+                                    Ulang.</p>
                             </div>
                             <div id="ams-decision-preview" class="ams-decision-preview small muted" role="status"
                                 aria-live="polite">Lengkapi hasil pemeriksaan AMS.</div>
@@ -221,10 +281,12 @@
             @endif
             @if ($serviceEvent === 'ready_for_completion')
                 <section class="card">
-                    <div class="section-heading"><div>
-                        <div class="eyebrow">LANGKAH 2 / HASIL PEMERIKSAAN ULANG</div>
-                        <h2>SE Sudah Terbit — Siap Ditandai Selesai</h2>
-                    </div></div>
+                    <div class="section-heading">
+                        <div>
+                            <div class="eyebrow">LANGKAH 2 / HASIL PEMERIKSAAN ULANG</div>
+                            <h2>SE Sudah Terbit — Siap Ditandai Selesai</h2>
+                        </div>
+                    </div>
                     <div class="note-box">
                         <strong>Sertifikat Elektronik telah dikonfirmasi aktif.</strong>
                         <p class="small muted">Notifikasi tindak lanjut sebelumnya sudah dikonfirmasi.
@@ -237,10 +299,12 @@
 
             @if ($serviceMessage && $serviceEvent)
                 <section class="card whatsapp-card">
-                    <div class="section-heading"><div>
-                        <div class="eyebrow">LANGKAH 2 / NOTIFIKASI SESUAI AMS</div>
-                        <h2>{{ \App\Models\WaMessageTemplate::EVENTS[$serviceEvent] }}</h2>
-                    </div><span class="wa-mark">WA</span></div>
+                    <div class="section-heading">
+                        <div>
+                            <div class="eyebrow">LANGKAH 2 / NOTIFIKASI SESUAI AMS</div>
+                            <h2>{{ \App\Models\WaMessageTemplate::EVENTS[$serviceEvent] }}</h2>
+                        </div><span class="wa-mark">WA</span>
+                    </div>
                     <p class="small muted">Notifikasi mengikuti kondisi aktual AMS dan tahap pelayanan.
                         Periksa isi pesan sebelum dikirim.</p>
                     @if (in_array($serviceEvent, \App\Models\WaMessageTemplate::CORRECTION_EVENTS, true))
@@ -248,7 +312,8 @@
                             <p>Setelah pesan dikirim, klik <strong>Saya Sudah Mengirim Pesan</strong>, lalu
                                 <strong>Kembalikan Permohonan</strong>. Tiket lama dipertahankan berstatus
                                 <strong>Perlu Pengajuan Ulang</strong>; tidak dihitung selesai.
-                                Rekomendasi: {{ $ticket->recommended_service === 'Pendaftaran' ? 'Penerbitan Sertifikat Elektronik' : $ticket->recommended_service }}.
+                                Rekomendasi:
+                                {{ $ticket->recommended_service === 'Pendaftaran' ? 'Penerbitan Sertifikat Elektronik' : $ticket->recommended_service }}.
                             </p>
                         </div>
                     @elseif ($serviceEvent === 'registration' && $ticket->layanan === 'Pendaftaran')
@@ -260,36 +325,43 @@
                                     Pemohon masih perlu mengaktifkan akun sesuai petunjuk BSrE.
                                 @endif
                                 Status Selesai berarti <strong>penanganan pengajuan oleh verifikator selesai</strong>,
-                                bukan menyatakan SE sudah terbit.</p>
+                                bukan menyatakan SE sudah terbit.
+                            </p>
                         </div>
                     @elseif ($serviceEvent === 'certificate_revoked')
                         <div class="note-box"><strong>SE telah dicabut (Revoke).</strong>
                             <p>Arahkan <strong>Penerbitan Ulang Sertifikat Elektronik</strong> sesuai prosedur BSrE.
                                 Gunakan tiket ini selama proses dapat dilanjutkan. Setelah terbit ulang, periksa
                                 kembali AMS dan pastikan status SE aktif serta WA terverifikasi.
-                                <strong>Tandai Selesai</strong> tidak tersedia selama SE masih Revoke.</p>
+                                <strong>Tandai Selesai</strong> tidak tersedia selama SE masih Revoke.
+                            </p>
                         </div>
                     @elseif ($ticket->certificate_validity_status === 'expired')
                         <div class="note-box"><strong>Sertifikat kedaluwarsa.</strong>
                             <p>Jalankan proses Pembaruan, lalu periksa ulang AMS sampai status menjadi aktif.
-                                <strong>Tandai Selesai</strong> tidak tersedia selama sertifikat kedaluwarsa.</p>
+                                <strong>Tandai Selesai</strong> tidak tersedia selama sertifikat kedaluwarsa.
+                            </p>
                         </div>
                     @elseif ($serviceEvent === 'certificate_not_issued')
                         <div class="note-box"><strong>Menunggu set passphrase.</strong>
                             <p>Pemohon melanjutkan set passphrase melalui petunjuk email BSrE.
                                 Gunakan tiket ini; <strong>tidak perlu mengisi permohonan baru</strong>.
-                                Setelah selesai, periksa ulang AMS. Tiket belum dapat diselesaikan sebelum SE terbit dan WA terverifikasi.
+                                Setelah selesai, periksa ulang AMS. Tiket belum dapat diselesaikan sebelum SE terbit dan WA
+                                terverifikasi.
                                 @if ($ticket->wa_verification_status === 'unverified')
                                     Nomor WA juga belum terverifikasi dan harus ditindaklanjuti.
                                 @endif
                             </p>
                         </div>
                     @endif
-                    <div class="message-box"><div class="message-toolbar">
-                        <strong>Pratinjau Pesan</strong>
-                        <button type="button" class="btn btn-copy btn-small"
-                            data-copy-target="service-wa-message">Salin Pesan</button>
-                    </div><div id="service-wa-message" class="message-preview">{{ $serviceMessage }}</div></div>
+                    <div class="message-box">
+                        <div class="message-toolbar">
+                            <strong>Pratinjau Pesan</strong>
+                            <button type="button" class="btn btn-copy btn-small"
+                                data-copy-target="service-wa-message">Salin Pesan</button>
+                        </div>
+                        <div id="service-wa-message" class="message-preview">{{ $serviceMessage }}</div>
+                    </div>
                     @unless ($ticket->source === 'simulated')
                         <form target="tte_whatsapp_web" method="post" data-wa-open="1"
                             action="{{ route('tickets.whatsapp.service', $ticket) }}">@csrf
@@ -316,17 +388,22 @@
             @if ($ticket->status === 'Done' && $waMessage)
                 @php($notification = $ticket->whatsappNotifications->firstWhere('event_type', 'completed'))
                 <section class="card whatsapp-card">
-                    <div class="section-heading"><div>
-                        <div class="eyebrow">LANGKAH 3 / NOTIFIKASI AKHIR</div>
-                        <h2>Notifikasi Selesai + Survei</h2>
-                    </div><span class="wa-mark">WA</span></div>
+                    <div class="section-heading">
+                        <div>
+                            <div class="eyebrow">LANGKAH 3 / NOTIFIKASI AKHIR</div>
+                            <h2>Notifikasi Selesai + Survei</h2>
+                        </div><span class="wa-mark">WA</span>
+                    </div>
                     <p class="small muted">Hasil aktual: <strong>{{ $ticket->service_outcome_label }}</strong>.
                         Notifikasi akhir menggunakan hasil tersebut, bukan otomatis layanan yang dipilih pada formulir.</p>
-                    <div class="message-box"><div class="message-toolbar">
-                        <strong>Pratinjau Pesan</strong>
-                        <button type="button" class="btn btn-copy btn-small"
-                            data-copy-target="completed-wa-message">Salin Pesan</button>
-                    </div><div id="completed-wa-message" class="message-preview">{{ $waMessage }}</div></div>
+                    <div class="message-box">
+                        <div class="message-toolbar">
+                            <strong>Pratinjau Pesan</strong>
+                            <button type="button" class="btn btn-copy btn-small"
+                                data-copy-target="completed-wa-message">Salin Pesan</button>
+                        </div>
+                        <div id="completed-wa-message" class="message-preview">{{ $waMessage }}</div>
+                    </div>
                     @unless ($ticket->source === 'simulated')
                         <form target="tte_whatsapp_web" method="post" data-wa-open="1"
                             action="{{ route('tickets.whatsapp', $ticket) }}">@csrf
@@ -336,7 +413,8 @@
                             <p class="small muted mt">Tautan dibuka
                                 {{ $notification->opened_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</p>
                             @if ($notification->confirmed_at)
-                                <div class="alert success mt">Notifikasi selesai dan tautan survei telah dikonfirmasi oleh petugas.</div>
+                                <div class="alert success mt">Notifikasi selesai dan tautan survei telah dikonfirmasi oleh
+                                    petugas.</div>
                             @else
                                 <form method="post" action="{{ route('tickets.whatsapp.confirm', $ticket) }}"
                                     class="mt">@csrf
@@ -349,9 +427,12 @@
             @endif
 
             <section class="card">
-                <div class="section-heading"><div>
-                    <div class="eyebrow">WORKFLOW</div><h2>Penanganan Tiket</h2>
-                </div><span class="stat-icon stat-indigo">▤</span></div>
+                <div class="section-heading">
+                    <div>
+                        <div class="eyebrow">WORKFLOW</div>
+                        <h2>Penanganan Tiket</h2>
+                    </div><span class="stat-icon stat-indigo">▤</span>
+                </div>
                 @if ($ticket->status === 'Open')
                     <p class="muted">Ambil tiket terlebih dahulu untuk melakukan pemeriksaan AMS BSrE.</p>
                     <form method="post" action="{{ route('tickets.claim', $ticket) }}">@csrf
@@ -372,17 +453,20 @@
                     @if (!$serviceEvent)
                         <p class="small muted">Lengkapi pemeriksaan AMS sebelum menyelesaikan tiket.</p>
                     @elseif ($serviceEvent === 'ready_for_completion')
-                        <p class="small muted">SE telah aktif setelah tindak lanjut. Konfirmasi hasil aktual sebelum menandai selesai.</p>
+                        <p class="small muted">SE telah aktif setelah tindak lanjut. Konfirmasi hasil aktual sebelum
+                            menandai selesai.</p>
                     @elseif (in_array($serviceEvent, \App\Models\WaMessageTemplate::CORRECTION_EVENTS, true))
                         @if ($ticket->source === 'simulated')
                             <p class="small muted">Pengembalian melalui WhatsApp tidak tersedia untuk tiket simulasi.</p>
                         @elseif (!$serviceConfirmed)
                             <p class="small muted">Kirim notifikasi Perbaikan Jenis Permohonan, kemudian klik
-                                <strong>Saya Sudah Mengirim Pesan</strong> untuk mengaktifkan tombol pengembalian.</p>
+                                <strong>Saya Sudah Mengirim Pesan</strong> untuk mengaktifkan tombol pengembalian.
+                            </p>
                         @else
                             <p class="small muted">Pesan koreksi sudah dikonfirmasi. Klik
                                 <strong>Kembalikan Permohonan</strong> untuk penutupan administratif.
-                                Tiket tidak menjadi Selesai dan tidak mendapatkan survei.</p>
+                                Tiket tidak menjadi Selesai dan tidak mendapatkan survei.
+                            </p>
                         @endif
                     @elseif ($serviceEvent === 'registration' && $ticket->layanan === 'Pendaftaran')
                         <p class="small muted">Kirim <strong>Notifikasi 4 — Pendaftaran Diproses</strong>, kemudian
@@ -392,37 +476,44 @@
                         <p class="small muted">Sertifikat Elektronik harus berstatus <strong>aktif</strong> di AMS
                             dan nomor WA terverifikasi sebelum tiket dapat diselesaikan. Pemeriksaan ulang diperlukan.</p>
                     @elseif (!in_array($serviceEvent, ['reset', 'renewal', 'registration'], true))
-                        <p class="small muted">Tiket belum dapat diselesaikan. Tindak lanjuti AMS atau rekomendasi layanan.</p>
+                        <p class="small muted">Tiket belum dapat diselesaikan. Tindak lanjuti AMS atau rekomendasi layanan.
+                        </p>
                     @elseif (!$serviceConfirmed && $ticket->source !== 'simulated')
-                        <p class="small muted">Pastikan tindakan layanan benar-benar dilakukan dan kirim notifikasi WhatsApp
-                            sebelum menutup tiket. Jika pengiriman belum dikonfirmasi, hal tersebut dicatat pada aktivitas.</p>
+                        <p class="small muted">Pastikan tindakan layanan benar-benar dilakukan dan kirim notifikasi
+                            WhatsApp
+                            sebelum menutup tiket. Jika pengiriman belum dikonfirmasi, hal tersebut dicatat pada aktivitas.
+                        </p>
                     @else
-                        <p class="small muted">Penanganan sudah dicatat. Anda dapat menandai selesai tanpa catatan wajib.</p>
+                        <p class="small muted">Penanganan sudah dicatat. Anda dapat menandai selesai tanpa catatan wajib.
+                        </p>
                     @endif
                     @if (in_array($serviceEvent, \App\Models\WaMessageTemplate::CORRECTION_EVENTS, true))
                         <form method="post" action="{{ route('tickets.return-for-correction', $ticket) }}">@csrf
-                            <button type="submit" class="btn btn-primary full"
-                                @disabled(!$serviceConfirmed || $ticket->source === 'simulated')>Kembalikan Permohonan</button>
+                            <button type="submit" class="btn btn-primary full" @disabled(!$serviceConfirmed || $ticket->source === 'simulated')>Kembalikan
+                                Permohonan</button>
                         </form>
                     @elseif (!($serviceEvent === 'registration' && $ticket->layanan === 'Pendaftaran'))
                         <form method="post" action="{{ route('tickets.complete', $ticket) }}">@csrf
-                            <button type="submit" class="btn btn-primary full"
-                                @disabled(!$completionReady)>Tandai Selesai ✓</button>
+                            <button type="submit" class="btn btn-primary full" @disabled(!$completionReady)>Tandai
+                                Selesai ✓</button>
                         </form>
                     @endif
                     @php($canRelease = !$ticket->activities->whereNotIn('action', ['claimed', 'released'])->count())
                     <form method="post" action="{{ route('tickets.release', $ticket) }}" class="mt">@csrf
-                        <button type="submit" class="btn btn-ghost full" @disabled(!$canRelease)>Lepas Tiket (belum dikerjakan)</button>
+                        <button type="submit" class="btn btn-ghost full" @disabled(!$canRelease)>Lepas Tiket (belum
+                            dikerjakan)</button>
                     </form>
                     @unless ($canRelease)
                         <p class="small muted mt">Tiket yang sudah diperiksa atau ditindaklanjuti tidak dapat dilepas.</p>
                     @endunless
                 @elseif ($ticket->status === 'Returned')
                     <div class="note-box"><strong>Perlu Pengajuan Ulang</strong>
-                        <p class="small muted">Notifikasi koreksi sudah dikonfirmasi, permohonan dikembalikan oleh verifikator.
+                        <p class="small muted">Notifikasi koreksi sudah dikonfirmasi, permohonan dikembalikan oleh
+                            verifikator.
                             Tiket lama dipertahankan dan tidak dihitung sebagai layanan berhasil maupun dikirim survei.</p>
                         <p class="small muted">Layanan diajukan: {{ $ticket->service_label }}. Rekomendasi:
-                            {{ $ticket->recommended_service === 'Pendaftaran' ? 'Penerbitan Sertifikat Elektronik' : $ticket->recommended_service }}.</p>
+                            {{ $ticket->recommended_service === 'Pendaftaran' ? 'Penerbitan Sertifikat Elektronik' : $ticket->recommended_service }}.
+                        </p>
                         <a href="{{ route('public.form') }}" class="btn btn-outline" target="_blank"
                             rel="noopener">Lihat Formulir Pengajuan Baru</a>
                     </div>
