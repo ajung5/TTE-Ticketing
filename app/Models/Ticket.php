@@ -115,6 +115,7 @@ class Ticket extends Model {
             'reset_passphrase' => 'Reset Passphrase',
             'certificate_renewal' => 'Pembaruan Sertifikat Elektronik',
             'certificate_issuance' => 'Penerbitan Sertifikat Elektronik',
+            'registration_followup' => 'Tindak lanjut permohonan Penerbitan SE',
             'certificate_reissuance' => 'Penerbitan Ulang Sertifikat Elektronik',
             'service_correction' => 'Klarifikasi jenis layanan',
             default => 'Belum ditetapkan'
@@ -125,6 +126,7 @@ class Ticket extends Model {
         return match ($this->service_outcome) {
             'passphrase_reset' => 'Reset Passphrase selesai',
             'certificate_issued' => 'Sertifikat Elektronik berhasil diterbitkan',
+            'registration_processed' => 'Permohonan Penerbitan SE telah diproses (bukan konfirmasi sertifikat telah terbit)',
             'certificate_renewed' => 'Sertifikat Elektronik berhasil diperbarui',
             'certificate_reissued' => 'Sertifikat Elektronik berhasil diterbitkan ulang',
             default => 'Hasil belum ditetapkan'

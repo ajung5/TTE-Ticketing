@@ -224,7 +224,9 @@ class TicketController extends Controller {
             $applicantUptd = '';
         }
         $serviceEvent = $ticket->status === 'In Progress' ? $this->serviceEvent($ticket) : null;
-        $completionReady = in_array($serviceEvent, ['reset', 'renewal', 'registration', 'ready_for_completion'], true) &&
+        // Pendaftaran Diproses ditutup lewat konfirmasi pengiriman, bukan tombol Tandai Selesai.
+        $completionReady = !($serviceEvent === 'registration' && $ticket->layanan === 'Pendaftaran') &&
+            in_array($serviceEvent, ['reset', 'renewal', 'registration', 'ready_for_completion'], true) &&
             $ticket->activation_status === 'activated' &&
             $ticket->wa_verification_status === 'verified' &&
             $ticket->certificate_issuance_status === 'issued' &&
@@ -481,7 +483,30 @@ class TicketController extends Controller {
                     'action' => 'wa_service_confirmed', 'note' => WaMessageTemplate::EVENTS[$event]
                 ]);
             }
+            // Penyelesaian administratif Pendaftaran: Notifikasi 4 telah DIKONFIRMASI
+            // dikirim verifikator. Ini BUKAN bukti akun sudah aktivasi atau SE sudah terbit.
+            // Semua dilakukan pada transaksi dan row lock yang sama untuk mencegah double-close.
+            if ($event === 'registration' && $record->layanan === 'Pendaftaran') {
+                $record->update([
+                    'status' => 'Done',
+                    'completed_at' => now(),
+                    'resolution_note' => null,
+                    'actual_process' => 'registration_followup',
+                    'service_outcome' => 'registration_processed',
+                ]);
+                TicketActivity::create([
+                    'ticket_id' => $record->id,
+                    'actor_id' => $request->user()->id,
+                    'action' => 'completed',
+                    'note' => 'Notifikasi Pendaftaran Diproses telah dikonfirmasi; ' .
+                        'tiket diselesaikan secara administratif, bukan bukti penerbitan SE.',
+                ]);
+            }
         });
+        if ($ticket->layanan === 'Pendaftaran' && $ticket->fresh()->status === 'Done') {
+            return redirect()->route('tickets.show', $ticket)->with('success',
+                'Notifikasi Pendaftaran Diproses dikonfirmasi. Tiket selesai; kirim Notifikasi Selesai + Survei.');
+        }
         return back()->with('success', 'Pengiriman notifikasi dikonfirmasi.');
     }
 
@@ -536,6 +561,10 @@ class TicketController extends Controller {
             $record = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
             abort_unless($record->claimed_by === $request->user()->id && $record->status === 'In Progress', 409);
             $event = $this->serviceEvent($record);
+            // Untuk Notifikasi 4, hanya konfirmasi WA yang boleh menutup tiket Pendaftaran.
+            abort_if($event === 'registration' && $record->layanan === 'Pendaftaran', 409,
+                'Kirim Notifikasi Pendaftaran Diproses dan klik Saya Sudah Mengirim Pesan. ' .
+                'Tiket akan otomatis selesai dan tautan survei tersedia.');
             abort_unless(in_array($event, ['reset', 'renewal', 'registration', 'ready_for_completion'], true),
                 409, 'Tiket belum dapat diselesaikan. Tindak lanjuti hasil AMS atau pengajuan ulang.');
             abort_unless($record->activation_status === 'activated' &&

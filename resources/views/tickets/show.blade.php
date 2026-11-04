@@ -251,12 +251,16 @@
                                 Rekomendasi: {{ $ticket->recommended_service === 'Pendaftaran' ? 'Penerbitan Sertifikat Elektronik' : $ticket->recommended_service }}.
                             </p>
                         </div>
-                    @elseif ($serviceEvent === 'registration' && $ticket->activation_status === 'not_activated')
-                        <div class="note-box"><strong>Pendaftaran Diproses — aktivasi akun diperlukan.</strong>
-                            <p>Berikan notifikasi Pendaftaran Diproses kepada pemohon. Aktivasi akun
-                                merupakan tahapan awal penerbitan SE. Setelah aktivasi, periksa kembali
-                                status WhatsApp dan Sertifikat Elektronik di AMS pada tiket yang sama.
-                                <strong>Tandai Selesai</strong> tetap tidak tersedia sebelum syaratnya terpenuhi.</p>
+                    @elseif ($serviceEvent === 'registration' && $ticket->layanan === 'Pendaftaran')
+                        <div class="note-box"><strong>Pendaftaran Diproses — penutupan administratif.</strong>
+                            <p>Kirim Notifikasi 4 melalui WhatsApp. Setelah benar-benar mengirim pesan,
+                                klik <strong>Saya Sudah Mengirim Pesan</strong>. Tiket otomatis menjadi
+                                <strong>Selesai</strong>, lalu tersedia Notifikasi Selesai + Survei.
+                                @if ($ticket->activation_status === 'not_activated')
+                                    Pemohon masih perlu mengaktifkan akun sesuai petunjuk BSrE.
+                                @endif
+                                Status Selesai berarti <strong>penanganan pengajuan oleh verifikator selesai</strong>,
+                                bukan menyatakan SE sudah terbit.</p>
                         </div>
                     @elseif ($serviceEvent === 'certificate_revoked')
                         <div class="note-box"><strong>SE telah dicabut (Revoke).</strong>
@@ -380,6 +384,10 @@
                                 <strong>Kembalikan Permohonan</strong> untuk penutupan administratif.
                                 Tiket tidak menjadi Selesai dan tidak mendapatkan survei.</p>
                         @endif
+                    @elseif ($serviceEvent === 'registration' && $ticket->layanan === 'Pendaftaran')
+                        <p class="small muted">Kirim <strong>Notifikasi 4 — Pendaftaran Diproses</strong>, kemudian
+                            klik <strong>Saya Sudah Mengirim Pesan</strong>. Tiket otomatis Selesai dan
+                            Notifikasi Selesai + Survei akan tersedia.</p>
                     @elseif (!$completionReady)
                         <p class="small muted">Sertifikat Elektronik harus berstatus <strong>aktif</strong> di AMS
                             dan nomor WA terverifikasi sebelum tiket dapat diselesaikan. Pemeriksaan ulang diperlukan.</p>
@@ -396,7 +404,7 @@
                             <button type="submit" class="btn btn-primary full"
                                 @disabled(!$serviceConfirmed || $ticket->source === 'simulated')>Kembalikan Permohonan</button>
                         </form>
-                    @else
+                    @elseif (!($serviceEvent === 'registration' && $ticket->layanan === 'Pendaftaran'))
                         <form method="post" action="{{ route('tickets.complete', $ticket) }}">@csrf
                             <button type="submit" class="btn btn-primary full"
                                 @disabled(!$completionReady)>Tandai Selesai ✓</button>

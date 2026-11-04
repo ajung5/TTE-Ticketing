@@ -143,7 +143,7 @@ it('continues set passphrase on the same ticket despite unverified WhatsApp and 
         ->where('action', 'ams_checked')->where('note', 'like', 'Pemeriksaan ulang%')->exists())->toBeTrue();
 })->with(['Pendaftaran', 'Reset Passphrase', 'Pembaruan']);
 
-it('does not misclassify later issuance as wrong registration after account activation', function () {
+it('closes unactivated registration after Notifikasi 4 rather than waiting for certificate issuance', function () {
     $owner = User::factory()->create(['role' => 'verifier']);
     $ticket = amsV27Ticket($owner, 'Pendaftaran');
     $this->actingAs($owner)->post(route('tickets.verify-whatsapp', $ticket), [
@@ -152,14 +152,12 @@ it('does not misclassify later issuance as wrong registration after account acti
     $this->get(route('tickets.show', $ticket))->assertSee('Pendaftaran Diproses');
     $this->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
     $this->post(route('tickets.whatsapp.service.confirm', $ticket))->assertRedirect();
-    $this->post(route('tickets.verify-whatsapp', $ticket), [
-        'activation_status' => 'activated', 'wa_verification_status' => 'verified',
-        'certificate_issuance_status' => 'issued', 'certificate_validity_status' => 'active',
-    ])->assertRedirect()->assertSessionHasNoErrors();
-    expect($ticket->fresh()->recommended_service)->toBeNull();
-    $this->get(route('tickets.show', $ticket))->assertDontSee('Perbaikan Jenis Permohonan');
-    $this->post(route('tickets.complete', $ticket))->assertRedirect();
-    expect($ticket->fresh()->status)->toBe('Done');
+    expect($ticket->fresh()->status)->toBe('Done')
+        ->and($ticket->fresh()->service_outcome)->toBe('registration_processed')
+        ->and($ticket->fresh()->recommended_service)->toBeNull();
+    $this->get(route('tickets.show', $ticket))->assertDontSee('Perbaikan Jenis Permohonan')
+        ->assertSee('Notifikasi Selesai + Survei');
+    $this->post(route('tickets.complete', $ticket))->assertStatus(409);
 });
 
 it('does not infer an active certificate from historical issued status', function () {
