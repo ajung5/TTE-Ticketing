@@ -109,3 +109,154 @@
 @media(prefers-reduced-motion:reduce) {
   .tte-internal .stat-card { transition:none; }
 }
+
+/* TTE v51: viewport-safe shell and desktop collapsible sidebar. */
+/* Prevent child min-content sizing from widening the entire application viewport. */
+.tte-internal {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+.tte-internal .main {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+}
+.tte-internal .content {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 1460px;
+}
+.tte-internal .content > *,
+.tte-internal .stat-grid,
+.tte-internal .columns,
+.tte-internal .report-page,
+.tte-internal .report-metrics,
+.tte-internal .page-heading,
+.tte-internal .bar-list,
+.tte-internal .message-box {
+    min-width: 0;
+    max-width: 100%;
+}
+.tte-internal .stat-grid > *,
+.tte-internal .columns > *,
+.tte-internal .report-metrics > *,
+.tte-internal .page-heading > *,
+.tte-internal .card,
+.tte-internal .section-heading > * {
+    min-width: 0;
+}
+.tte-internal .page-heading { flex-wrap: wrap; }
+/* Tables are permitted to scroll, but ONLY inside the table container. */
+.tte-internal .table-scroll {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+.tte-internal .stat-grid.admin-statistics {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 172px), 1fr));
+}
+@media (min-width: 1181px) {
+    .tte-internal .overview-columns { grid-template-columns: minmax(0, 1.3fr) minmax(0, .9fr); }
+}
+@media (max-width: 1180px) {
+    .tte-internal .overview-columns { grid-template-columns: minmax(0, 1fr); }
+}
+/* Desktop: reserve a fixed sidebar track; main content may always shrink. */
+@media (min-width: 681px) {
+    .tte-internal { --tte-sidebar-track: 270px; }
+    .tte-internal .sidebar {
+        box-sizing: border-box;
+        width: var(--tte-sidebar-track);
+        flex: 0 0 var(--tte-sidebar-track);
+        min-width: 0;
+        transition: width .2s ease, flex-basis .2s ease, padding .2s ease;
+    }
+    .tte-internal .main { flex: 1 1 0%; width: 0; }
+    .tte-internal.tte-sidebar-collapsed { --tte-sidebar-track: 76px; }
+    .tte-internal.tte-sidebar-collapsed .sidebar { padding: 22px 8px 17px; }
+    .tte-internal.tte-sidebar-collapsed .brand {
+        justify-content: center;
+        padding: 5px 0 16px;
+        gap: 0;
+    }
+    .tte-internal.tte-sidebar-collapsed .brand > span:last-child,
+    .tte-internal.tte-sidebar-collapsed .nav-caption,
+    .tte-internal.tte-sidebar-collapsed .sidebar-help,
+    .tte-internal.tte-sidebar-collapsed .profile-chip > span:last-child,
+    .tte-internal.tte-sidebar-collapsed .tte-sidebar-toggle-label { display: none; }
+    .tte-internal.tte-sidebar-collapsed .sidebar-group { min-width: 0; }
+    .tte-internal.tte-sidebar-collapsed .sidebar .nav-item {
+        justify-content: center;
+        gap: 0;
+        min-width: 0;
+        font-size: 0 !important;
+        padding: 11px 8px;
+        overflow: hidden;
+    }
+    .tte-internal.tte-sidebar-collapsed .sidebar .nav-item .nav-symbol {
+        flex: 0 0 20px;
+        width: 20px;
+        height: 20px;
+        margin: 0;
+    }
+    .tte-internal.tte-sidebar-collapsed .profile-chip { justify-content: center; padding: 10px 0; }
+    .tte-internal.tte-sidebar-collapsed .sidebar-bottom { min-width: 0; }
+    .tte-internal.tte-sidebar-collapsed .sidebar-logout {
+        font-size: 0 !important;
+        padding: 10px 5px;
+        min-height: 42px;
+    }
+    .tte-internal.tte-sidebar-collapsed .sidebar-logout::before {
+        content: '⏻';
+        font-size: 20px;
+        line-height: 1;
+    }
+    .tte-internal.tte-sidebar-collapsed .tte-sidebar-toggle { justify-content: center; padding: 8px; }
+    .tte-internal.tte-sidebar-collapsed .tte-sidebar-toggle-arrow { transform: rotate(180deg); }
+}
+@media (min-width: 861px) and (max-width: 1180px) {
+    .tte-internal:not(.tte-sidebar-collapsed) { --tte-sidebar-track: 239px; }
+}
+@media (min-width: 681px) and (max-width: 860px) {
+    .tte-internal:not(.tte-sidebar-collapsed) { --tte-sidebar-track: 214px; }
+}
+.tte-sidebar-toggle { display: none; }
+@media (min-width: 681px) {
+    .tte-internal.tte-sidebar-ready .tte-sidebar-toggle {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid #45617c;
+        border-radius: 10px;
+        background: #1c3853;
+        color: #ecf5ff;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        margin: 0 0 17px;
+    }
+    .tte-sidebar-toggle:hover { background: #294e6f; }
+    .tte-sidebar-toggle:focus-visible { outline: 3px solid #9ed5ef; outline-offset: 2px; }
+    .tte-sidebar-toggle-arrow { font-size: 21px; line-height: 1; transition: transform .2s ease; }
+}
+@media (max-width: 680px) {
+    .tte-internal .main,
+    .tte-internal .content { width: 100%; max-width: 100%; min-width: 0; }
+    .tte-internal .table-scroll { overscroll-behavior-x: contain; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .tte-internal .sidebar,
+    .tte-sidebar-toggle-arrow { transition: none; }
+}

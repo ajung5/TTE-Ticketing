@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/tte-ui-fixes.css') }}?v=1">
     @auth
-        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=1">
-        <script src="{{ asset('js/tte-internal-refresh.js') }}?v=1" defer></script>
+        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=51">
+        <script src="{{ asset('js/tte-internal-refresh.js') }}?v=51" defer></script>
     @endauth
     <script src="{{ asset('js/tte.js') }}?v=3" defer></script>
 </head>
@@ -61,6 +61,12 @@
                     <span class="brand-icon">T</span>
                     <span>TTE Ticketing<small>Layanan Sertifikat Elektronik</small></span>
                 </a>
+                <button type="button" class="tte-sidebar-toggle" data-sidebar-toggle
+                    aria-controls="tte-sidebar-menu" aria-pressed="false"
+                    aria-label="Perkecil menu samping" title="Perkecil menu samping">
+                    <span class="tte-sidebar-toggle-arrow" aria-hidden="true">‹</span>
+                    <span class="tte-sidebar-toggle-label">Perkecil menu</span>
+                </button>
                 <button type="button" class="tte-mobile-menu-toggle" data-menu-toggle
                     aria-controls="tte-sidebar-menu" aria-expanded="false">
                     <span>Menu Navigasi</span><span aria-hidden="true" class="tte-menu-chevron">▾</span>

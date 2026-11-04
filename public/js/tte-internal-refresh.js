@@ -50,3 +50,36 @@
     });
   }
 })();
+
+/* TTE v51: persisted desktop sidebar toggle (independent from mobile menu). */
+(() => {
+  'use strict';
+  const root = document.querySelector('.tte-internal');
+  const toggle = root?.querySelector('[data-sidebar-toggle]');
+  if (!root || !toggle) return;
+  const storageKey = 'tte-sidebar-collapsed-v1';
+  let collapsed = false;
+  try { collapsed = window.localStorage.getItem(storageKey) === '1'; }
+  catch (_) { /* Storage can be unavailable in private browsing. */ }
+  const render = () => {
+    root.classList.toggle('tte-sidebar-collapsed', collapsed);
+    toggle.setAttribute('aria-pressed', String(collapsed));
+    const label = collapsed ? 'Perbesar menu samping' : 'Perkecil menu samping';
+    toggle.setAttribute('aria-label', label);
+    toggle.setAttribute('title', label);
+    // Accessible names remain as text in each link even when visually icon-only.
+  };
+  for (const link of root.querySelectorAll('.sidebar .nav-item')) {
+    if (!link.hasAttribute('title')) link.title = link.textContent.trim().replace(/\s+/g, ' ');
+  }
+  const logout = root.querySelector('.sidebar-logout');
+  if (logout && !logout.hasAttribute('title')) logout.title = 'Keluar Sistem';
+  render();
+  root.classList.add('tte-sidebar-ready');
+  toggle.addEventListener('click', () => {
+    collapsed = !collapsed;
+    render();
+    try { window.localStorage.setItem(storageKey, collapsed ? '1' : '0'); }
+    catch (_) { /* Keep working without persistence. */ }
+  });
+})();
