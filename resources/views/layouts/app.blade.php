@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/tte-ui-fixes.css') }}?v=1">
     @auth
-        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=51">
+        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=52">
         <script src="{{ asset('js/tte-internal-refresh.js') }}?v=51" defer></script>
     @endauth
     <script src="{{ asset('js/tte.js') }}?v=3" defer></script>
@@ -57,16 +57,21 @@
     @auth
         <div class="shell tte-internal">
             <aside class="sidebar">
-                <a href="{{ route('dashboard') }}" class="brand" aria-label="Dashboard TTE Ticketing">
-                    <span class="brand-icon">T</span>
-                    <span>TTE Ticketing<small>Layanan Sertifikat Elektronik</small></span>
-                </a>
-                <button type="button" class="tte-sidebar-toggle" data-sidebar-toggle
-                    aria-controls="tte-sidebar-menu" aria-pressed="false"
-                    aria-label="Perkecil menu samping" title="Perkecil menu samping">
-                    <span class="tte-sidebar-toggle-arrow" aria-hidden="true">‹</span>
-                    <span class="tte-sidebar-toggle-label">Perkecil menu</span>
-                </button>
+                <div class="tte-sidebar-head">
+                    <a href="{{ route('dashboard') }}" class="brand" aria-label="Dashboard TTE Ticketing">
+                        <span class="brand-icon">T</span>
+                        <span>TTE Ticketing<small>Layanan Sertifikat Elektronik</small></span>
+                    </a>
+                    <button type="button" class="tte-sidebar-toggle" data-sidebar-toggle
+                        aria-controls="tte-sidebar-menu" aria-pressed="false"
+                        aria-label="Perkecil menu samping" title="Perkecil menu samping">
+                        <svg class="tte-sidebar-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="3.5" y="4" width="17" height="16" rx="2" />
+                            <path d="M9.5 4v16" />
+                            <path class="tte-toggle-chevron" d="m15 9-3 3 3 3" />
+                        </svg>
+                    </button>
+                </div>
                 <button type="button" class="tte-mobile-menu-toggle" data-menu-toggle
                     aria-controls="tte-sidebar-menu" aria-expanded="false">
                     <span>Menu Navigasi</span><span aria-hidden="true" class="tte-menu-chevron">▾</span>
