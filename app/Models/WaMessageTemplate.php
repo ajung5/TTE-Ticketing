@@ -13,7 +13,6 @@ class WaMessageTemplate extends Model {
         'Pendaftaran' => 'Penerbitan Sertifikat Elektronik'
     ];
 
-    // Jenis notifikasi yang aktif. Template umum memakai service_code '*'.
     public const EVENTS = [
         'unverified' => 'Nomor WA Belum Terverifikasi',
         'reset' => 'Reset Passphrase',
@@ -23,6 +22,7 @@ class WaMessageTemplate extends Model {
         'unregistered' => 'User Belum Terdaftar',
         'activation_required' => 'Aktivasi Akun Diperlukan',
         'certificate_not_issued' => 'SE Belum Terbit',
+        'certificate_revoked' => 'SE Revoke — Penerbitan Ulang',
         'service_mismatch' => 'Perbaikan Jenis Permohonan',
         'issuance_required' => 'Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)'
     ];
@@ -36,6 +36,7 @@ class WaMessageTemplate extends Model {
         'unregistered' => '*',
         'activation_required' => '*',
         'certificate_not_issued' => '*',
+        'certificate_revoked' => '*',
         'service_mismatch' => '*',
         'issuance_required' => '*'
     ];
@@ -45,9 +46,11 @@ class WaMessageTemplate extends Model {
     public const VARIABLE_DESCRIPTIONS = [
         '{nama_pemohon}' => 'Nama pemohon',
         '{nomor_tiket}' => 'Nomor tiket',
-        '{layanan}' => 'Jenis layanan',
+        '{layanan}' => 'Jenis layanan yang diajukan',
         '{layanan_diajukan}' => 'Layanan yang diajukan pemohon',
         '{layanan_disarankan}' => 'Layanan yang disarankan verifikator',
+        '{proses_aktual}' => 'Tahapan layanan berdasarkan pemeriksaan AMS',
+        '{hasil_aktual}' => 'Hasil akhir pelayanan yang telah dikonfirmasi',
         '{form_url}' => 'Tautan formulir permohonan',
         '{email}' => 'Email dinas pemohon',
         '{nik}' => 'NIK tersamarkan (12 digit disembunyikan)',
@@ -64,23 +67,10 @@ class WaMessageTemplate extends Model {
     ];
 
     public const PLACEHOLDERS = [
-        '{nama_pemohon}',
-        '{nomor_tiket}',
-        '{layanan}',
-        '{layanan_diajukan}',
-        '{layanan_disarankan}',
-        '{form_url}',
-        '{email}',
-        '{nik}',
-        '{nip}',
-        '{nomor_wa}',
-        '{jabatan}',
-        '{opd}',
-        '{keterangan}',
-        '{status_verifikasi_wa}',
-        '{nama_verifikator}',
-        '{inisial_verifikator}',
-        '{nama_instansi}',
-        '{survey_url}'
+        '{nama_pemohon}', '{nomor_tiket}', '{layanan}', '{layanan_diajukan}',
+        '{layanan_disarankan}', '{proses_aktual}', '{hasil_aktual}', '{form_url}',
+        '{email}', '{nik}', '{nip}', '{nomor_wa}', '{jabatan}', '{opd}',
+        '{keterangan}', '{status_verifikasi_wa}', '{nama_verifikator}',
+        '{inisial_verifikator}', '{nama_instansi}', '{survey_url}'
     ];
 }

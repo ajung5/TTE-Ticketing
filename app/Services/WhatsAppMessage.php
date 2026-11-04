@@ -16,7 +16,6 @@ class WhatsAppMessage {
 
     public function forCompletedTicket(Ticket $ticket): string {
         $message = $this->render($ticket, 'completed');
-        // Tautan survei harus ada walaupun preset admin lama tidak memuat {survey_url}.
         if (!str_contains($message, '/survei/' . $ticket->getKey() . '?')) {
             $message .= "\n\nSurvei Kepuasan Layanan (30 hari):\n" . $this->surveyUrl($ticket);
         }
@@ -38,11 +37,7 @@ class WhatsAppMessage {
             'unverified' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nNomor WA Anda belum terverifikasi pada AMS BSrE. Mohon lakukan verifikasi sebelum layanan dilanjutkan.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'activation_required' =>
-                "Yth. Bapak/Ibu {nama_pemohon},
-
-Akun AMS BSrE Anda belum diaktivasi. Mohon lakukan aktivasi sesuai petunjuk BSrE lalu hubungi petugas untuk pemeriksaan ulang pada tiket yang sama: {nomor_tiket}.
-
-Jangan membagikan OTP, password, atau passphrase.",
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nAkun AMS BSrE Anda belum diaktivasi. Mohon lakukan aktivasi sesuai petunjuk resmi BSrE, kemudian hubungi petugas untuk pemeriksaan ulang pada tiket yang sama: {nomor_tiket}.\n\nJangan membagikan OTP, password, atau passphrase.",
             'unregistered' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nBerdasarkan pemeriksaan AMS BSrE, sertifikat elektronik aktif belum ditemukan untuk NIK Anda. Silakan hubungi petugas untuk tindak lanjut.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'reset' =>
@@ -52,33 +47,32 @@ Jangan membagikan OTP, password, atau passphrase.",
             'registration' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Pendaftaran TTE nomor tiket {nomor_tiket} telah diproses. Mohon tunggu informasi tahapan berikutnya.\nPetugas: {nama_verifikator}",
             'certificate_not_issued' =>
-                "Yth. Bapak/Ibu {nama_pemohon},\n\nAkun AMS BSrE Anda sudah diaktivasi, tetapi Sertifikat Elektronik belum terbit. Silakan periksa Inbox/Spam email dinas {email} dan lakukan set passphrase melalui petunjuk resmi BSrE. Setelah selesai, hubungi petugas untuk pemeriksaan ulang.\n\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}\nJangan pernah membagikan passphrase, OTP, atau password.",
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nAkun AMS BSrE sudah diaktivasi, tetapi Sertifikat Elektronik belum terbit. Silakan periksa Inbox/Spam email dinas {email} dan lakukan set passphrase melalui petunjuk resmi BSrE. Setelah selesai, hubungi petugas untuk pemeriksaan ulang.\n\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}\nJangan pernah membagikan passphrase, OTP, atau password.",
+            'certificate_revoked' =>
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nSertifikat Elektronik Anda berstatus Revoke (dicabut). Silakan mengikuti proses Penerbitan Ulang sesuai prosedur resmi BSrE, kemudian beri tahu petugas untuk pemeriksaan ulang.\n\nLayanan diajukan: {layanan_diajukan}\nProses aktual: {proses_aktual}\nTiket yang sama: {nomor_tiket}\nPetugas: {nama_verifikator}\n\nJangan membagikan OTP, password, atau passphrase.",
             'issuance_required' =>
-                'Yth. Bapak/Ibu {nama_pemohon},
-
-Berdasarkan pemeriksaan AMS BSrE, Sertifikat Elektronik Anda belum pernah terbit, meskipun akun sudah diaktivasi atau nomor WhatsApp sudah terverifikasi. Layanan Reset Passphrase atau Pembaruan belum sesuai untuk kondisi ini.
-
-Layanan diajukan: {layanan_diajukan}
-Layanan disarankan: {layanan_disarankan}
-
-Mohon ajukan permohonan Penerbitan Sertifikat Elektronik melalui: {form_url}
-Petugas akan mengembalikan tiket ini dengan status Perlu Pengajuan Ulang setelah konfirmasi pesan. Tiket ini tidak dihitung sebagai layanan selesai.
-
-Nomor tiket: {nomor_tiket}
-Petugas: {nama_verifikator}
-{nama_instansi}
-
-Jangan membagikan passphrase, OTP, atau password.',
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nBerdasarkan pemeriksaan AMS BSrE, SE belum pernah terbit. Ajukan penerbitan melalui {form_url}.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'service_mismatch' =>
-                "Yth. Bapak/Ibu {nama_pemohon},\n\nBerdasarkan pemeriksaan AMS BSrE, jenis layanan yang diajukan ({layanan_diajukan}) tidak sesuai dengan kondisi akun. Mohon mengajukan kembali dengan memilih {layanan_disarankan} melalui: {form_url}\n\nTiket sebelumnya ditutup secara administratif dan tidak dihitung sebagai layanan berhasil.\nNomor tiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nJenis layanan yang diajukan ({layanan_diajukan}) tidak sesuai dengan kondisi akun. Mohon mengajukan kembali dengan memilih {layanan_disarankan} melalui: {form_url}\n\nTiket sebelumnya ditutup secara administratif dan tidak dihitung sebagai layanan berhasil.\nNomor tiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'completed' =>
-                "Yth. Bapak/Ibu {nama_pemohon},\n\nPenanganan permohonan {layanan} nomor tiket {nomor_tiket} telah selesai. Mohon mengisi survei kepuasan melalui {survey_url}.\nPetugas: {nama_verifikator}"
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nPenanganan nomor tiket {nomor_tiket} telah selesai. Hasil pelayanan: {hasil_aktual}. Mohon mengisi survei kepuasan melalui {survey_url}.\nPetugas: {nama_verifikator}"
         ];
         $templateBody = $template?->body ?? $fallback[$event];
+        // Preset lama menggunakan {layanan} sebagai nama layanan pengajuan.
+        // Untuk tiket baru yang mempunyai hasil aktual, ubah kalimat bakunya
+        // agar tidak membentuk frasa rancu seperti 'permohonan sertifikat berhasil terbit'.
+        if ($event === 'completed' && $ticket->service_outcome !== null) {
+            $templateBody = str_replace(
+                'Penanganan permohonan {layanan} nomor tiket {nomor_tiket} telah selesai.',
+                'Hasil pelayanan tiket {nomor_tiket}: {hasil_aktual}.',
+                $templateBody
+            );
+        }
         if ($event === 'certificate_not_issued' && $ticket->wa_verification_status === 'unverified') {
-            $templateBody .= "
-
-Nomor WhatsApp Anda juga belum terverifikasi pada AMS BSrE. Mohon tindak lanjuti verifikasi WhatsApp sebelum penutupan tiket, di samping proses set passphrase.";
+            $templateBody .= "\n\nNomor WhatsApp Anda juga belum terverifikasi pada AMS BSrE. Mohon tindak lanjuti verifikasi WhatsApp sebelum penutupan tiket, di samping proses set passphrase.";
+        }
+        if ($event === 'certificate_revoked' && $ticket->wa_verification_status === 'unverified') {
+            $templateBody .= "\n\nNomor WhatsApp Anda juga belum terverifikasi. Selesaikan verifikasi WA sebelum penutupan tiket.";
         }
         if ($event === 'unregistered' && $ticket->activation_status === 'not_activated') {
             $templateBody .= "\n\nHasil pemeriksaan AMS: akun belum diaktivasi. Mohon lakukan aktivasi akun sesuai petunjuk resmi sebelum proses dilanjutkan.";
@@ -90,18 +84,23 @@ Nomor WhatsApp Anda juga belum terverifikasi pada AMS BSrE. Mohon tindak lanjuti
             $templateBody .= "\n\nStatus sertifikat masih kedaluwarsa. Penutupan tiket menunggu pemeriksaan ulang sampai sertifikat aktif.";
         }
         $verifier = $ticket->claimant;
-
+        // Jangan menyebut layanan awal sebagai hasil selesai. Pada tiket historis tanpa outcome,
+        // pertahankan perilaku semula agar tidak mengarang hasil yang tidak pernah tercatat.
+        $completedLabel = $ticket->service_outcome ? $ticket->service_outcome_label : $ticket->service_label;
         return strtr($templateBody, [
             '{nama_pemohon}' => (string) $ticket->nama_user,
             '{nomor_tiket}' => (string) ($ticket->ticket_number ?? '#' . $ticket->id),
-            '{layanan}' => $ticket->service_label,
+            '{layanan}' => $event === 'completed' ? $completedLabel : $ticket->service_label,
             '{layanan_diajukan}' => $ticket->service_label,
             '{layanan_disarankan}' => match ($ticket->recommended_service) {
                 'Pendaftaran' => 'Penerbitan Sertifikat Elektronik',
                 'Pembaruan' => 'Pembaruan Sertifikat Elektronik',
                 'Reset Passphrase' => 'Reset Passphrase',
+                'Penerbitan Ulang' => 'Penerbitan Ulang Sertifikat Elektronik',
                 default => 'Hubungi petugas'
             },
+            '{proses_aktual}' => $ticket->actual_process_label,
+            '{hasil_aktual}' => $ticket->service_outcome ? $ticket->service_outcome_label : 'Penanganan tiket diselesaikan',
             '{form_url}' => route('public.form'),
             '{nama_verifikator}' => (string) ($verifier?->name ?? 'Tim Verifikator TTE'),
             '{inisial_verifikator}' => (string) ($verifier?->initials ?: '-'),

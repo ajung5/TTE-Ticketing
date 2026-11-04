@@ -22,7 +22,6 @@ class AdminController extends Controller {
             'done' => Ticket::where('status', 'Done')->count(),
             'returned' => Ticket::where('status', 'Returned')->count()
         ];
-        // Agregat hasil pemeriksaan terakhir, tanpa akses admin untuk memproses tiket.
         $ams = Ticket::query()->selectRaw(
             "COUNT(*) as total,
             SUM(CASE WHEN activation_status = 'activated' THEN 1 ELSE 0 END) as activated,
@@ -31,23 +30,22 @@ class AdminController extends Controller {
             SUM(CASE WHEN activation_status = 'activated' AND wa_verification_status = 'verified' THEN 1 ELSE 0 END) as wa_verified,
             SUM(CASE WHEN certificate_issuance_status = 'not_issued' THEN 1 ELSE 0 END) as not_issued,
             SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'active' THEN 1 ELSE 0 END) as cert_active,
-            SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'expired' THEN 1 ELSE 0 END) as cert_expired"
+            SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'expired' THEN 1 ELSE 0 END) as cert_expired,
+            SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'revoked' THEN 1 ELSE 0 END) as cert_revoked"
         )->first();
-        $services = Ticket::select('layanan')
-            ->selectRaw('COUNT(*) as total')
-            ->groupBy('layanan')
-            ->pluck('total', 'layanan');
-        $counts = Ticket::select('claimed_by')
-            ->selectRaw(
-                "COUNT(*) as total, SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as active_count, SUM(CASE WHEN status = 'Returned' THEN 1 ELSE 0 END) as returned_count"
-            )
-            ->whereNotNull('claimed_by')
-            ->groupBy('claimed_by')
-            ->get()
-            ->keyBy('claimed_by');
+        $services = Ticket::select('layanan')->selectRaw('COUNT(*) as total')
+            ->groupBy('layanan')->pluck('total', 'layanan');
+        $counts = Ticket::select('claimed_by')->selectRaw(
+            "COUNT(*) as total, SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count,
+            SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as active_count,
+            SUM(CASE WHEN status = 'Returned' THEN 1 ELSE 0 END) as returned_count"
+        )->whereNotNull('claimed_by')->groupBy('claimed_by')->get()->keyBy('claimed_by');
         $verifiers = User::where('role', 'verifier')->orderBy('name')->get();
-
-        return view('admin.dashboard', compact('stats', 'services', 'counts', 'verifiers', 'ams'));
+        // Distribusi hasil aktual, berbeda dengan distribusi layanan yang diminta pemohon.
+        $outcomes = Ticket::query()->where('status', 'Done')->whereNotNull('service_outcome')
+            ->select('service_outcome')->selectRaw('COUNT(*) as total')
+            ->groupBy('service_outcome')->pluck('total', 'service_outcome');
+        return view('admin.dashboard', compact('stats', 'services', 'counts', 'verifiers', 'ams', 'outcomes'));
     }
 
     public function sendResetLink(Request $request, User $user) {
@@ -65,12 +63,8 @@ class AdminController extends Controller {
             'created_at' => now(),
             'updated_at' => now()
         ]);
-
-        return back()->with(
-            'success',
-            'Tautan reset password dibuat untuk ' .
-                $user->name .
-                '. Pada MAIL_MAILER=log, periksa storage/logs/laravel.log.'
-        );
+        return back()->with('success',
+            'Tautan reset password dibuat untuk ' . $user->name .
+            '. Pada MAIL_MAILER=log, periksa storage/logs/laravel.log.');
     }
 }
