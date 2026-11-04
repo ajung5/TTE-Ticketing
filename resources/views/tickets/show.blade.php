@@ -251,6 +251,13 @@
                                 Rekomendasi: {{ $ticket->recommended_service === 'Pendaftaran' ? 'Penerbitan Sertifikat Elektronik' : $ticket->recommended_service }}.
                             </p>
                         </div>
+                    @elseif ($serviceEvent === 'registration' && $ticket->activation_status === 'not_activated')
+                        <div class="note-box"><strong>Pendaftaran Diproses — aktivasi akun diperlukan.</strong>
+                            <p>Berikan notifikasi Pendaftaran Diproses kepada pemohon. Aktivasi akun
+                                merupakan tahapan awal penerbitan SE. Setelah aktivasi, periksa kembali
+                                status WhatsApp dan Sertifikat Elektronik di AMS pada tiket yang sama.
+                                <strong>Tandai Selesai</strong> tetap tidak tersedia sebelum syaratnya terpenuhi.</p>
+                        </div>
                     @elseif ($serviceEvent === 'certificate_revoked')
                         <div class="note-box"><strong>SE telah dicabut (Revoke).</strong>
                             <p>Arahkan <strong>Penerbitan Ulang Sertifikat Elektronik</strong> sesuai prosedur BSrE.

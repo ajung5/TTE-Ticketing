@@ -44,6 +44,21 @@ it('leaves WA and certificate unchecked when account is not activated', function
     $this->get(route('tickets.show', $ticket))->assertSee('Aktivasi Akun Diperlukan');
 });
 
+it('keeps a new registration in progress with registration notice before activation', function () {
+    $owner = User::factory()->create(['role' => 'verifier']);
+    $ticket = rbAmsTicket($owner, 'Pendaftaran');
+    $this->actingAs($owner)->post(route('tickets.verify-whatsapp', $ticket), [
+        'activation_status' => 'not_activated',
+    ])->assertSessionHasNoErrors();
+    expect($ticket->fresh()->actual_process)->toBe('account_activation')
+        ->and($ticket->fresh()->status)->toBe('In Progress')
+        ->and($ticket->fresh()->wa_verification_status)->toBe('unchecked');
+    $this->get(route('tickets.show', $ticket))
+        ->assertSee('Pendaftaran Diproses')
+        ->assertDontSee('Perbaikan Jenis Permohonan');
+    $this->post(route('tickets.complete', $ticket))->assertStatus(409);
+});
+
 it('rejects a fabricated certificate decision for an unactivated account', function () {
     $owner = User::factory()->create(['role' => 'verifier']);
     $ticket = rbAmsTicket($owner);

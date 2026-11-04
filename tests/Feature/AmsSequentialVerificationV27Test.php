@@ -149,7 +149,7 @@ it('does not misclassify later issuance as wrong registration after account acti
     $this->actingAs($owner)->post(route('tickets.verify-whatsapp', $ticket), [
         'activation_status' => 'not_activated',
     ])->assertRedirect()->assertSessionHasNoErrors();
-    $this->get(route('tickets.show', $ticket))->assertSee('Aktivasi Akun Diperlukan');
+    $this->get(route('tickets.show', $ticket))->assertSee('Pendaftaran Diproses');
     $this->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
     $this->post(route('tickets.whatsapp.service.confirm', $ticket))->assertRedirect();
     $this->post(route('tickets.verify-whatsapp', $ticket), [

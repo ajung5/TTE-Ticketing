@@ -83,7 +83,9 @@
 
     let message = 'Mulai dari pemeriksaan aktivasi akun.';
     if (activation.value === 'not_activated') {
-      message = 'Akun belum aktivasi. Pandu aktivasi dan periksa ulang menggunakan tiket yang sama.';
+      message = requested === 'Pendaftaran'
+        ? 'Pendaftaran Diproses. Akun belum diaktivasi; arahkan aktivasi, lalu periksa ulang AMS menggunakan tiket yang sama.'
+        : 'Akun belum aktivasi. Pandu aktivasi dan periksa ulang menggunakan tiket yang sama.';
     } else if (activated && !hasWa) {
       message = 'Tahap 2: periksa verifikasi nomor WA di AMS BSrE.';
     } else if (hasWa && !cert.value) {

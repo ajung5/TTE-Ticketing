@@ -29,6 +29,35 @@ it('selects activation notice instead of an incorrect service correction', funct
     expect($message)->toContain('tiket')->not->toContain('Perbaikan Jenis Permohonan');
 });
 
+it('sends Pendaftaran Diproses for an unactivated registration, then continues on one ticket', function () {
+    $owner = User::factory()->create(['role' => 'verifier']);
+    $ticket = rbWhatsAppTicket($owner, 'Pendaftaran');
+    $this->actingAs($owner)->post(route('tickets.verify-whatsapp', $ticket), [
+        'activation_status' => 'not_activated',
+    ])->assertSessionHasNoErrors();
+    $message = app(WhatsAppMessage::class)->forServiceTicket($ticket->fresh(), 'registration');
+    expect($message)->toContain('sedang diproses')
+        ->toContain('belum diaktivasi')
+        ->toContain('Tidak perlu mengajukan tiket baru');
+    $this->get(route('tickets.show', $ticket))->assertSee('Pendaftaran Diproses');
+    $this->post(route('tickets.whatsapp.service', $ticket))->assertRedirect();
+    $this->assertDatabaseHas('wa_notifications', [
+        'ticket_id' => $ticket->id, 'event_type' => 'registration',
+    ]);
+    $this->post(route('tickets.whatsapp.service.confirm', $ticket))->assertRedirect();
+    $this->post(route('tickets.verify-whatsapp', $ticket), [
+        'activation_status' => 'activated',
+        'wa_verification_status' => 'verified',
+        'certificate_issuance_status' => 'issued',
+        'certificate_validity_status' => 'active',
+    ])->assertSessionHasNoErrors();
+    $this->get(route('tickets.show', $ticket))
+        ->assertDontSee('Perbaikan Jenis Permohonan');
+    $this->post(route('tickets.complete', $ticket))->assertRedirect();
+    expect($ticket->fresh()->status)->toBe('Done')
+        ->and($ticket->fresh()->service_outcome)->toBe('certificate_issued');
+});
+
 it('informs pending issuance and unverified WA in the same notice', function () {
     $owner = User::factory()->create(['role' => 'verifier']);
     $ticket = rbWhatsAppTicket($owner);

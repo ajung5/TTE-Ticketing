@@ -58,6 +58,14 @@ class WhatsAppMessage {
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPenanganan nomor tiket {nomor_tiket} telah selesai. Hasil pelayanan: {hasil_aktual}. Mohon mengisi survei kepuasan melalui {survey_url}.\nPetugas: {nama_verifikator}"
         ];
         $templateBody = $template?->body ?? $fallback[$event];
+        if ($event === 'registration' && $ticket->activation_status === 'not_activated') {
+            // Tahapan aktivasi disampaikan di dalam notifikasi Pendaftaran Diproses,
+            // bukan mengganti jenis notifikasi ataupun mengklaim SE sudah terbit.
+            $templateBody .= "\n\nBerdasarkan pemeriksaan AMS BSrE, akun Anda belum diaktivasi. "
+                . "Mohon lakukan aktivasi akun sesuai petunjuk resmi BSrE agar proses Penerbitan "
+                . "Sertifikat Elektronik dapat dilanjutkan. Setelah aktivasi berhasil, "
+                . "hubungi petugas untuk pemeriksaan ulang. Tidak perlu mengajukan tiket baru.";
+        }
         // Preset lama menggunakan {layanan} sebagai nama layanan pengajuan.
         // Untuk tiket baru yang mempunyai hasil aktual, ubah kalimat bakunya
         // agar tidak membentuk frasa rancu seperti 'permohonan sertifikat berhasil terbit'.

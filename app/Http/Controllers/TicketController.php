@@ -56,7 +56,8 @@ class TicketController extends Controller {
             return null;
         }
         if ($ticket->activation_status === 'not_activated') {
-            return 'activation_required';
+            // Penerbitan SE tetap berada pada alur Pendaftaran; aktivasi adalah tahap awal.
+            return $ticket->layanan === 'Pendaftaran' ? 'registration' : 'activation_required';
         }
         if (!in_array($ticket->wa_verification_status, ['verified', 'unverified'], true)) {
             return null;
@@ -142,6 +143,7 @@ class TicketController extends Controller {
             ->whereIn('note', [
                 WaMessageTemplate::EVENTS['unregistered'],
                 WaMessageTemplate::EVENTS['activation_required'],
+                WaMessageTemplate::EVENTS['registration'],
                 WaMessageTemplate::EVENTS['certificate_not_issued'],
                 WaMessageTemplate::EVENTS['certificate_revoked']
             ])->exists()) {
@@ -150,10 +152,18 @@ class TicketController extends Controller {
         // Pemeriksaan sebelumnya adalah bukti bahwa status penerbitan berubah
         // selama tiket yang sama ditangani, meski notifikasi antara tidak dikonfirmasi.
         return $this->hadCertificateState($ticket, 'not_issued') ||
-            $this->hadCertificateState($ticket, 'revoked');
+            $this->hadCertificateState($ticket, 'revoked') ||
+            // Perubahan dari belum aktivasi ke SE aktif juga bagian dari onboarding satu tiket.
+            TicketActivity::query()->where('ticket_id', $ticket->id)
+                ->where('action', 'ams_checked')
+                ->where('note', 'like', '%Aktivasi: not_activated%')->exists();
     }
 
     private function actualProcess(Ticket $ticket, ?string $event): ?string {
+        // Nama notifikasi Pendaftaran Diproses tidak berarti penerbitan sudah dilakukan.
+        if ($ticket->activation_status === 'not_activated') {
+            return 'account_activation';
+        }
         return match ($event) {
             'activation_required' => 'account_activation',
             'unverified' => 'whatsapp_verification',
