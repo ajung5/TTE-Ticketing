@@ -12,7 +12,6 @@
             <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
             <button class="btn btn-primary full" type="submit">Masuk ke Sistem</button>
         </form>
-        <p class="muted small center mt-lg">Jika lupa password, hubungi administrator layanan untuk meminta tautan reset.
-        </p>
+        <p class="muted small center mt-lg"><a href="{{ route('password.request') }}">Lupa Password?</a></p>
     </div>
 @endsection

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\TtePasswordResetNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -21,6 +22,10 @@ class User extends Authenticatable {
 
     public function isVerifier(): bool {
         return $this->role === 'verifier';
+    }
+
+    public function sendPasswordResetNotification($token): void {
+        $this->notify(new TtePasswordResetNotification($token));
     }
 
     protected function casts(): array {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
+use App\Services\NewTicketEmailNotifier;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,7 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ZohoWebhookController extends Controller {
-    public function store(Request $request) {
+    public function store(Request $request, NewTicketEmailNotifier $notifier) {
         $secret = config('tte.zoho_webhook_secret');
         if (!is_string($secret) || strlen($secret) < 24) {
             return response()->json(['message' => 'Integrasi belum dikonfigurasi.'], 503);
@@ -86,6 +87,7 @@ class ZohoWebhookController extends Controller {
             return response()->json(['ticket_number' => $existing->ticket_number, 'duplicate' => true]);
         }
         $this->log($externalId, 'created', $digest);
+        $notifier->notify($ticket);
 
         return response()->json(['ticket_number' => $ticket->ticket_number, 'duplicate' => false], 201);
     }

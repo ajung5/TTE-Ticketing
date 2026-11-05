@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -125,8 +127,34 @@ class AuthController extends Controller {
         return back()->with('success', 'Password Anda telah diperbarui.');
     }
 
+    public function forgotForm() {
+        return response()->view('auth.forgot-password')
+            ->header('Cache-Control', 'no-store, private')
+            ->header('X-Robots-Tag', 'noindex, nofollow');
+    }
+
+    public function sendResetEmail(Request $request) {
+        $data = $request->validate(['email' => ['required', 'email', 'max:255']]);
+        $email = strtolower(trim($data['email']));
+
+        // Always the same response for known/unknown/soft-deleted accounts.
+        // Broker applies token lifetime and per-email throttle.
+        try {
+            Password::broker()->sendResetLink(['email' => $email]);
+        } catch (\Throwable $e) {
+            // Never write reset tokens, mail content, or user-provided addresses to application logs.
+            Log::error('Pengiriman tautan reset akun gagal.', ['exception_class' => get_class($e)]);
+        }
+
+        return back()->with('success',
+            'Jika email terdaftar dan aktif, tautan reset akan dikirim. Periksa Inbox atau Spam.');
+    }
+
     public function resetForm(Request $request, string $token) {
-        return view('auth.reset-password', ['token' => $token, 'email' => $request->query('email', '')]);
+        return response()->view('auth.reset-password', ['token' => $token, 'email' => $request->query('email', '')])
+            ->header('Cache-Control', 'no-store, private')
+            ->header('Referrer-Policy', 'no-referrer')
+            ->header('X-Robots-Tag', 'noindex, nofollow');
     }
 
     public function reset(Request $request) {
@@ -137,6 +165,11 @@ class AuthController extends Controller {
         ]);
         $status = Password::reset($data, function ($user, $password) {
             $user->forceFill(['password' => Hash::make($password), 'remember_token' => Str::random(60)])->save();
+            // Revoke existing database sessions when the password is reset.
+            if (config('session.driver') === 'database') {
+                DB::table('sessions')->where('user_id', $user->getKey())->delete();
+            }
+            event(new PasswordReset($user));
         });
 
         return $status === Password::PASSWORD_RESET

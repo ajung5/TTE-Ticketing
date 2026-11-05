@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Services\EmailDirectoryService;
+use App\Services\NewTicketEmailNotifier;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -65,7 +66,7 @@ class PublicTicketController extends Controller {
             ->header('X-Robots-Tag', 'noindex, nofollow');
     }
 
-    public function store(Request $request, EmailDirectoryService $directory) {
+    public function store(Request $request, EmailDirectoryService $directory, NewTicketEmailNotifier $notifier) {
         $data = $request->validate(
             [
                 'layanan' => ['required', Rule::in(['Reset Passphrase', 'Pembaruan', 'Pendaftaran'])],
@@ -180,6 +181,7 @@ class PublicTicketController extends Controller {
             }
             throw $e;
         }
+        $notifier->notify($ticket);
         return redirect()->route('public.success')->with('submission_success_ticket', $ticket->ticket_number);
     }
 

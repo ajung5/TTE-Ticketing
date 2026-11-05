@@ -80,7 +80,7 @@ class AdminController extends Controller {
             'success',
             'Tautan reset password dibuat untuk ' .
                 $user->name .
-                '. Pada MAIL_MAILER=log, periksa storage/logs/laravel.log.'
+                '. Periksa inbox email akun tersebut. Pengiriman memerlukan SMTP aktif.'
         );
     }
 }
