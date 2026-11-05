@@ -153,7 +153,8 @@
             </div>
             <span class="pill pill-neutral">{{ $verifiers->count() }} akun</span>
         </div>
-        <p class="small muted">Gunakan <strong>Edit Akun</strong> untuk memperbarui identitas, atau <strong>Kirim Reset Email</strong> agar verifikator mengatur password sendiri. Password
+        <p class="small muted">Gunakan <strong>Edit Akun</strong> untuk memperbarui identitas, atau <strong>Kirim Reset
+                Email</strong> agar verifikator mengatur password sendiri. Password
             lama tidak dapat ditampilkan.</p>
         <div class="table-scroll">
             <table class="verifier-table">
@@ -188,7 +189,8 @@
                                     <button type="button" class="btn btn-outline btn-small"
                                         data-open-dialog="tte-edit-verifier-{{ $verifier->id }}">Edit Akun</button>
                                     <form method="post" action="{{ route('admin.password-reset', $verifier) }}"
-                                        onsubmit="return confirm('Kirim tautan reset password ke email verifikator ini?')">@csrf
+                                        onsubmit="return confirm('Kirim tautan reset password ke email verifikator ini?')">
+                                        @csrf
                                         <button class="btn btn-outline btn-small" type="submit">Kirim Reset Email</button>
                                     </form>
                                     <form method="post" action="{{ route('admin.verifiers.destroy', $verifier) }}"
@@ -201,7 +203,8 @@
                                     </form>
                                 </div>
                                 @if ($activeCount > 0)
-                                    <p class="verifier-help">Selesaikan {{ $activeCount }} tiket aktif sebelum menonaktifkan
+                                    <p class="verifier-help">Selesaikan {{ $activeCount }} tiket aktif sebelum
+                                        menonaktifkan
                                         akun.</p>
                                 @endif
                             </td>
@@ -218,51 +221,49 @@
     </section>
     {{-- Editor ditempatkan di luar tabel agar tabel tidak melebar saat edit. --}}
     @foreach ($verifiers as $verifier)
-                                    <dialog class="tte-verifier-dialog" id="tte-edit-verifier-{{ $verifier->id }}"
-                                        aria-labelledby="tte-edit-title-{{ $verifier->id }}"
-                                        @if ((string) old('_edit_id') === (string) $verifier->id) data-auto-open @endif>
-                                        <div class="tte-dialog-heading">
-                                            <div><h2 id="tte-edit-title-{{ $verifier->id }}">Edit Verifikator</h2>
-                                                <p class="small muted">{{ $verifier->name }}</p></div>
-                                            <button type="button" class="btn btn-outline btn-small" data-close-dialog>
-                                                Tutup
-                                            </button>
-                                        </div>
-                                        <form method="post" action="{{ route('admin.verifiers.update', $verifier) }}"
-                                            class="stack" autocomplete="off">
-                                            @csrf
-                                            @method('PUT')
-                                            <input type="hidden" name="_edit_id" value="{{ $verifier->id }}">
-                                            <div class="verifier-form-grid">
-                                                <label>Nama lengkap
-                                                    <input type="text" name="name" minlength="3" maxlength="160"
-                                                        required
-                                                        value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('name', $verifier->name) : $verifier->name }}">
-                                                </label>
-                                                <label>Email akun
-                                                    <input type="email" name="email" maxlength="255" required
-                                                        value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('email', $verifier->email) : $verifier->email }}">
-                                                </label>
-                                                <label>Inisial
-                                                    <input type="text" name="initials" maxlength="12"
-                                                        pattern="[A-Za-z0-9]*" value="{{ $verifier->initials }}">
-                                                </label>
-                                            </div>
-                                            <p class="small muted">Kosongkan kedua kolom password apabila hanya mengubah
-                                                profil.</p>
-                                            <div class="verifier-form-grid">
-                                                <label>Password baru (opsional)
-                                                    <input type="password" name="password" minlength="12"
-                                                        autocomplete="new-password"
-                                                        placeholder="Biarkan kosong jika tidak diganti">
-                                                </label>
-                                                <label>Konfirmasi password baru
-                                                    <input type="password" name="password_confirmation" minlength="12"
-                                                        autocomplete="new-password">
-                                                </label>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                                        </form>
-                                    </dialog>
+        <dialog class="tte-verifier-dialog" id="tte-edit-verifier-{{ $verifier->id }}"
+            aria-labelledby="tte-edit-title-{{ $verifier->id }}" @if ((string) old('_edit_id') === (string) $verifier->id) data-auto-open @endif>
+            <div class="tte-dialog-heading">
+                <div>
+                    <h2 id="tte-edit-title-{{ $verifier->id }}">Edit Verifikator</h2>
+                    <p class="small muted">{{ $verifier->name }}</p>
+                </div>
+                <button type="button" class="btn btn-outline btn-small" data-close-dialog>
+                    Tutup
+                </button>
+            </div>
+            <form method="post" action="{{ route('admin.verifiers.update', $verifier) }}" class="stack"
+                autocomplete="off">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="_edit_id" value="{{ $verifier->id }}">
+                <div class="verifier-form-grid">
+                    <label>Nama lengkap
+                        <input type="text" name="name" minlength="3" maxlength="160" required
+                            value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('name', $verifier->name) : $verifier->name }}">
+                    </label>
+                    <label>Email akun
+                        <input type="email" name="email" maxlength="255" required
+                            value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('email', $verifier->email) : $verifier->email }}">
+                    </label>
+                    <label>Inisial
+                        <input type="text" name="initials" maxlength="12" pattern="[A-Za-z0-9]*"
+                            value="{{ $verifier->initials }}">
+                    </label>
+                </div>
+                <p class="small muted">Kosongkan kedua kolom password apabila hanya mengubah
+                    profil.</p>
+                <div class="verifier-form-grid">
+                    <label>Password baru (opsional)
+                        <input type="password" name="password" minlength="12" autocomplete="new-password"
+                            placeholder="Biarkan kosong jika tidak diganti">
+                    </label>
+                    <label>Konfirmasi password baru
+                        <input type="password" name="password_confirmation" minlength="12" autocomplete="new-password">
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+            </form>
+        </dialog>
     @endforeach
 @endsection

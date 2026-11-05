@@ -27,8 +27,12 @@
         <div class="tte-next-eyebrow">Tindakan Berikutnya · Tahap {{ $nextAction['step'] }} dari 4</div>
         <ol class="tte-next-progress" aria-label="Progres penanganan">
             @for ($step = 1; $step <= 4; $step++)
-                <li @class(['is-complete' => $step < $nextAction['step'], 'is-current' => $step === $nextAction['step']])
-                    aria-label="Tahap {{ $step }}{{ $step < $nextAction['step'] ? ' selesai' : ($step === $nextAction['step'] ? ' saat ini' : ' berikutnya') }}"></li>
+                <li @class([
+                    'is-complete' => $step < $nextAction['step'],
+                    'is-current' => $step === $nextAction['step']
+                ])
+                    aria-label="Tahap {{ $step }}{{ $step < $nextAction['step'] ? ' selesai' : ($step === $nextAction['step'] ? ' saat ini' : ' berikutnya') }}">
+                </li>
             @endfor
         </ol>
         <h2>{{ $nextAction['title'] }}</h2>
@@ -209,7 +213,8 @@
                             <span class="tte-ams-requested-label">LAYANAN DIAJUKAN OLEH PEMOHON</span>
                             <strong class="tte-ams-requested-name">{{ $ticket->service_label }}</strong>
                         </div>
-                        <p>Bandingkan pilihan layanan pemohon dengan hasil pemeriksaan AMS. Jenis layanan yang diajukan tidak berubah otomatis.</p>
+                        <p>Bandingkan pilihan layanan pemohon dengan hasil pemeriksaan AMS. Jenis layanan yang diajukan
+                            tidak berubah otomatis.</p>
                     </div>
                     <div class="verification-panel">
                         <div class="verification-tag"><strong class="verification-status">
@@ -222,14 +227,16 @@
                                     {{ $ticket->wa_checked_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</div>
                             @endif
                         </div>
-                        <details class="tte-ams-help"><summary class="small muted">Panduan urutan pemeriksaan AMS</summary>
-                        <p class="small muted">Urutan pemeriksaan pada <strong>AMS BSrE</strong>:
-                            <strong>1. Aktivasi akun</strong>, <strong>2. Verifikasi WhatsApp</strong>,
-                            <strong>3. Penerbitan Sertifikat Elektronik</strong>,
-                            <strong>4. Status SE (Aktif, Expired, Revoke)</strong>, dan
-                            <strong>5. Kesesuaian pilihan layanan</strong>.
-                            Status sudah terbit tidak otomatis berarti sertifikat aktif.
-                        </p></details>
+                        <details class="tte-ams-help">
+                            <summary class="small muted">Panduan urutan pemeriksaan AMS</summary>
+                            <p class="small muted">Urutan pemeriksaan pada <strong>AMS BSrE</strong>:
+                                <strong>1. Aktivasi akun</strong>, <strong>2. Verifikasi WhatsApp</strong>,
+                                <strong>3. Penerbitan Sertifikat Elektronik</strong>,
+                                <strong>4. Status SE (Aktif, Expired, Revoke)</strong>, dan
+                                <strong>5. Kesesuaian pilihan layanan</strong>.
+                                Status sudah terbit tidak otomatis berarti sertifikat aktif.
+                            </p>
+                        </details>
                         <form method="post" action="{{ route('tickets.verify-whatsapp', $ticket) }}" class="stack"
                             id="ams-verification-form" data-requested-service="{{ $ticket->layanan }}"
                             data-onboarding-history="{{ $onboardingHistory ? '1' : '0' }}"
@@ -247,7 +254,8 @@
                                     <select id="ams-wa-status" name="wa_verification_status" disabled>
                                         <option value="">Pilih status verifikasi WA</option>
                                         <option value="verified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'verified')>Sudah terverifikasi</option>
-                                        <option value="unverified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'unverified')>Belum terverifikasi</option>
+                                        <option value="unverified" @selected(old('wa_verification_status', $ticket->wa_verification_status) === 'unverified')>Belum terverifikasi
+                                        </option>
                                     </select>
                                 </label></div>
                             <div class="ams-conditional" id="ams-certificate-block" hidden><label
@@ -295,7 +303,9 @@
                                 <p class="small muted">SE Expired diarahkan ke Pembaruan; SE Revoke diarahkan ke Penerbitan
                                     Ulang.</p>
                             </div>
-                            <div class="tte-ux-hint">Pilih hasil pemeriksaan yang terlihat di AMS. Rekomendasi otomatis mengikuti hasil yang pasti; untuk kasus membutuhkan klarifikasi, pilih layanan yang sesuai.</div>
+                            <div class="tte-ux-hint">Pilih hasil pemeriksaan yang terlihat di AMS. Rekomendasi otomatis
+                                mengikuti hasil yang pasti; untuk kasus membutuhkan klarifikasi, pilih layanan yang sesuai.
+                            </div>
                             <div id="ams-decision-preview" class="ams-decision-preview small muted" role="status"
                                 aria-live="polite">Lengkapi hasil pemeriksaan AMS.</div>
                             <label for="ams-note">Catatan pemeriksaan (opsional)

@@ -5,8 +5,8 @@
         <header class="public-header" aria-label="Identitas instansi">
             <div class="official-letterhead">
                 <div class="official-letterhead__logo">
-                    <img src="{{ asset('images/lambang-kabupaten-subang.png') }}"
-                        alt="Lambang Kabupaten Subang" width="92" height="108" fetchpriority="high">
+                    <img src="{{ asset('images/lambang-kabupaten-subang.png') }}" alt="Lambang Kabupaten Subang" width="92"
+                        height="108" fetchpriority="high">
                 </div>
                 <div class="official-letterhead__text">
                     <div class="official-letterhead__government">PEMERINTAH DAERAH KABUPATEN SUBANG</div>
@@ -56,7 +56,7 @@
 
                                 <p class="directory-lookup-status small muted" id="nik-status" role="status"
                                     aria-live="polite">
-                                    
+
                                 </p>
                             </div>
 
@@ -88,7 +88,8 @@
                                 <h2 id="request-details-title">Data Pemohon</h2>
                             </div>
                         </div>
-                        <p class="small muted request-inline-note">Data belum sesuai? Anda bisa memperbaikinya. Email Gov mengikuti direktori.</p>
+                        <p class="small muted request-inline-note">Data belum sesuai? Anda bisa memperbaikinya. Email Gov
+                            mengikuti direktori.</p>
                         <div class="public-fields">
                             <label for="nama_user">Nama Lengkap <span class="required-mark">*</span>
                                 <input id="nama_user" name="nama_user" maxlength="160" required

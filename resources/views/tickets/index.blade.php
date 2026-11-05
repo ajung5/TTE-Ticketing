@@ -35,7 +35,8 @@
             </div>
             <div class="stat-name">Perlu Pengajuan Ulang</div>
             <div class="stat-number">{{ number_format($stats['returned'], 0, ',', '.') }}</div>
-            <div class="stat-foot"><a href="{{ route('tickets.index', ['status' => 'Returned']) }}">Lihat tiket yang Anda kembalikan →</a></div>
+            <div class="stat-foot"><a href="{{ route('tickets.index', ['status' => 'Returned']) }}">Lihat tiket yang Anda
+                    kembalikan →</a></div>
         </div>
     </div>
     <nav class="tte-queue-tabs" aria-label="Filter cepat status tiket">
@@ -43,19 +44,25 @@
             @if (request('status') === 'all') aria-current="page" @endif>Semua Tiket</a>
         <a href="{{ route('tickets.index', ['status' => 'Open']) }}" @class(['is-active' => request('status') === 'Open'])
             @if (request('status') === 'Open') aria-current="page" @endif>Baru <strong>{{ $stats['new'] }}</strong></a>
-        <a href="{{ route('tickets.index', ['status' => 'In Progress']) }}" @class(['is-active' => in_array(request('status'), [null, 'In Progress'], true)])
-            @if (in_array(request('status'), [null, 'In Progress'], true)) aria-current="page" @endif>Milik Saya <strong>{{ $stats['mine'] }}</strong></a>
+        <a href="{{ route('tickets.index', ['status' => 'In Progress']) }}" @class([
+            'is-active' => in_array(request('status'), [null, 'In Progress'], true)
+        ])
+            @if (in_array(request('status'), [null, 'In Progress'], true)) aria-current="page" @endif>Milik Saya
+            <strong>{{ $stats['mine'] }}</strong></a>
         <a href="{{ route('tickets.index', ['status' => 'Done']) }}" @class(['is-active' => request('status') === 'Done'])
-            @if (request('status') === 'Done') aria-current="page" @endif>Selesai <strong>{{ $stats['completed'] }}</strong></a>
+            @if (request('status') === 'Done') aria-current="page" @endif>Selesai
+            <strong>{{ $stats['completed'] }}</strong></a>
         <a href="{{ route('tickets.index', ['status' => 'Returned']) }}" @class(['is-active' => request('status') === 'Returned'])
-            @if (request('status') === 'Returned') aria-current="page" @endif>Pengajuan Ulang <strong>{{ $stats['returned'] }}</strong></a>
+            @if (request('status') === 'Returned') aria-current="page" @endif>Pengajuan Ulang
+            <strong>{{ $stats['returned'] }}</strong></a>
     </nav>
     <section class="card">
         <div class="section-heading">
             <div>
                 <div class="eyebrow">MANAJEMEN PERMOHONAN</div>
                 <h2>Daftar Tiket dan Antrean</h2>
-                <p class="small muted">Antrean milik Anda ditampilkan terlebih dahulu. Pilih Baru untuk tiket yang paling lama menunggu; tab Semua Tiket menampilkan seluruh tiket yang boleh Anda lihat.</p>
+                <p class="small muted">Antrean milik Anda ditampilkan terlebih dahulu. Pilih Baru untuk tiket yang paling
+                    lama menunggu; tab Semua Tiket menampilkan seluruh tiket yang boleh Anda lihat.</p>
             </div><span class="pill pill-neutral">{{ $tickets->total() }} hasil</span>
         </div>
         <form class="filters" method="get" action="{{ route('tickets.index') }}">
@@ -92,7 +99,8 @@
                 <tbody>
                     @forelse($tickets as $ticket)
                         <tr>
-                            <td data-label="Nomor Tiket"><strong class="ticket-number">{{ $ticket->ticket_number ?? '#' . $ticket->id }}</strong>
+                            <td data-label="Nomor Tiket"><strong
+                                    class="ticket-number">{{ $ticket->ticket_number ?? '#' . $ticket->id }}</strong>
                                 <div class="small muted">
                                     {{ $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y · H:i') }}</div>
                                 @if ($ticket->source === 'simulated')
@@ -103,7 +111,8 @@
                                 <div class="small muted">{{ $ticket->opd ?: 'Belum ada unit kerja' }}</div>
                             </td>
                             <td data-label="Layanan"><span class="service-chip">{{ $ticket->service_label }}</span></td>
-                            <td data-label="Hasil AMS"><span class="small muted">{{ $ticket->ams_summary_label }}</span></td>
+                            <td data-label="Hasil AMS"><span class="small muted">{{ $ticket->ams_summary_label }}</span>
+                            </td>
                             <td data-label="Status"><span
                                     class="pill {{ $ticket->status === 'Open' ? 'pill-neutral' : ($ticket->status === 'Done' ? 'pill-green' : ($ticket->status === 'Returned' ? 'tte-pill-returned' : 'pill-blue')) }}">{{ $ticket->status_label }}</span>
                             </td>

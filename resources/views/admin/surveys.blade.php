@@ -65,7 +65,8 @@
                 <tbody>
                     @forelse ($responses as $response)
                         <tr>
-                            <td data-label="Waktu">{{ $response->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</td>
+                            <td data-label="Waktu">
+                                {{ $response->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</td>
                             <td data-label="Nomor Tiket">{{ $response->ticket?->ticket_number ?? '-' }}</td>
                             <td data-label="Nama Pengisi">{{ $response->respondent_name ?: 'Belum dicatat' }}</td>
                             <td data-label="Nilai"><span class="tte-rating">{{ $response->overall_rating }}/5</span></td>

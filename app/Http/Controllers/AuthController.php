@@ -128,7 +128,8 @@ class AuthController extends Controller {
     }
 
     public function forgotForm() {
-        return response()->view('auth.forgot-password')
+        return response()
+            ->view('auth.forgot-password')
             ->header('Cache-Control', 'no-store, private')
             ->header('X-Robots-Tag', 'noindex, nofollow');
     }
@@ -146,12 +147,15 @@ class AuthController extends Controller {
             Log::error('Pengiriman tautan reset akun gagal.', ['exception_class' => get_class($e)]);
         }
 
-        return back()->with('success',
-            'Jika email terdaftar dan aktif, tautan reset akan dikirim. Periksa Inbox atau Spam.');
+        return back()->with(
+            'success',
+            'Jika email terdaftar dan aktif, tautan reset akan dikirim. Periksa Inbox atau Spam.'
+        );
     }
 
     public function resetForm(Request $request, string $token) {
-        return response()->view('auth.reset-password', ['token' => $token, 'email' => $request->query('email', '')])
+        return response()
+            ->view('auth.reset-password', ['token' => $token, 'email' => $request->query('email', '')])
             ->header('Cache-Control', 'no-store, private')
             ->header('Referrer-Policy', 'no-referrer')
             ->header('X-Robots-Tag', 'noindex, nofollow');

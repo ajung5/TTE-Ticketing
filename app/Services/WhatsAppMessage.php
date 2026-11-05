@@ -26,8 +26,10 @@ class WhatsAppMessage {
     public function surveyUrl(Ticket $ticket): string {
         // Stable signature: opening the identical final message later must not cancel its confirmation.
         // The 30-day validity starts when the ticket is completed, not on each page view.
-        $issuedAt = $ticket->completed_at ?? $ticket->created_at ?? now();
-        return URL::temporarySignedRoute('public.survey.show', $issuedAt->copy()->addDays(30), ['ticket' => $ticket->getKey()]);
+        $issuedAt = $ticket->completed_at ?? ($ticket->created_at ?? now());
+        return URL::temporarySignedRoute('public.survey.show', $issuedAt->copy()->addDays(30), [
+            'ticket' => $ticket->getKey()
+        ]);
     }
 
     private function render(Ticket $ticket, string $event): string {
@@ -150,12 +152,11 @@ class WhatsAppMessage {
     /** Also works when JavaScript is unavailable (native form POST). */
     public function urlForRequest(Request $request, Ticket $ticket, string $message): string {
         $mobileHint = $request->input('wa_client') === 'mobile';
-        $mobileUserAgent = preg_match(
-            '/Android|iPhone|iPad|iPod|IEMobile|Windows Phone|Opera Mini/i',
-            (string) $request->userAgent()
-        ) === 1;
-        return ($mobileHint || $mobileUserAgent)
-            ? $this->mobileUrl($ticket, $message)
-            : $this->url($ticket, $message);
+        $mobileUserAgent =
+            preg_match(
+                '/Android|iPhone|iPad|iPod|IEMobile|Windows Phone|Opera Mini/i',
+                (string) $request->userAgent()
+            ) === 1;
+        return $mobileHint || $mobileUserAgent ? $this->mobileUrl($ticket, $message) : $this->url($ticket, $message);
     }
 }

@@ -67,21 +67,22 @@
             <aside class="sidebar">
                 <div class="tte-sidebar-head">
                     <a href="{{ route('dashboard') }}" class="brand" aria-label="Dashboard TTE Ticketing">
-                        <span class="brand-icon" aria-hidden="true"><img src="{{ asset('favicon.svg') }}?v=53" alt="" width="42" height="42"></span>
+                        <span class="brand-icon" aria-hidden="true"><img src="{{ asset('favicon.svg') }}?v=53"
+                                alt="" width="42" height="42"></span>
                         <span>TTE Ticketing<small>Layanan Sertifikat Elektronik</small></span>
                     </a>
                 </div>
                 <button type="button" class="tte-sidebar-toggle tte-sidebar-edge-toggle" data-sidebar-toggle
-                    aria-controls="tte-sidebar-menu" aria-pressed="false"
-                    aria-label="Perkecil menu samping" title="Perkecil menu samping">
+                    aria-controls="tte-sidebar-menu" aria-pressed="false" aria-label="Perkecil menu samping"
+                    title="Perkecil menu samping">
                     <svg class="tte-sidebar-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <rect x="3.5" y="4" width="17" height="16" rx="2" />
                         <path d="M9.5 4v16" />
                         <path class="tte-toggle-chevron" d="m15 9-3 3 3 3" />
                     </svg>
                 </button>
-                <button type="button" class="tte-mobile-menu-toggle" data-menu-toggle
-                    aria-controls="tte-sidebar-menu" aria-expanded="false">
+                <button type="button" class="tte-mobile-menu-toggle" data-menu-toggle aria-controls="tte-sidebar-menu"
+                    aria-expanded="false">
                     <span>Menu Navigasi</span><span aria-hidden="true" class="tte-menu-chevron">▾</span>
                 </button>
                 <div class="sidebar-group" id="tte-sidebar-menu">
@@ -160,7 +161,8 @@
                     @yield('content')
                     @include('layouts.footer')
                 </div>
-                <button type="button" class="tte-back-to-top" data-tte-back-top aria-label="Kembali ke atas" title="Kembali ke atas" hidden>
+                <button type="button" class="tte-back-to-top" data-tte-back-top aria-label="Kembali ke atas"
+                    title="Kembali ke atas" hidden>
                     <span aria-hidden="true">↑</span> Ke Atas
                 </button>
             </main>

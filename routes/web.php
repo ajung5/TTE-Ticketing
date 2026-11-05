@@ -39,7 +39,8 @@ Route::middleware('guest')->group(function () {
         ->name('login.submit');
     Route::get('/lupa-password', [AuthController::class, 'forgotForm'])->name('password.request');
     Route::post('/lupa-password', [AuthController::class, 'sendResetEmail'])
-        ->middleware('throttle:tte-password-email')->name('password.email');
+        ->middleware('throttle:tte-password-email')
+        ->name('password.email');
     Route::get('/reset-password/{token}', [AuthController::class, 'resetForm'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'reset'])
         ->middleware('throttle:6,1')

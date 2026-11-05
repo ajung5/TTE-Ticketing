@@ -88,7 +88,7 @@ class AppServiceProvider extends ServiceProvider {
             $emailHash = hash('sha256', strtolower(trim((string) $request->input('email', ''))));
             return [
                 Limit::perMinutes(10, 12)->by('ip:' . $request->ip()),
-                Limit::perMinutes(10, 3)->by('email:' . $emailHash),
+                Limit::perMinutes(10, 3)->by('email:' . $emailHash)
             ];
         });
 
