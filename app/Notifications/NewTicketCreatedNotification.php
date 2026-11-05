@@ -30,7 +30,7 @@ class NewTicketCreatedNotification extends Notification implements ShouldQueue {
 
     public function toMail(object $notifiable): MailMessage {
         return new MailMessage()
-            ->subject('[TTE-Ticketing] Tiket baru: ' . $this->ticketNumber)
+            ->subject('[Tiket baru]: ' . $this->ticketNumber)
             ->greeting('Ada permohonan layanan TTE baru')
             ->line('Nomor tiket: ' . $this->ticketNumber)
             ->line('Jenis layanan: ' . $this->serviceLabel)
