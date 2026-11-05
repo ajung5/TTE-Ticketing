@@ -1,0 +1,35 @@
+/* TTE v60: unified footer for authenticated and public views. */
+.tte-site-footer {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: auto;
+    padding: 30px 0 4px;
+    color: #6c7889;
+    text-align: right;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+.tte-site-footer small { font: inherit; }
+.tte-internal .content {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 70px);
+}
+.auth-page > .tte-site-footer {
+    flex: 0 0 auto;
+    align-self: stretch;
+    margin-top: 28px;
+    padding: 12px 6px 0;
+}
+@media (max-width: 680px) {
+    .tte-site-footer {
+        font-size: 11px;
+        padding: 23px 4px 5px;
+    }
+    .tte-internal .content { min-height: auto; }
+    .auth-page > .tte-site-footer { padding: 12px 4px 0; }
+}
+@media print {
+    .tte-site-footer { color: #515151; }
+}

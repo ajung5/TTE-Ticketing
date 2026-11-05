@@ -15,6 +15,7 @@
     <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=53">
     <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/tte-ui-fixes.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/tte-footer.css') }}?v=60">
     @auth
         <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=59">
         <script src="{{ asset('js/tte-internal-refresh.js') }}?v=51" defer></script>
@@ -157,6 +158,7 @@
                         </div>
                     @endif
                     @yield('content')
+                    @include('layouts.footer')
                 </div>
                 <button type="button" class="tte-back-to-top" data-tte-back-top aria-label="Kembali ke atas" title="Kembali ke atas" hidden>
                     <span aria-hidden="true">↑</span> Ke Atas
@@ -178,6 +180,7 @@
                 </div>
             @endif
             @yield('content')
+            @include('layouts.footer')
         </main>
     @endauth
     <div id="clipboard-status" class="clipboard-status" role="status" aria-live="polite"></div>

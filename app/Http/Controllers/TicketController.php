@@ -137,7 +137,21 @@ class TicketController extends Controller {
         // tidak dikirim melalui aplikasi (misalnya petugas menindaklanjuti secara luring).
         return $this->hadCertificateState($ticket, 'revoked') ||
             $this->hadCertificateState($ticket, 'not_issued') ||
-            ($ticket->layanan === 'Pembaruan' && $this->hadCertificateState($ticket, 'expired'));
+            ($ticket->layanan === 'Pembaruan' && $this->hadCertificateState($ticket, 'expired')) ||
+            // Akun awalnya belum aktif, kemudian aktivasi selesai dan SE aktif:
+            // cukup Tandai Selesai, tanpa notifikasi Reset/Pembaruan tambahan.
+            (in_array($ticket->layanan, ['Reset Passphrase', 'Pembaruan'], true) &&
+                $this->hadActivationFollowUp($ticket));
+    }
+
+    /** Riwayat aktivasi nyata pada tiket yang sama; bukan inferensi dari SE aktif. */
+    private function hadActivationFollowUp(Ticket $ticket): bool {
+        return $this->hasConfirmedNotice($ticket, 'activation_required') ||
+            TicketActivity::query()
+                ->where('ticket_id', $ticket->id)
+                ->where('action', 'ams_checked')
+                ->where('note', 'like', '%Aktivasi: not_activated%')
+                ->exists();
     }
 
     private function hadCertificateState(Ticket $ticket, string $status): bool {
@@ -203,7 +217,11 @@ class TicketController extends Controller {
             $this->hadCertificateState($ticket, 'revoked')
                 ? 'certificate_reissuance'
                 : ($this->hasConfirmedNotice($ticket, 'certificate_not_issued') ||
-                $this->hadCertificateState($ticket, 'not_issued')
+                $this->hadCertificateState($ticket, 'not_issued') ||
+                // Pembaruan yang memang pernah expired tetap dilaporkan sebagai pembaruan.
+                ($this->hadActivationFollowUp($ticket) &&
+                    !$this->hasConfirmedNotice($ticket, 'renewal') &&
+                    !$this->hadCertificateState($ticket, 'expired'))
                     ? 'certificate_issuance'
                     : 'certificate_renewal'),
             default => null
@@ -226,6 +244,10 @@ class TicketController extends Controller {
             }
             if ($this->hasConfirmedNotice($ticket, 'renewal') || $this->hadCertificateState($ticket, 'expired')) {
                 return 'certificate_renewed';
+            }
+            if ($this->hadActivationFollowUp($ticket)) {
+                // SE aktif pada pemeriksaan ulang setelah proses aktivasi.
+                return 'certificate_issued';
             }
         }
         return match ($event) {
