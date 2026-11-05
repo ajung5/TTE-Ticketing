@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Ticket;
 use App\Models\WaMessageTemplate;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
 class WhatsAppMessage {
@@ -133,7 +134,25 @@ class WhatsAppMessage {
         ]);
     }
 
+    /** Desktop stays in WhatsApp Web. */
     public function url(Ticket $ticket, string $message): string {
         return 'https://web.whatsapp.com/send?phone=' . $ticket->no_wa . '&text=' . rawurlencode($message);
+    }
+
+    /** Official universal link: native WhatsApp when installed on iOS/Android. */
+    public function mobileUrl(Ticket $ticket, string $message): string {
+        return 'https://wa.me/' . $ticket->no_wa . '?text=' . rawurlencode($message);
+    }
+
+    /** Also works when JavaScript is unavailable (native form POST). */
+    public function urlForRequest(Request $request, Ticket $ticket, string $message): string {
+        $mobileHint = $request->input('wa_client') === 'mobile';
+        $mobileUserAgent = preg_match(
+            '/Android|iPhone|iPad|iPod|IEMobile|Windows Phone|Opera Mini/i',
+            (string) $request->userAgent()
+        ) === 1;
+        return ($mobileHint || $mobileUserAgent)
+            ? $this->mobileUrl($ticket, $message)
+            : $this->url($ticket, $message);
     }
 }

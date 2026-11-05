@@ -370,7 +370,7 @@
                     @unless ($ticket->source === 'simulated')
                         <form target="tte_whatsapp_web" method="post" data-wa-open="1"
                             action="{{ route('tickets.whatsapp.service', $ticket) }}">@csrf
-                            <button class="btn btn-wa full" type="submit">Buka WhatsApp Web ↗</button>
+                            <button class="btn btn-wa full" type="submit">Buka WhatsApp ↗</button>
                         </form>
                         @if ($serviceNotification?->opened_at)
                             <p class="small muted mt">Tautan dibuka
@@ -385,7 +385,7 @@
                             @endif
                         @endif
                     @endunless
-                    <p class="small muted mt">Membuka WhatsApp Web bukan bukti pesan terkirim atau diterima.
+                    <p class="small muted mt">Membuka WhatsApp bukan bukti pesan terkirim atau diterima.
                         Konfirmasi dilakukan manual.</p>
                 </section>
             @endif
@@ -532,5 +532,5 @@
     </div>
     <link rel="stylesheet" href="{{ asset('css/ams-workflow.css') }}?v=35">
     <script src="{{ asset('js/ams-workflow.js') }}?v=35" defer></script>
-    <script src="{{ asset('js/whatsapp-open-refresh.js') }}?v=1" defer></script>
+    <script src="{{ asset('js/whatsapp-open-refresh.js') }}?v=56" defer></script>
 @endsection

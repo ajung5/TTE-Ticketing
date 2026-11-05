@@ -539,7 +539,9 @@ class TicketController extends Controller {
             ['ticket_id' => $ticket->id, 'event_type' => $event],
             ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now(), 'confirmed_at' => null]
         );
-        $whatsappUrl = $whatsapp->url($ticket, $message);
+        // Device-aware redirect; the record above is written before navigating.
+        // JSON is kept for the desktop tab-opening flow.
+        $whatsappUrl = $whatsapp->urlForRequest($request, $ticket, $message);
         if ($request->expectsJson()) {
             return response()->json(['url' => $whatsappUrl]);
         }
@@ -735,7 +737,9 @@ class TicketController extends Controller {
             ['ticket_id' => $ticket->id, 'event_type' => 'completed'],
             ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now()]
         );
-        $whatsappUrl = $whatsapp->url($ticket, $message);
+        // Device-aware redirect; the record above is written before navigating.
+        // JSON is kept for the desktop tab-opening flow.
+        $whatsappUrl = $whatsapp->urlForRequest($request, $ticket, $message);
         if ($request->expectsJson()) {
             return response()->json(['url' => $whatsappUrl]);
         }
