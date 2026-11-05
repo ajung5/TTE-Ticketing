@@ -530,7 +530,7 @@
             </section>
         </div>
     </div>
-    <link rel="stylesheet" href="{{ asset('css/ams-workflow.css') }}?v=35">
+    <link rel="stylesheet" href="{{ asset('css/ams-workflow.css') }}?v=57">
     <script src="{{ asset('js/ams-workflow.js') }}?v=35" defer></script>
-    <script src="{{ asset('js/whatsapp-open-refresh.js') }}?v=56" defer></script>
+    <script src="{{ asset('js/whatsapp-open-refresh.js') }}?v=57" defer></script>
 @endsection
