@@ -451,3 +451,36 @@
     .tte-next-action .btn { width:100%; }
     .tte-admin-health-list { grid-template-columns:1fr; }
 }
+
+/* TTE v59: preset writing aids accessible at every editor, including last item. */
+.tte-internal .tte-preset-quick-tokens { display:flex; align-items:center; flex-wrap:wrap; gap:7px; padding:4px 0 0; }
+.tte-internal .tte-preset-quick-tokens > span { font-size:12px; color:#50677b; font-weight:700; width:100%; }
+.tte-internal .tte-preset-quick-tokens .token-insert { max-width:100%; font-size:12px; }
+.tte-internal .tte-preset-inline-guide { border:1px solid #d7e7e1; border-radius:11px; background:#f8fbf9; overflow:hidden; }
+.tte-internal .tte-preset-inline-guide > summary { cursor:pointer; font-weight:750; font-size:13px; padding:12px 14px; color:#285a50; }
+.tte-internal .tte-preset-inline-guide > summary:focus-visible { outline:3px solid #83b8a8; outline-offset:-3px; }
+.tte-internal .tte-preset-inline-guide[open] > summary { border-bottom:1px solid #d7e7e1; }
+.tte-internal .tte-preset-inline-guide-body { padding:12px 14px 14px; }
+.tte-internal .tte-preset-inline-guide-body .token-list { max-height:330px; overflow-y:auto; }
+.tte-internal .tte-preset-inline-guide-body .token-row { min-width:0; }
+.tte-internal .template-columns > aside.stack { align-self:stretch; height:100%; min-height:0; }
+.tte-internal .template-columns > aside.stack .sticky-guide { position:sticky; top:15px; max-height:calc(100dvh - 30px); overflow-y:auto; overscroll-behavior:contain; }
+/* Highlight submitted service at the exact point where AMS is checked. */
+.tte-internal .tte-ams-requested-service { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; background:#eaf3f9; border:1px solid #91b9d2; border-left:5px solid #255879; border-radius:12px; padding:16px 18px; margin-bottom:15px; }
+.tte-internal .tte-ams-requested-service .tte-ams-requested-label { display:block; font-size:11px; font-weight:800; letter-spacing:.07em; color:#2e5974; margin-bottom:3px; }
+.tte-internal .tte-ams-requested-service .tte-ams-requested-name { display:block; font-size:20px; font-weight:800; line-height:1.3; color:#123b56; overflow-wrap:anywhere; }
+.tte-internal .tte-ams-requested-service p { flex:1 1 190px; font-size:12px; line-height:1.55; color:#3b5f77; margin:0; }
+/* Mobile-only, unobtrusive action when scrolled near the bottom of a long page. */
+.tte-back-to-top { display:none; }
+@media(max-width:1000px) {
+    /* Per-preset inline help remains available when the sidebar would fall below the editors. */
+    .tte-internal .template-columns > aside.stack { display:none; }
+}
+@media(max-width:680px) {
+    .tte-internal .tte-ams-requested-service { padding:13px 14px; }
+    .tte-internal .tte-ams-requested-service .tte-ams-requested-name { font-size:19px; }
+    .tte-back-to-top:not([hidden]) { position:fixed; right:15px; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); z-index:110; display:inline-flex; align-items:center; gap:7px; padding:12px 15px; border:1px solid #aac9bd; border-radius:999px; background:#195b4d; color:white; box-shadow:0 5px 20px rgba(13,36,31,.25); font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+    .tte-back-to-top:focus-visible { outline:3px solid #88d6bc; outline-offset:3px; }
+}
+.tte-back-to-top[hidden] { display:none !important; }
+@media print { .tte-back-to-top { display:none !important; } }

@@ -16,10 +16,11 @@
     <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/tte-ui-fixes.css') }}?v=1">
     @auth
-        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=58">
+        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=59">
         <script src="{{ asset('js/tte-internal-refresh.js') }}?v=51" defer></script>
+        <script src="{{ asset('js/tte-back-to-top.js') }}?v=59" defer></script>
     @endauth
-    <script src="{{ asset('js/tte.js') }}?v=3" defer></script>
+    <script src="{{ asset('js/tte.js') }}?v=59" defer></script>
 </head>
 
 <body>
@@ -157,6 +158,9 @@
                     @endif
                     @yield('content')
                 </div>
+                <button type="button" class="tte-back-to-top" data-tte-back-top aria-label="Kembali ke atas" title="Kembali ke atas" hidden>
+                    <span aria-hidden="true">↑</span> Ke Atas
+                </button>
             </main>
         </div>
     @else

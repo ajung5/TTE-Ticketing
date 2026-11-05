@@ -35,6 +35,27 @@
                             <label for="body-{{ $eventCode }}">Isi pesan WhatsApp</label>
                             <textarea id="body-{{ $eventCode }}" name="body" rows="9" minlength="40" maxlength="3500" required
                                 class="template-textarea">{{ old('body', $template->body) }}</textarea>
+                            <div class="tte-preset-quick-tokens" aria-label="Placeholder penting">
+                                <span>Masukkan placeholder:</span>
+                                <button type="button" class="token-insert" data-insert-token="{nama_pemohon}">{nama_pemohon}</button>
+                                <button type="button" class="token-insert" data-insert-token="{nomor_tiket}">{nomor_tiket}</button>
+                                <button type="button" class="token-insert" data-insert-token="{nama_verifikator}">{nama_verifikator}</button>
+                            </div>
+                            <details class="tte-preset-inline-guide">
+                                <summary>Semua Placeholder dan Panduan Penulisan</summary>
+                                <div class="tte-preset-inline-guide-body">
+                                    <p class="small muted">Ketuk placeholder untuk memasukkannya langsung ke preset ini. NIK pada pesan tetap tersamarkan.</p>
+                                    <div class="token-list">
+                                        @foreach (\App\Models\WaMessageTemplate::VARIABLE_DESCRIPTIONS as $token => $desc)
+                                            <div class="token-row">
+                                                <button type="button" class="token-insert" data-insert-token="{{ $token }}" title="Masukkan ke preset ini">{{ $token }}</button>
+                                                <span class="small muted">{{ $desc }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <p class="small muted mt">Wajib: {nama_pemohon}, {nomor_tiket}, dan {nama_verifikator}. Gunakan {survey_url} untuk notifikasi Selesai.</p>
+                                </div>
+                            </details>
                             <div class="tte-preset-sample">
                                 <strong>Pratinjau dengan data contoh</strong>
                                 <p class="tte-preview-caption">Contoh fiktif di browser, tanpa mengambil identitas pemohon atau mengirim pesan.</p>

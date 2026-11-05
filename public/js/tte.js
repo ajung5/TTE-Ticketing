@@ -38,8 +38,10 @@
     const button = event.target.closest('[data-insert-token]');
     if (!button) return;
     const token = button.getAttribute('data-insert-token');
+    // A token in an inline guide must always target that same preset.
+    const localEditor = button.closest('.tte-preset-detail')?.querySelector('.template-textarea');
     const activeEditor = focusedPresetEditor?.closest('details')?.open ? focusedPresetEditor : null;
-    const textarea = activeEditor || document.querySelector('.tte-preset-detail[open] .template-textarea')
+    const textarea = localEditor || activeEditor || document.querySelector('.tte-preset-detail[open] .template-textarea')
       || document.querySelector('.template-textarea');
     if (!textarea || !token) return;
     const start = textarea.selectionStart, end = textarea.selectionEnd;

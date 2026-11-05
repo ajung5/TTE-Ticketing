@@ -204,6 +204,13 @@
                             <h2>Pemeriksaan Akun, WhatsApp, Sertifikat, dan Layanan</h2>
                         </div>
                     </div>
+                    <div class="tte-ams-requested-service" role="note" aria-label="Layanan diajukan pemohon">
+                        <div>
+                            <span class="tte-ams-requested-label">LAYANAN DIAJUKAN OLEH PEMOHON</span>
+                            <strong class="tte-ams-requested-name">{{ $ticket->service_label }}</strong>
+                        </div>
+                        <p>Bandingkan pilihan layanan pemohon dengan hasil pemeriksaan AMS. Jenis layanan yang diajukan tidak berubah otomatis.</p>
+                    </div>
                     <div class="verification-panel">
                         <div class="verification-tag"><strong class="verification-status">
                                 Akun: {{ $ticket->activation_label }} ·
@@ -248,8 +255,8 @@
                                     3. Status penerbitan Sertifikat Elektronik
                                     <select id="ams-certificate-status" name="certificate_issuance_status" disabled>
                                         <option value="">Pilih status penerbitan</option>
-                                        <option value="issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'issued')>Sudah/pernah terbit</option>
-                                        <option value="not_issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'not_issued')>Belum pernah terbit
+                                        <option value="issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'issued')>Sudah Terbit</option>
+                                        <option value="not_issued" @selected(old('certificate_issuance_status', $ticket->certificate_issuance_status) === 'not_issued')>Belum Terbit
                                         </option>
                                     </select>
                                 </label></div>
