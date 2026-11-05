@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider {
                         'feedback'
                     ]);
                 } else {
-                    $request->session()->keep('_old_input');
+                    $request->session()->flash('_old_input', $request->session()->get('_old_input', []));
                 }
             }
 
