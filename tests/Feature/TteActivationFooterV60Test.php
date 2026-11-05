@@ -111,17 +111,23 @@ it('does not bypass the normal reset or renewal notification when no activation 
         ->where('action', 'wa_service_confirmed')->exists())->toBeFalse();
 })->with(['Reset Passphrase', 'Pembaruan']);
 
-it('renders the same right-aligned, dynamic copyright footer on public, admin and verifier screens', function () {
+it('renders copyright on the left and app version on the right for public, admin and verifier', function () {
     config()->set('tte.version', '3.2.1');
-    $label = 'Copyright@DiskominfoSubang 2026-' . now('Asia/Jakarta')->year . ' v3.2.1';
-    $this->get(route('public.form'))->assertOk()
-        ->assertSee($label)
-        ->assertSee('class="tte-site-footer"', false)
-        ->assertSee('tte-footer.css');
+    $copyright = 'Copyright@DiskominfoSubang 2026-' . now('Asia/Jakarta')->year;
+    $check = function ($response) use ($copyright) {
+        $response->assertOk()->assertSee($copyright)
+            ->assertSee('class="tte-site-footer"', false)
+            ->assertSee('class="tte-site-footer-copy"', false)
+            ->assertSee('class="tte-site-footer-version"', false)
+            ->assertSee('v3.2.1')
+            ->assertSee('tte-footer.css')
+            ->assertSee('tte-footer.css?v=60.1');
+        $html = $response->getContent();
+        expect(strpos($html, $copyright))->toBeLessThan(strpos($html, 'v3.2.1'));
+    };
+    $check($this->get(route('public.form')));
     $admin = User::factory()->create(['role' => 'admin']);
-    $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk()
-        ->assertSee($label)->assertSee('class="tte-site-footer"', false);
+    $check($this->actingAs($admin)->get(route('admin.dashboard')));
     $verifier = User::factory()->create(['role' => 'verifier']);
-    $this->actingAs($verifier)->get(route('tickets.index'))->assertOk()
-        ->assertSee($label)->assertSee('class="tte-site-footer"', false);
+    $check($this->actingAs($verifier)->get(route('tickets.index')));
 });
