@@ -35,6 +35,11 @@
                             <label for="body-{{ $eventCode }}">Isi pesan WhatsApp</label>
                             <textarea id="body-{{ $eventCode }}" name="body" rows="9" minlength="40" maxlength="3500" required
                                 class="template-textarea">{{ old('body', $template->body) }}</textarea>
+                            <div class="tte-preset-sample">
+                                <strong>Pratinjau dengan data contoh</strong>
+                                <p class="tte-preview-caption">Contoh fiktif di browser, tanpa mengambil identitas pemohon atau mengirim pesan.</p>
+                                <div class="tte-preset-preview" data-tte-preset-preview aria-live="off"></div>
+                            </div>
                             <div class="template-actions">
                                 <span class="small muted">Terakhir diperbarui
                                     {{ $template->updated_at?->timezone('Asia/Jakarta')->format('d M Y H:i') }}</span>
@@ -74,4 +79,5 @@
             </section>
         </aside>
     </div>
+    <script src="{{ asset('js/tte-preset-preview.js') }}?v=58" defer></script>
 @endsection

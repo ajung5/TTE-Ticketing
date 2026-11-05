@@ -39,12 +39,12 @@
         </div>
     </div>
     <nav class="tte-queue-tabs" aria-label="Filter cepat status tiket">
-        <a href="{{ route('tickets.index') }}" @class(['is-active' => !request('status')])
-            @if (!request('status')) aria-current="page" @endif>Semua Tiket</a>
+        <a href="{{ route('tickets.index', ['status' => 'all']) }}" @class(['is-active' => request('status') === 'all'])
+            @if (request('status') === 'all') aria-current="page" @endif>Semua Tiket</a>
         <a href="{{ route('tickets.index', ['status' => 'Open']) }}" @class(['is-active' => request('status') === 'Open'])
             @if (request('status') === 'Open') aria-current="page" @endif>Baru <strong>{{ $stats['new'] }}</strong></a>
-        <a href="{{ route('tickets.index', ['status' => 'In Progress']) }}" @class(['is-active' => request('status') === 'In Progress'])
-            @if (request('status') === 'In Progress') aria-current="page" @endif>Milik Saya <strong>{{ $stats['mine'] }}</strong></a>
+        <a href="{{ route('tickets.index', ['status' => 'In Progress']) }}" @class(['is-active' => in_array(request('status'), [null, 'In Progress'], true)])
+            @if (in_array(request('status'), [null, 'In Progress'], true)) aria-current="page" @endif>Milik Saya <strong>{{ $stats['mine'] }}</strong></a>
         <a href="{{ route('tickets.index', ['status' => 'Done']) }}" @class(['is-active' => request('status') === 'Done'])
             @if (request('status') === 'Done') aria-current="page" @endif>Selesai <strong>{{ $stats['completed'] }}</strong></a>
         <a href="{{ route('tickets.index', ['status' => 'Returned']) }}" @class(['is-active' => request('status') === 'Returned'])
@@ -55,15 +55,15 @@
             <div>
                 <div class="eyebrow">MANAJEMEN PERMOHONAN</div>
                 <h2>Daftar Tiket dan Antrean</h2>
-                <p class="small muted">Hanya tiket baru dan tiket milik Anda yang ditampilkan.</p>
+                <p class="small muted">Antrean milik Anda ditampilkan terlebih dahulu. Pilih Baru untuk tiket yang paling lama menunggu; tab Semua Tiket menampilkan seluruh tiket yang boleh Anda lihat.</p>
             </div><span class="pill pill-neutral">{{ $tickets->total() }} hasil</span>
         </div>
         <form class="filters" method="get" action="{{ route('tickets.index') }}">
             <input name="q" type="search" value="{{ request('q') }}" placeholder="Cari nama pemohon / nomor tiket"
                 aria-label="Cari tiket">
             <select name="status" aria-label="Filter status">
-                <option value="">Semua Status</option>
-                @foreach (['Open' => 'Baru', 'In Progress' => 'Diproses', 'Done' => 'Selesai', 'Returned' => 'Perlu Pengajuan Ulang'] as $value => $label)
+                <option value="all" @selected(request('status') === 'all')>Semua Status</option>
+                @foreach (['Open' => 'Baru', 'In Progress' => 'Milik Saya', 'Done' => 'Selesai', 'Returned' => 'Perlu Pengajuan Ulang'] as $value => $label)
                     <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
                 @endforeach
             </select>

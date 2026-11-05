@@ -424,3 +424,30 @@
 @media print {
     .tte-internal .sidebar > .tte-sidebar-edge-toggle { display: none !important; }
 }
+
+/* TTE UX v58: one visible next action; evidence remains available. */
+.tte-next-action { border:1px solid #bfdbcf; background:#f4faf6; border-radius:15px; padding:18px 20px; margin:0 0 20px; }
+.tte-next-action .tte-next-eyebrow { color:#346e57; font-size:11px; font-weight:750; letter-spacing:.07em; text-transform:uppercase; }
+.tte-next-action h2 { margin:7px 0 6px; font-size:19px; color:#1f493d; }
+.tte-next-action p { color:#4d625c; font-size:13px; max-width:850px; margin:0 0 13px; }
+.tte-next-action .btn { min-height:40px; width:fit-content; max-width:100%; }
+.tte-next-progress { display:flex; gap:7px; margin-bottom:12px; list-style:none; padding:0; }
+.tte-next-progress li { flex:1; height:5px; border-radius:999px; background:#dce8e2; }
+.tte-next-progress li.is-complete { background:#2a8666; }
+.tte-next-progress li.is-current { background:#f0b85a; }
+.tte-internal #tte-ams-check,.tte-internal #tte-service-notification,.tte-internal #tte-final-notification,.tte-internal #tte-ticket-workflow { scroll-margin-top:20px; }
+.tte-internal .tte-ux-hint { border-left:3px solid #87a69a; padding:8px 12px; background:#f7faf8; font-size:12px; color:#456359; margin-top:10px; }
+.tte-admin-health-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin:0 22px 20px; }
+.tte-admin-health-list .tte-health-item { border:1px solid #e1e8ed; border-radius:11px; background:#fbfcfd; padding:13px; min-width:0; }
+.tte-health-item strong { display:block; font-size:13px; color:#234356; margin-bottom:6px; }
+.tte-health-item p { font-size:12px; line-height:1.5; color:#627385; margin:0; }
+.tte-health-item .tte-health-status { font-weight:800; font-size:12px; color:#1d694d; }
+.tte-health-item .tte-health-status.is-warning { color:#a35b20; }
+.tte-preset-preview { white-space:pre-wrap; overflow-wrap:anywhere; border:1px dashed #bdd2d8; background:#f4f9f8; color:#2b4052; border-radius:11px; padding:15px; min-height:90px; font-size:12px; line-height:1.6; }
+.tte-preview-caption { font-size:11px; color:#71879a; }
+.tte-internal .tte-queue-tabs a { min-height:40px; display:inline-flex; align-items:center; }
+@media(max-width:680px) {
+    .tte-next-action { padding:15px; }
+    .tte-next-action .btn { width:100%; }
+    .tte-admin-health-list { grid-template-columns:1fr; }
+}

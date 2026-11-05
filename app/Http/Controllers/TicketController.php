@@ -7,6 +7,7 @@ use App\Models\TicketActivity;
 use App\Models\WaNotification;
 use App\Models\WaMessageTemplate;
 use App\Services\WhatsAppMessage;
+use App\Services\TicketNextAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -28,10 +29,11 @@ class TicketController extends Controller {
         $this->verifier($request);
         $query = Ticket::query()
             ->with('claimant')
-            ->where(fn($q) => $q->where('status', 'Open')->orWhere('claimed_by', $request->user()->id))
-            ->latest();
-        if (in_array($request->query('status'), ['Open', 'In Progress', 'Done', 'Returned'], true)) {
-            $query->where('status', $request->query('status'));
+            ->where(fn($q) => $q->where('status', 'Open')->orWhere('claimed_by', $request->user()->id));
+        // Default to actionable work. Explicit status=all keeps full queue visible.
+        $status = $request->query('status', 'In Progress');
+        if (in_array($status, ['Open', 'In Progress', 'Done', 'Returned'], true)) {
+            $query->where('status', $status);
         }
         if (in_array($request->query('layanan'), ['Reset Passphrase', 'Pembaruan', 'Pendaftaran'], true)) {
             $query->where('layanan', $request->query('layanan'));
@@ -43,6 +45,8 @@ class TicketController extends Controller {
                     ->orWhere('ticket_number', 'like', '%' . $search . '%')
             );
         }
+        // FIFO for the shared unclaimed queue; most recent first elsewhere.
+        $query->orderBy('created_at', $status === 'Open' ? 'asc' : 'desc')->orderBy('id', $status === 'Open' ? 'asc' : 'desc');
         $tickets = $query->paginate(12)->withQueryString();
         $stats = [
             'new' => Ticket::where('status', 'Open')->count(),
@@ -266,6 +270,11 @@ class TicketController extends Controller {
             : null;
         $serviceConfirmed = $serviceNotification?->confirmed_at !== null;
         $waMessage = $ticket->status === 'Done' ? $whatsapp->forCompletedTicket($ticket) : null;
+        $finalNotice = $ticket->status === 'Done'
+            ? $ticket->whatsappNotifications->firstWhere('event_type', 'completed') : null;
+        $nextAction = app(TicketNextAction::class)->resolve(
+            $ticket, $serviceEvent, $serviceConfirmed, $completionReady, $serviceNotification, $finalNotice
+        );
         return view(
             'tickets.show',
             compact(
@@ -276,7 +285,8 @@ class TicketController extends Controller {
                 'serviceConfirmed',
                 'waMessage',
                 'applicantUptd',
-                'completionReady'
+                'completionReady',
+                'nextAction'
             )
         );
     }
@@ -535,9 +545,12 @@ class TicketController extends Controller {
         );
         $ticket->load('claimant');
         $message = $whatsapp->forServiceTicket($ticket, $event);
+        $previousNotice = WaNotification::where('ticket_id', $ticket->id)->where('event_type', $event)->first();
+        $confirmation = $previousNotice && hash_equals((string) $previousNotice->message, $message)
+            ? $previousNotice->confirmed_at : null;
         WaNotification::updateOrCreate(
             ['ticket_id' => $ticket->id, 'event_type' => $event],
-            ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now(), 'confirmed_at' => null]
+            ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now(), 'confirmed_at' => $confirmation]
         );
         // Device-aware redirect; the record above is written before navigating.
         // JSON is kept for the desktop tab-opening flow.
@@ -733,9 +746,12 @@ class TicketController extends Controller {
         abort_unless($ticket->status === 'Done', 409);
         $ticket->load('claimant');
         $message = $whatsapp->forCompletedTicket($ticket);
+        $previousNotice = WaNotification::where('ticket_id', $ticket->id)->where('event_type', 'completed')->first();
+        $confirmation = $previousNotice && hash_equals((string) $previousNotice->message, $message)
+            ? $previousNotice->confirmed_at : null;
         WaNotification::updateOrCreate(
             ['ticket_id' => $ticket->id, 'event_type' => 'completed'],
-            ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now()]
+            ['verifier_id' => $request->user()->id, 'message' => $message, 'opened_at' => now(), 'confirmed_at' => $confirmation]
         );
         // Device-aware redirect; the record above is written before navigating.
         // JSON is kept for the desktop tab-opening flow.

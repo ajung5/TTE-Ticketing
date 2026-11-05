@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\TteSystemHealth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
@@ -50,6 +51,15 @@ class AdminController extends Controller {
             ->get()
             ->keyBy('claimed_by');
         $verifiers = User::where('role', 'verifier')->orderBy('name')->get();
+        $health = app(TteSystemHealth::class)->summary();
+        $attentionHours = max(1, (int) config('tte.ticket_attention_hours', 24));
+        $attention = [
+            'hours' => $attentionHours,
+            'waiting' => Ticket::where('status', 'Open')->where('created_at', '<', now()->subHours($attentionHours))->count(),
+            'idle' => Ticket::where('status', 'In Progress')->where('updated_at', '<', now()->subHours($attentionHours))->count(),
+            'weekly_in' => Ticket::where('created_at', '>=', now()->subDays(7))->count(),
+            'weekly_done' => Ticket::where('status', 'Done')->where('completed_at', '>=', now()->subDays(7))->count(),
+        ];
         // Distribusi hasil aktual, berbeda dengan distribusi layanan yang diminta pemohon.
         $outcomes = Ticket::query()
             ->where('status', 'Done')
@@ -58,7 +68,7 @@ class AdminController extends Controller {
             ->selectRaw('COUNT(*) as total')
             ->groupBy('service_outcome')
             ->pluck('total', 'service_outcome');
-        return view('admin.dashboard', compact('stats', 'services', 'counts', 'verifiers', 'ams', 'outcomes'));
+        return view('admin.dashboard', compact('stats', 'services', 'counts', 'verifiers', 'ams', 'outcomes', 'health', 'attention'));
     }
 
     public function sendResetLink(Request $request, User $user) {

@@ -80,6 +80,11 @@
     if (!canRecommend || recommended.value === requested) recommended.value = '';
     if (!issued || revoked) alignment.value = '';
     if (registrationMismatch || (expired && requested !== 'Pembaruan')) alignment.value = 'unsuitable';
+    // Keep manual choice only for ambiguous cases. The server still decides.
+    if (expired && requested !== 'Pembaruan') {
+      stage(recommended, recommendationBlock, false);
+      recommended.value = '';
+    }
 
     let message = 'Mulai dari pemeriksaan aktivasi akun.';
     if (activation.value === 'not_activated') {

@@ -23,6 +23,20 @@
         <div class="alert warn" role="status"><strong>Mode simulasi:</strong> Tiket ini menggunakan data dan nomor WhatsApp
             fiktif. Tombol kirim ke WhatsApp dinonaktifkan; gunakan tombol Salin Pesan untuk menguji format pesan.</div>
     @endif
+    <section class="tte-next-action" aria-label="Tindakan berikutnya">
+        <div class="tte-next-eyebrow">Tindakan Berikutnya · Tahap {{ $nextAction['step'] }} dari 4</div>
+        <ol class="tte-next-progress" aria-label="Progres penanganan">
+            @for ($step = 1; $step <= 4; $step++)
+                <li @class(['is-complete' => $step < $nextAction['step'], 'is-current' => $step === $nextAction['step']])
+                    aria-label="Tahap {{ $step }}{{ $step < $nextAction['step'] ? ' selesai' : ($step === $nextAction['step'] ? ' saat ini' : ' berikutnya') }}"></li>
+            @endfor
+        </ol>
+        <h2>{{ $nextAction['title'] }}</h2>
+        <p>{{ $nextAction['description'] }}</p>
+        @if ($nextAction['target'])
+            <a class="btn btn-primary" href="{{ $nextAction['target'] }}">{{ $nextAction['button'] }} →</a>
+        @endif
+    </section>
     <div class="columns detail-columns">
         <div class="stack">
             <section class="card">
@@ -183,7 +197,7 @@
                         ])
                         ->isNotEmpty();
                 @endphp
-                <section class="card">
+                <section class="card" id="tte-ams-check">
                     <div class="section-heading">
                         <div>
                             <div class="eyebrow">LANGKAH 1 / PEMERIKSAAN AMS</div>
@@ -201,13 +215,14 @@
                                     {{ $ticket->wa_checked_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</div>
                             @endif
                         </div>
+                        <details class="tte-ams-help"><summary class="small muted">Panduan urutan pemeriksaan AMS</summary>
                         <p class="small muted">Urutan pemeriksaan pada <strong>AMS BSrE</strong>:
                             <strong>1. Aktivasi akun</strong>, <strong>2. Verifikasi WhatsApp</strong>,
                             <strong>3. Penerbitan Sertifikat Elektronik</strong>,
                             <strong>4. Status SE (Aktif, Expired, Revoke)</strong>, dan
                             <strong>5. Kesesuaian pilihan layanan</strong>.
                             Status sudah terbit tidak otomatis berarti sertifikat aktif.
-                        </p>
+                        </p></details>
                         <form method="post" action="{{ route('tickets.verify-whatsapp', $ticket) }}" class="stack"
                             id="ams-verification-form" data-requested-service="{{ $ticket->layanan }}"
                             data-onboarding-history="{{ $onboardingHistory ? '1' : '0' }}"
@@ -273,6 +288,7 @@
                                 <p class="small muted">SE Expired diarahkan ke Pembaruan; SE Revoke diarahkan ke Penerbitan
                                     Ulang.</p>
                             </div>
+                            <div class="tte-ux-hint">Pilih hasil pemeriksaan yang terlihat di AMS. Rekomendasi otomatis mengikuti hasil yang pasti; untuk kasus membutuhkan klarifikasi, pilih layanan yang sesuai.</div>
                             <div id="ams-decision-preview" class="ams-decision-preview small muted" role="status"
                                 aria-live="polite">Lengkapi hasil pemeriksaan AMS.</div>
                             <label for="ams-note">Catatan pemeriksaan (opsional)
@@ -303,7 +319,7 @@
             @endif
 
             @if ($serviceMessage && $serviceEvent)
-                <section class="card whatsapp-card">
+                <section class="card whatsapp-card" id="tte-service-notification">
                     <div class="section-heading">
                         <div>
                             <div class="eyebrow">LANGKAH 2 / NOTIFIKASI SESUAI AMS</div>
@@ -392,7 +408,7 @@
 
             @if ($ticket->status === 'Done' && $waMessage)
                 @php($notification = $ticket->whatsappNotifications->firstWhere('event_type', 'completed'))
-                <section class="card whatsapp-card">
+                <section class="card whatsapp-card" id="tte-final-notification">
                     <div class="section-heading">
                         <div>
                             <div class="eyebrow">LANGKAH 3 / NOTIFIKASI AKHIR</div>
@@ -431,7 +447,7 @@
                 </section>
             @endif
 
-            <section class="card">
+            <section class="card" id="tte-ticket-workflow">
                 <div class="section-heading">
                     <div>
                         <div class="eyebrow">WORKFLOW</div>
@@ -531,6 +547,6 @@
         </div>
     </div>
     <link rel="stylesheet" href="{{ asset('css/ams-workflow.css') }}?v=57">
-    <script src="{{ asset('js/ams-workflow.js') }}?v=35" defer></script>
+    <script src="{{ asset('js/ams-workflow.js') }}?v=58" defer></script>
     <script src="{{ asset('js/whatsapp-open-refresh.js') }}?v=57" defer></script>
 @endsection

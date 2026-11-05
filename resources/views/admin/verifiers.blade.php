@@ -153,7 +153,7 @@
             </div>
             <span class="pill pill-neutral">{{ $verifiers->count() }} akun</span>
         </div>
-        <p class="small muted">Gunakan <strong>Edit Akun</strong> untuk memperbarui identitas atau mengganti password. Password
+        <p class="small muted">Gunakan <strong>Edit Akun</strong> untuk memperbarui identitas, atau <strong>Kirim Reset Email</strong> agar verifikator mengatur password sendiri. Password
             lama tidak dapat ditampilkan.</p>
         <div class="table-scroll">
             <table class="verifier-table">
@@ -187,6 +187,10 @@
                                 <div class="verifier-actions">
                                     <button type="button" class="btn btn-outline btn-small"
                                         data-open-dialog="tte-edit-verifier-{{ $verifier->id }}">Edit Akun</button>
+                                    <form method="post" action="{{ route('admin.password-reset', $verifier) }}"
+                                        onsubmit="return confirm('Kirim tautan reset password ke email verifikator ini?')">@csrf
+                                        <button class="btn btn-outline btn-small" type="submit">Kirim Reset Email</button>
+                                    </form>
                                     <form method="post" action="{{ route('admin.verifiers.destroy', $verifier) }}"
                                         onsubmit="return confirm('Nonaktifkan akun verifikator ini? Akun tidak dapat login lagi, tetapi histori tiket tetap tersimpan.')">
                                         @csrf

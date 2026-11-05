@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3">
     <link rel="stylesheet" href="{{ asset('css/tte-ui-fixes.css') }}?v=1">
     @auth
-        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=53">
+        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=58">
         <script src="{{ asset('js/tte-internal-refresh.js') }}?v=51" defer></script>
     @endauth
     <script src="{{ asset('js/tte.js') }}?v=3" defer></script>

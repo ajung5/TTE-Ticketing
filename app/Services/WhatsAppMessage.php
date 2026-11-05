@@ -24,7 +24,10 @@ class WhatsAppMessage {
     }
 
     public function surveyUrl(Ticket $ticket): string {
-        return URL::temporarySignedRoute('public.survey.show', now()->addDays(30), ['ticket' => $ticket->getKey()]);
+        // Stable signature: opening the identical final message later must not cancel its confirmation.
+        // The 30-day validity starts when the ticket is completed, not on each page view.
+        $issuedAt = $ticket->completed_at ?? $ticket->created_at ?? now();
+        return URL::temporarySignedRoute('public.survey.show', $issuedAt->copy()->addDays(30), ['ticket' => $ticket->getKey()]);
     }
 
     private function render(Ticket $ticket, string $event): string {

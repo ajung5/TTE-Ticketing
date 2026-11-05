@@ -49,6 +49,40 @@
             <div class="stat-foot">Tidak dihitung sebagai tiket selesai</div>
         </div>
     </div>
+    <details class="card mt tte-collapsible tte-health-disclosure">
+        <summary class="section-heading tte-disclosure-heading">
+            <div>
+                <div class="eyebrow">MONITORING OPERASIONAL</div>
+                <h2>Kesehatan Sistem TTE</h2>
+                <p class="small muted">Status direktori, SMTP, dan antrean pekerjaan. Tidak mengubah konfigurasi server.</p>
+            </div>
+        </summary>
+        <div class="tte-admin-health-list">
+            <div class="tte-health-item">
+                <strong>Direktori Email</strong>
+                <span @class(['tte-health-status', 'is-warning' => !$health['directory_fresh']])>{{ $health['directory_fresh'] ? 'Data tersedia' : 'Perlu perhatian' }}</span>
+                <p>{{ number_format($health['directory_count'], 0, ',', '.') }} baris · Sinkronisasi terakhir: {{ $health['directory_last'] }}.</p>
+                <p>Batas usia {{ $health['directory_max_age'] }} jam. Akses Google Sheets: {{ $health['sheet_configured'] ? 'credential terkonfigurasi' : 'belum lengkap' }}.</p>
+            </div>
+            <div class="tte-health-item">
+                <strong>Notifikasi Email</strong>
+                <span @class(['tte-health-status', 'is-warning' => !$health['smtp_ready']])>{{ $health['smtp_ready'] ? 'Konfigurasi SMTP lengkap' : 'Konfigurasi perlu diperiksa' }}</span>
+                <p>Mailer: {{ $health['mailer'] }}. Status konfigurasi, bukan bukti email terkirim.</p>
+            </div>
+            <div class="tte-health-item">
+                <strong>Queue &amp; Scheduler</strong>
+                <span @class(['tte-health-status', 'is-warning' => ($health['failed_jobs'] ?? 0) > 0])>Queue: {{ $health['queue_driver'] }}</span>
+                <p>Menunggu: {{ $health['pending_jobs'] === null ? 'Tidak tersedia' : $health['pending_jobs'] }} · Gagal: {{ $health['failed_jobs'] === null ? 'Tidak tersedia' : $health['failed_jobs'] }}.</p>
+                <p>Status cron/worker tidak dapat dipastikan hanya dari konfigurasi.</p>
+            </div>
+            <div class="tte-health-item">
+                <strong>Antrean Butuh Perhatian</strong>
+                <span class="tte-health-status">Indikator {{ $attention['hours'] }} jam (bukan SLA)</span>
+                <p>{{ $attention['waiting'] }} belum diambil melebihi ambang · {{ $attention['idle'] }} diproses tanpa pembaruan tiket melebihi ambang.</p>
+                <p>7 hari terakhir: {{ $attention['weekly_in'] }} tiket masuk · {{ $attention['weekly_done'] }} tiket diselesaikan (berdasarkan tanggal selesai).</p>
+            </div>
+        </div>
+    </details>
     <details class="card mt tte-collapsible tte-ams-disclosure">
         <summary class="section-heading tte-disclosure-heading">
             <div>
@@ -147,7 +181,7 @@
             <div>
                 <div class="eyebrow">KINERJA TIM</div>
                 <h2>Statistik Verifikator</h2>
-                <p class="small muted">Pemulihan password melalui tautan sekali pakai, tidak menampilkan password lama.</p>
+                <p class="small muted">Data agregat penanganan petugas. Kelola akun dan reset password di menu Manajemen Verifikator.</p>
             </div><span class="pill pill-neutral">{{ $verifiers->count() }} verifikator</span>
         </div>
         <div class="table-scroll">
@@ -160,7 +194,7 @@
                         <th>Aktif</th>
                         <th>Selesai</th>
                         <th>Perlu Pengajuan Ulang</th>
-                        <th>Aksi</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -180,16 +214,11 @@
                             <td>{{ $c?->active_count ?? 0 }}</td>
                             <td><span class="pill pill-green">{{ $c?->done_count ?? 0 }} selesai</span></td>
                             <td>{{ $c?->returned_count ?? 0 }}</td>
-                            <td>
-                                <form method="post" action="{{ route('admin.password-reset', $verifier) }}"
-                                    onsubmit="return confirm('Kirim tautan reset password untuk akun ini?')">@csrf
-                                    <button class="btn btn-outline btn-small" type="submit">Reset Password</button>
-                                </form>
-                            </td>
+
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="empty">Belum ada verifikator.</td>
+                            <td colspan="6" class="empty">Belum ada verifikator.</td>
                         </tr>
                     @endforelse
                 </tbody>
