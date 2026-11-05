@@ -63,7 +63,7 @@
                 <span
                     @class([
                         'tte-health-status',
-                        'is-warning' => !$health['directory_fresh']
+                        'is-warning' => !$health['directory_fresh'],
                     ])>{{ $health['directory_fresh'] ? 'Data tersedia' : 'Perlu perhatian' }}</span>
                 <p>{{ number_format($health['directory_count'], 0, ',', '.') }} baris · Sinkronisasi terakhir:
                     {{ $health['directory_last'] }}.</p>
@@ -80,7 +80,7 @@
                 <strong>Queue &amp; Scheduler</strong>
                 <span @class([
                     'tte-health-status',
-                    'is-warning' => ($health['failed_jobs'] ?? 0) > 0
+                    'is-warning' => ($health['failed_jobs'] ?? 0) > 0,
                 ])>Queue: {{ $health['queue_driver'] }}</span>
                 <p>Menunggu: {{ $health['pending_jobs'] === null ? 'Tidak tersedia' : $health['pending_jobs'] }} · Gagal:
                     {{ $health['failed_jobs'] === null ? 'Tidak tersedia' : $health['failed_jobs'] }}.</p>
@@ -114,7 +114,7 @@
             'SE Belum Terbit' => $ams->not_issued,
             'SE Aktif' => $ams->cert_active,
             'SE Kedaluwarsa' => $ams->cert_expired,
-            'SE Revoke (Penerbitan Ulang)' => $ams->cert_revoked
+            'SE Revoke (Penerbitan Ulang)' => $ams->cert_revoked,
         ] as $label => $total)
                 <div class="stat-card">
                     <div class="stat-name">{{ $label }}</div>
@@ -179,7 +179,7 @@
             'SE Baru Terbit' => $outcomes['certificate_issued'] ?? 0,
             'SE Diperbarui' => $outcomes['certificate_renewed'] ?? 0,
             'SE Diterbitkan Ulang' => $outcomes['certificate_reissued'] ?? 0,
-            'Pendaftaran Diproses (Administratif)' => $outcomes['registration_processed'] ?? 0
+            'Pendaftaran Diproses (Administratif)' => $outcomes['registration_processed'] ?? 0,
         ] as $label => $total)
                 <div class="stat-card">
                     <div class="stat-name">{{ $label }}</div>

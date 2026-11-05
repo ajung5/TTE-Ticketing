@@ -436,7 +436,7 @@
             'WA Belum Terverifikasi' => $amsSummary->wa_unverified,
             'SE Belum Terbit' => $amsSummary->not_issued,
             'SE Aktif' => $amsSummary->cert_active,
-            'SE Kedaluwarsa' => $amsSummary->cert_expired
+            'SE Kedaluwarsa' => $amsSummary->cert_expired,
         ] as $label => $count)
                     <div class="report-metric">
                         <small>{{ $label }}</small><strong>{{ number_format((int) $count, 0, ',', '.') }}</strong>
