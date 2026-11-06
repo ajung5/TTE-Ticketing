@@ -2,9 +2,9 @@
 
 **Sistem Manajemen Layanan Tanda Tangan Elektronik (TTE) dan Sertifikat Elektronik (SE)** untuk mendukung pelayanan di lingkungan Pemerintah Kabupaten Subang.
 
-Aplikasi berbasis **Laravel 13** ini menyediakan formulir pengajuan tanpa login, direktori email dinas dari Google Sheets, antrean verifikator dengan mekanisme **self-claim**, pencatatan hasil pemeriksaan manual pada AMS BSrE, notifikasi melalui WhatsApp Web, pelaporan, serta survei kepuasan layanan.
+Aplikasi **Laravel 13** ini menyediakan formulir permohonan tanpa login, direktori email dinas dari Google Sheets, antrean **self-claim**, pemeriksaan manual AMS BSrE, komunikasi WhatsApp Web (desktop) / aplikasi WhatsApp native (mobile), email pemberitahuan tiket baru ke satu inbox operasional, laporan, dan survei kepuasan layanan. Tampilan admin/verifikator menggunakan panel **Tindakan Berikutnya**, dashboard kesehatan sistem *read-only*, serta footer copyright dan versi aplikasi yang konsisten.
 
-> **Acuan dokumentasi:** repository [`ajung5/TTE-Ticketing`](https://github.com/ajung5/TTE-Ticketing), branch `main`, commit [`7c3e48f`](https://github.com/ajung5/TTE-Ticketing/commit/7c3e48f2160959abc591f3f5f666555429a5d43a) (4 November 2026). Dokumen ini menjelaskan perilaku kode pada commit tersebut, **bukan** jaminan bahwa konfigurasi server dan kontrol keamanan production sudah selesai divalidasi.
+> **Status dokumentasi:** diverifikasi terhadap kode branch `main` per **5 November 2026**, baseline [`26504c2`](https://github.com/ajung5/TTE-Ticketing/commit/26504c27176a53f3f26f00eece0f62f4ae7a26d8) (fitur hingga pembaruan footer v60.1 dan email tiket). Pembaruan dokumentasi **tidak membuktikan** kesiapan konfigurasi server, SMTP, sinkronisasi direktori, keamanan, atau keberhasilan seluruh test pada deployment tertentu.
 >
 > **Perhatian production:** pencarian NIK/NIP pada versi ini **tidak menggunakan OTP/verifikasi email** dan masih dapat menampilkan profil pegawai berdasarkan NIK/NIP yang cocok. Rate limit telah tersedia, tetapi **bukan pembuktian kepemilikan identitas**. Sebelum akses dibuka luas, pastikan pengelola layanan menerima risikonya dan menerapkan pembatasan jaringan/WAF/anti-enumerasi yang memadai.
 
@@ -22,6 +22,7 @@ Aplikasi berbasis **Laravel 13** ini menyediakan formulir pengajuan tanpa login,
 10. [Operasional, keamanan, dan backup](#10-operasional-keamanan-dan-backup)
 11. [Troubleshooting](#11-troubleshooting)
 12. [Rute dan struktur proyek](#12-rute-dan-struktur-proyek)
+13. [Dokumentasi operasional yang dipertahankan](#13-dokumentasi-operasional-yang-dipertahankan)
 
 ---
 
@@ -53,6 +54,8 @@ Aplikasi berbasis **Laravel 13** ini menyediakan formulir pengajuan tanpa login,
 | Mengirim tautan reset password verifikator | — | — | Ya |
 
 **Aturan penting:** administrator tidak menugaskan, mengambil alih, memeriksa AMS, atau menyelesaikan tiket atas nama verifikator. Verifikator hanya boleh memproses tiket yang sudah diambil sendiri. Admin dapat menambah, memperbarui, menonaktifkan, dan memulihkan akun verifikator menurut aturan aplikasi; penghapusan akun menggunakan *soft delete* untuk mempertahankan riwayat.
+
+**UX terkini:** antrean verifikator memprioritaskan **Milik Saya**, sedangkan antrean Baru diurutkan dari tiket yang lebih lama; halaman detail menonjolkan layanan diajukan dan panel **Tindakan Berikutnya** berbasis keputusan backend. Admin memiliki statistik, rincian laporan dan indikator kesehatan direktori/SMTP/queue yang **informatif saja** (bukan bukti pengiriman email atau keberhasilan scheduler). Preset WA memiliki pratinjau dengan data fiktif dan panduan token di setiap editor. Footer seluruh halaman menampilkan copyright **DiskominfoSubang 2026–tahun berjalan** di kiri serta `vX.X.X` di kanan sesuai `TTE_APP_VERSION`.
 
 ### Formulir permohonan
 
@@ -96,8 +99,8 @@ LANGKAH 1 — Pemeriksaan AMS BSrE (manual)
 LANGKAH 2 — Notifikasi berdasarkan keputusan AMS
           │
           ▼
-Buka WhatsApp Web → kirim pesan secara manual
-→ klik “Saya Sudah Mengirim Pesan”
+Desktop: WhatsApp Web / mobile: tautan ke aplikasi WhatsApp
+→ kirim pesan secara manual → klik “Saya Sudah Mengirim Pesan”
           │
           ├── Pendaftaran Diproses → otomatis Done
           ├── Perbaikan Jenis Permohonan → Returned (setelah dikembalikan)
@@ -110,7 +113,7 @@ Jika Done → Notifikasi Selesai + tautan survei
 Pemohon mengisi survei → hasil dapat dilihat administrator
 ```
 
-**WhatsApp Web tidak terintegrasi dengan API pengiriman.** Membuka tab bukan bukti pesan terkirim. Tombol **Saya Sudah Mengirim Pesan** adalah **konfirmasi manual petugas**, bukan bukti penerimaan atau pembacaan oleh pemohon.
+**WhatsApp tidak terintegrasi dengan API pengiriman.** Di desktop sistem membuka WhatsApp Web; di mobile sistem mencatat pembukaan lalu menyediakan tombol **Buka Aplikasi WhatsApp** (`whatsapp://`) dan fallback browser. Kedua jalur tetap memerlukan pengiriman pesan dan konfirmasi manual **Saya Sudah Mengirim Pesan**. Membuka tautan tidak membuktikan pesan terkirim/diterima; membuka ulang pesan identik tidak membatalkan konfirmasi yang masih berlaku, sementara perubahan isi notifikasi memerlukan konfirmasi ulang.
 
 ### Aturan khusus: Penerbitan SE (`Pendaftaran`)
 
@@ -118,7 +121,7 @@ Pemohon mengisi survei → hasil dapat dilihat administrator
 2. Pesan Pendaftaran Diproses memberikan arahan aktivasi kepada pemohon, tanpa menyatakan SE sudah terbit.
 3. Ketika verifikator **mengonfirmasi pengiriman Notifikasi 4** melalui **Saya Sudah Mengirim Pesan**, sistem **otomatis menutup tiket sebagai `Done`** dalam transaksi yang sama.
 4. Hasil tersimpan sebagai `actual_process = registration_followup` dan `service_outcome = registration_processed`.
-5. Setelah `Done`, verifikator dapat mengirim **Notifikasi Selesai + Survei** melalui WhatsApp Web.
+5. Setelah `Done`, verifikator mengirim **Notifikasi Selesai + Survei** secara manual melalui WhatsApp Web (desktop) atau aplikasi WhatsApp (mobile).
 6. **Status Done pada skenario ini berarti tindak lanjut administratif selesai, bukan akun sudah aktif atau SE sudah diterbitkan.** Jangan menghitungnya sebagai jumlah sertifikat yang benar-benar terbit.
 
 Alur di atas juga berlaku saat event yang dipilih adalah `registration` pada tiket `Pendaftaran` lain. Jika sistem memilih event berbeda berdasarkan AMS (misalnya `certificate_not_issued`, `certificate_revoked`, atau koreksi layanan), **jangan menganggap tiket otomatis selesai** hanya karena WhatsApp sudah dikonfirmasi.
@@ -126,7 +129,9 @@ Alur di atas juga berlaku saat event yang dipilih adalah `registration` pada tik
 ### Reset Passphrase dan Pembaruan
 
 - Hasil pemeriksaan dimulai dari status **aktivasi akun**, kemudian **WA**, lalu **penerbitan dan keaktifan sertifikat**; tidak boleh langsung menyimpulkan SE aktif hanya dari riwayat pernah terbit.
-- Akun belum aktif pada permohonan Reset/Pembaruan menghasilkan notifikasi `Aktivasi Akun Diperlukan`.
+- Akun belum aktif pada permohonan Reset/Pembaruan menghasilkan notifikasi `Aktivasi Akun Diperlukan`. **Jika setelah tindak lanjut akun telah aktif, WA terverifikasi, dan SE terbit serta aktif**, sistem mengenali riwayat aktivasi pada tiket yang sama dan mengarahkan langsung ke **Tandai Selesai → Notifikasi Selesai + Survei**, tanpa notifikasi Reset/Pembaruan tambahan. Status akhirnya mencatat hasil aktual `certificate_issued`, bukan otomatis `passphrase_reset`/`certificate_renewed`.
+- Jika akun sudah aktif tetapi SE **belum terbit**, proses *set passphrase* dan pemeriksaan ulang dilakukan pada **nomor tiket yang sama**. Setelah SE dinyatakan terbit dan aktif serta WA terverifikasi, petugas langsung **Tandai Selesai → Notifikasi Selesai + Survei**.
+- Dua jalur tersebut tidak membolehkan penyelesaian jika WA belum terverifikasi atau SE masih belum terbit, expired, atau revoked; keputusan hanya berasal dari pemeriksaan AMS yang dicatat oleh verifikator.
 - Jika SE belum terbit, verifikator mengarahkan tindak lanjut *set passphrase* melalui petunjuk resmi BSrE dan dapat melakukan pemeriksaan ulang pada tiket yang sama.
 - Jika SE `revoked`, sistem mengarahkan **Penerbitan Ulang** dan tidak menyelesaikan tiket selama belum memenuhi syarat.
 - Sertifikat `expired` pada permohonan yang tidak sesuai dapat mengarah ke koreksi **Pembaruan**; sertifikat yang masih expired tidak boleh dianggap selesai.
@@ -171,7 +176,7 @@ Laporan admin menampilkan status tiket, kategori hasil AMS, rekap per layanan/ve
 
 ### Survei
 
-- Hanya tersedia bagi tiket `Done` melalui **signed URL** Laravel yang berlaku **30 hari** sejak URL dibuat.
+- Hanya tersedia bagi tiket `Done` melalui **signed URL** Laravel yang berlaku **30 hari sejak waktu tiket diselesaikan** (`completed_at`). URL stabil ketika pesan akhir yang sama dibuka ulang; bukan diperpanjang setiap kali pesan dibuka.
 - Setiap tiket hanya menerima **satu respons survei**.
 - Isian: nama responden, empat penilaian skala 1–5 (keseluruhan, petugas, kejelasan, kecepatan), dan saran opsional.
 - Hasil tersedia untuk administrator di **`/admin/survei`**.
@@ -182,7 +187,7 @@ Laporan admin menampilkan status tiket, kategori hasil AMS, rekap per layanan/ve
 
 ## 4. Arsitektur dan persyaratan
 
-**Komponen utama:** Laravel 13, PHP 8.3+, database SQLite/MySQL/PostgreSQL yang didukung aplikasi, session dan cache Laravel, Google Sheets API (opsional untuk sinkronisasi), dan WhatsApp Web (pengiriman manual).
+**Komponen utama:** Laravel 13, PHP 8.3+, database SQLite/MySQL/PostgreSQL sesuai driver aplikasi, session/cache/queue Laravel, Google Sheets API (sinkronisasi direktori), SMTP (notifikasi inbox/reset password), dan WhatsApp Web/native (pengiriman manual).
 
 | Komponen | Kebutuhan |
 | --- | --- |
@@ -193,7 +198,8 @@ Laporan admin menampilkan status tiket, kategori hasil AMS, rekap per layanan/ve
 | Web server production | Nginx atau Apache dengan document root **`public/`** |
 | Node.js/npm | Tidak wajib untuk menjalankan aset CSS/JS yang saat ini disajikan langsung dari `public/`; dipakai jika membangun aset Vite |
 | Google Sheets | Service account dengan hak **Viewer** ke spreadsheet yang relevan |
-| SMTP | Diperlukan agar tautan reset password petugas benar-benar terkirim |
+| SMTP | Diperlukan untuk email tiket baru ke inbox operasional dan tautan reset password petugas |
+| Queue worker | Diperlukan bila `QUEUE_CONNECTION=database`; email tiket baru dijalankan sebagai queued notification |
 
 **Tidak ada koneksi API langsung untuk mengubah akun atau sertifikat di AMS BSrE.** Pemeriksaan AMS dan tindak lanjut dilakukan petugas secara manual, lalu hasilnya dicatat pada aplikasi.
 
@@ -383,6 +389,8 @@ QUEUE_CONNECTION=database
 FILESYSTEM_DISK=local
 
 TTE_SERVICE_NAME="Layanan TTE Kabupaten Subang"
+TTE_APP_VERSION=1.0.0
+TTE_NEW_TICKET_INBOX_EMAIL=inbox-operasional@domain-anda
 TTE_EMAIL_SHEET_ID=ISI_ID_SPREADSHEET
 TTE_EMAIL_SHEET_RANGE="Data ASN Merge!A1:R"
 TTE_GOOGLE_SERVICE_ACCOUNT_JSON=/etc/tte-ticket/google-credentials.json
@@ -398,7 +406,7 @@ MAIL_FROM_ADDRESS=alamat-pengirim@domain-anda
 MAIL_FROM_NAME="${APP_NAME}"
 ```
 
-Isi `APP_KEY` melalui `php artisan key:generate` **hanya** jika instalasi baru dan database masih kosong. Jangan menyalin kunci production dari lingkungan development. `MAIL_MAILER=log` hanya untuk development; untuk fitur reset password production gunakan SMTP yang valid.
+Isi `APP_KEY` melalui `php artisan key:generate` **hanya** jika instalasi baru dan database masih kosong. Jangan menyalin kunci production dari lingkungan development. `MAIL_MAILER=log` hanya untuk development; SMTP valid diperlukan untuk notifikasi inbox operasional dan reset password. Jika `QUEUE_CONNECTION=database`, pastikan worker dipantau dan berjalan terus-menerus. `TTE_APP_VERSION` adalah versi produk semantik; jangan otomatis menyamakannya dengan nomor patch.
 
 **Zona waktu:** `config/app.php` pada commit acuan masih menggunakan `UTC` secara hard-coded. Tampilan dan periode laporan yang relevan menggunakan `Asia/Jakarta` secara eksplisit. Menambahkan `APP_TIMEZONE=Asia/Jakarta` ke `.env` **tidak otomatis** mengubah konfigurasi tersebut tanpa perubahan source.
 
@@ -484,7 +492,7 @@ Jika pengaturan `TTE_EMAIL_DIRECTORY_MAX_AGE_HOURS=24`, direktori dianggap tidak
 - [ ] Pencarian NIK/NIP bekerja menggunakan direktori yang masih valid **hanya pada lingkup akses yang diizinkan**.
 - [ ] Pengajuan mengeluarkan nomor tiket; tanda tangan tersimpan privat.
 - [ ] Self-claim, pemeriksaan AMS, notifikasi WhatsApp, Pendaftaran Diproses → `Done` → survei, dan status `Returned` telah diuji.
-- [ ] Email reset password petugas terkirim dari SMTP yang sah.
+- [ ] Email tiket baru diterima **satu inbox operasional** (`TTE_NEW_TICKET_INBOX_EMAIL`) melalui worker queue; email reset password petugas terkirim dari SMTP yang sah.
 - [ ] Scheduler dan backup berjalan; proses **restore** pernah diuji.
 - [ ] Statistik, pagination, rincian laporan, dan ekspor CSV tampil konsisten.
 
@@ -555,13 +563,15 @@ Karena itu:
 - Jika harus dibuka ke internet, tetapkan kontrol tambahan terhadap enumerasi serta evaluasi perlindungan data pribadi sebelum go-live; kebutuhan ini **belum diselesaikan oleh source saat ini**.
 - Jika menggunakan reverse proxy/WAF, pastikan IP klien yang diterima Laravel benar; salah konfigurasi IP dapat mengurangi efektivitas rate limit.
 
-### Reset password petugas
+### Email tiket baru dan reset password
 
-Fitur admin untuk mengirim tautan reset password verifikator memakai mekanisme password broker Laravel. Agar pesan terkirim, konfigurasi `MAIL_*` harus menunjuk **SMTP valid**, bukan `MAIL_MAILER=log` pada production.
+Saat tiket baru berstatus `Open` diterima dari formulir publik atau webhook legacy, sistem membuat **satu notifikasi email ke inbox operasional**, bukan mengirim ke seluruh verifikator. Penerima ditentukan oleh `TTE_NEW_TICKET_INBOX_EMAIL` pada `.env`. Isi pesan hanya memuat nomor tiket, jenis layanan, waktu masuk (WIB), status, dan tautan menuju aplikasi; tidak menyertakan NIK, nomor WA, atau tanda tangan. Template berada di `app/Notifications/NewTicketCreatedNotification.php`, sedangkan pengiriman di `app/Services/NewTicketEmailNotifier.php`. Notifikasi ini memakai queue; pastikan worker berjalan dan pantau `php artisan queue:failed`.
 
-### WhatsApp Web
+Reset password admin/verifikator menggunakan `app/Notifications/TtePasswordResetNotification.php` dan dikirim ke **email akun masing-masing** (bukan inbox operasional). Admin dapat mengirim tautan reset dari **Manajemen Verifikator**. Konfigurasi `MAIL_*` harus menunjuk SMTP valid pada production. Petunjuk rinci: [`docs/PANDUAN-EMAIL-SMTP-DAN-RESET.md`](docs/PANDUAN-EMAIL-SMTP-DAN-RESET.md).
 
-WhatsApp pada aplikasi **tidak mengirim pesan secara otomatis**. Petugas membuka WhatsApp Web, mengirimkan pesan, lalu menekan tombol konfirmasi. Template dikelola admin; placeholder seperti `{nama_pemohon}`, `{nomor_tiket}`, `{hasil_aktual}`, dan `{survey_url}` dirender oleh aplikasi.
+### WhatsApp Web dan aplikasi native
+
+WhatsApp **tidak mengirim pesan otomatis**. Di desktop petugas memakai WhatsApp Web; pada mobile sistem menyiapkan tautan langsung ke aplikasi WhatsApp dan fallback browser setelah pembukaan dicatat. Kirim pesan secara manual, kembali ke tiket, lalu tekan **Saya Sudah Mengirim Pesan**. Template dikelola admin; placeholder seperti `{nama_pemohon}`, `{nomor_tiket}`, `{hasil_aktual}`, dan `{survey_url}` dirender oleh aplikasi.
 
 ### Zoho webhook lama
 
@@ -586,6 +596,9 @@ php artisan test tests/Feature/TteBaselineSeederTest.php --compact
 php artisan test tests/Feature/Current/AmsBusinessRulesTest.php --compact
 php artisan test tests/Feature/Current/WhatsAppWorkflowTest.php --compact
 php artisan test tests/Feature/ReturnedTicketStatisticsTest.php --compact
+php artisan test tests/Feature/TteActivationFooterV60Test.php --compact
+php artisan test tests/Feature/TteFourUxImprovementsV59Test.php --compact
+php artisan test tests/Feature/NewTicketEmailNotificationTest.php --compact
 php artisan test tests/Feature/PublicSurveyTest.php --compact
 ```
 
@@ -606,7 +619,7 @@ php artisan schedule:list
 2. Buka WA Web tanpa mengonfirmasi: tiket tetap `In Progress`.
 3. Konfirmasi **Saya Sudah Mengirim Pesan**: tiket `Done`, `service_outcome = registration_processed`, tanpa klaim SE terbit.
 4. Pastikan Notifikasi **Selesai + Survei** tersedia, signed URL valid, dan survei hanya bisa diisi sekali.
-5. Uji Reset Passphrase/Pembaruan dengan kombinasi akun belum aktivasi, WA belum verified, SE belum terbit, expired, revoked, dan active.
+5. Uji Reset Passphrase/Pembaruan dengan kombinasi akun belum aktivasi, WA belum verified, SE belum terbit, expired, revoked, dan active. Khusus riwayat aktivasi/set passphrase yang setelah pemeriksaan ulang menjadi **WA verified + SE active**, pastikan langsung **Tandai Selesai**, tanpa notifikasi Reset/Pembaruan antara.
 6. Uji koreksi layanan hingga status `Returned`; pastikan tidak dihitung sebagai `Done` atau dikirimi survei.
 7. Uji pembatasan akses: admin tidak dapat memproses tiket, verifikator kedua tidak bisa mengambil alih tiket milik petugas lain.
 8. Uji laporan admin: total per status, **Selesai Selama Periode**, pagination, filter, dan unduhan CSV.
@@ -657,7 +670,7 @@ Gunakan commit/tag yang telah diuji; jalankan deployment secara terkontrol. Saat
 | NIK/NIP tidak ditemukan | Direktori belum sinkron, data tidak cocok, atau email dinas kosong | Jalankan `tte:sync-email-directory`, cek header/range dan umur sinkronisasi |
 | Google Sheet gagal dibaca | Path JSON masih menunjuk laptop, sheet belum dibagikan, izin Google API | Gunakan path **Linux server** yang dapat dibaca PHP; service account sebagai Viewer |
 | Reset password tidak terkirim | `MAIL_MAILER=log` atau SMTP gagal | Uji SMTP dari staging, cek email pengirim dan log |
-| Tombol **Saya Sudah Mengirim Pesan** tidak muncul | WA Web belum dibuka lewat tombol aplikasi atau halaman belum memuat ulang status | Gunakan tombol aplikasi, lalu refresh halaman tiket jika diperlukan; cek catatan `opened_at` |
+| Tombol **Saya Sudah Mengirim Pesan** tidak muncul | URL WhatsApp belum dibuka lewat alur aplikasi atau halaman belum memuat ulang | Gunakan tombol WhatsApp dari tiket (di mobile pilih **Buka Aplikasi WhatsApp**), kembali/refresh halaman, lalu cek `opened_at` jika perlu |
 | Survei 404 / 429 | Tiket belum `Done`, signed URL tidak valid/kedaluwarsa, atau rate limit | Periksa status tiket, URL/domain/`APP_KEY`, dan header `Retry-After` |
 | Test gagal pada source production | Perubahan source/test atau environment tidak sinkron | Jalankan pada staging/CI terisolasi; **jangan** menjalankan `migrate:fresh` di production |
 
@@ -717,7 +730,7 @@ config/
   database.php
   email_directory.php
   filesystems.php
-  tte.php
+  tte.php          # termasuk TTE_APP_VERSION dan inbox notifikasi
 database/
   migrations/         # 8 migration aktif
   seeders/
@@ -728,6 +741,7 @@ public/
   css/
   js/
 resources/views/
+  layouts/footer.blade.php
   public/
   tickets/
   admin/
@@ -740,6 +754,20 @@ tests/Feature/
 
 ---
 
+## 13. Dokumentasi operasional yang dipertahankan
+
+Folder `docs/` dibersihkan dari petunjuk patch historis yang tidak lagi berlaku setelah implementasi v58–v60.1. Dokumentasi acuan saat ini adalah **README ini** dan berkas berikut:
+
+| Berkas | Kegunaan |
+| --- | --- |
+| [`PANDUAN-EMAIL-SMTP-DAN-RESET.md`](docs/PANDUAN-EMAIL-SMTP-DAN-RESET.md) | Setup SMTP, mailbox tiket baru, queue, reset password dan smoke test |
+| [`CONTOH-DIREKTORI-EMAIL-TEST.csv`](docs/CONTOH-DIREKTORI-EMAIL-TEST.csv) | Contoh data **sintetis** untuk menguji impor direktori, bukan data pegawai nyata |
+| [`zoho-payload.example.json`](docs/zoho-payload.example.json) | Contoh payload integrasi Zoho **legacy**; endpoint masih ada tetapi bukan alur utama |
+
+Panduan patch yang dihapus tetap tersedia dalam riwayat Git. Penghapusan ini **tidak menghapus** endpoint integrasi legacy, data aplikasi, migration, seeder, atau kode yang sedang digunakan.
+
+---
+
 ## Catatan terakhir
 
-README ini disusun mengikuti **source pada commit acuan**. **Tidak ada perubahan source, database, `.env`, atau proses deployment** yang dilakukan hanya dengan mengganti README. Jika proses bisnis, migration, seeder, atau keamanan endpoint diubah lagi, perbarui dokumentasi dan test sebelum menandai rilis sebagai production.
+README ini merepresentasikan source yang diperiksa pada **5 November 2026** (baseline kode `26504c2`). Pembaruan dokumentasi **tidak menjalankan** migration, test suite, deployment, ataupun pemeriksaan production. Uji perubahan proses bisnis dan keamanan secara terpisah sebelum rilis.

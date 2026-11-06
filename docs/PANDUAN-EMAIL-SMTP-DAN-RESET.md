@@ -3,8 +3,8 @@
 ## Fitur
 
 - Satu inbox operasional menerima pemberitahuan satu kali untuk setiap tiket **baru** (baik form publik maupun webhook legacy). Tidak mengirim ke semua verifikator.
-- Email tiket berisi hanya nomor tiket, layanan, dan waktu (WIB). Tidak memuat NIK, NIP, WA, nama pemohon, maupun tanda tangan.
-- Admin dan verifikator dapat memakai **Lupa Password?** pada halaman login. Admin juga dapat mengirim reset ke verifikator dari dashboard.
+- Email tiket berisi nomor tiket, jenis layanan, waktu (WIB), status, dan tombol menuju aplikasi. Tidak memuat NIK, NIP, WA, nama pemohon, maupun tanda tangan.
+- Admin dan verifikator dapat memakai **Lupa Password?** pada halaman login. Admin juga dapat mengirim tautan reset ke verifikator dari **Manajemen Verifikator**.
 - Tautan reset dikirim ke **email masing-masing akun**, bukan ke inbox operasional. Token Laravel berlaku 60 menit, satu kali pakai, dan dibatasi penerbitannya.
 - Tidak ada perubahan migration, seeder, RBAC, ataupun proses bisnis tiket.
 
