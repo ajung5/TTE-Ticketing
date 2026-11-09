@@ -134,22 +134,3 @@ it('rejects non-government emails, unconfirmed corrections, and completed ticket
     ])->assertStatus(409);
 });
 
-it('blocks a Zoho submission with a matching active identity but not a new submission ID', function () {
-    $secret = str_repeat('K', 32);
-    config()->set('tte.zoho_webhook_secret', $secret);
-    $payload = [
-        'submission_id' => (string) Str::uuid(),
-        'nama_user' => 'Pegawai V61',
-        'no_wa' => '081212345678',
-        'layanan' => 'Pembaruan',
-        'nip' => '198901012020011001',
-        'nik' => '3273010101010001'
-    ];
-    $headers = ['X-Zoho-Webhook-Secret' => $secret];
-    $this->postJson('/api/tickets/zoho', $payload, $headers)->assertCreated();
-    $payload['submission_id'] = (string) Str::uuid();
-    $this->postJson('/api/tickets/zoho', $payload, $headers)
-        ->assertOk()->assertJsonPath('blocked_active', true);
-    expect(Ticket::count())->toBe(1);
-    expect(Ticket::firstOrFail()->duplicate_attempts)->toBe(1);
-});

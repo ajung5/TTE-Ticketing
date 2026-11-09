@@ -111,29 +111,6 @@ it(
     },
 );
 
-it('queues exactly one email for a new Zoho ticket and none for its duplicate', function () {
-    Notification::fake();
-    config()->set('tte.new_ticket_inbox_email', 'tiket-operasional@gmail.com');
-    $secret = str_repeat('S', 32);
-    config()->set('tte.zoho_webhook_secret', $secret);
-    $payload = [
-        'submission_id' => 'zoho-' . Str::uuid(),
-        'nama_user' => 'Pemohon Uji',
-        'no_wa' => '081234567890',
-        'layanan' => 'Pembaruan',
-        'opd' => 'Diskominfo',
-    ];
-    $headers = ['X-Zoho-Webhook-Secret' => $secret];
-    $this->postJson('/api/tickets/zoho', $payload, $headers)->assertCreated();
-    $this->postJson('/api/tickets/zoho', $payload, $headers)
-        ->assertOk()
-        ->assertJsonPath('duplicate', true);
-
-    expect(Ticket::count())->toBe(1);
-    Notification::assertCount(1);
-    Notification::assertSentOnDemand(NewTicketCreatedNotification::class);
-});
-
 it('does not send mail if the central inbox is absent or invalid', function () {
     Notification::fake();
     Storage::fake('local');

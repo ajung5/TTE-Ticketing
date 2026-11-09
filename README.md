@@ -565,7 +565,7 @@ Karena itu:
 
 ### Email tiket baru dan reset password
 
-Saat tiket baru berstatus `Open` diterima dari formulir publik atau webhook legacy, sistem membuat **satu notifikasi email ke inbox operasional**, bukan mengirim ke seluruh verifikator. Penerima ditentukan oleh `TTE_NEW_TICKET_INBOX_EMAIL` pada `.env`. Isi pesan hanya memuat nomor tiket, jenis layanan, waktu masuk (WIB), status, dan tautan menuju aplikasi; tidak menyertakan NIK, nomor WA, atau tanda tangan. Template berada di `app/Notifications/NewTicketCreatedNotification.php`, sedangkan pengiriman di `app/Services/NewTicketEmailNotifier.php`. Notifikasi ini memakai queue; pastikan worker berjalan dan pantau `php artisan queue:failed`.
+Saat tiket baru berstatus `Open` diterima dari formulir publik internal Laravel, sistem membuat **satu notifikasi email ke inbox operasional**, bukan mengirim ke seluruh verifikator. Penerima ditentukan oleh `TTE_NEW_TICKET_INBOX_EMAIL` pada `.env`. Isi pesan hanya memuat nomor tiket, jenis layanan, waktu masuk (WIB), status, dan tautan menuju aplikasi; tidak menyertakan NIK, nomor WA, atau tanda tangan. Template berada di `app/Notifications/NewTicketCreatedNotification.php`, sedangkan pengiriman di `app/Services/NewTicketEmailNotifier.php`. Notifikasi ini memakai queue; pastikan worker berjalan dan pantau `php artisan queue:failed`.
 
 Reset password admin/verifikator menggunakan `app/Notifications/TtePasswordResetNotification.php` dan dikirim ke **email akun masing-masing** (bukan inbox operasional). Admin dapat mengirim tautan reset dari **Manajemen Verifikator**. Konfigurasi `MAIL_*` harus menunjuk SMTP valid pada production. Petunjuk rinci: [`docs/PANDUAN-EMAIL-SMTP-DAN-RESET.md`](docs/PANDUAN-EMAIL-SMTP-DAN-RESET.md).
 
@@ -573,9 +573,9 @@ Reset password admin/verifikator menggunakan `app/Notifications/TtePasswordReset
 
 WhatsApp **tidak mengirim pesan otomatis**. Di desktop petugas memakai WhatsApp Web; pada mobile sistem menyiapkan tautan langsung ke aplikasi WhatsApp dan fallback browser setelah pembukaan dicatat. Kirim pesan secara manual, kembali ke tiket, lalu tekan **Saya Sudah Mengirim Pesan**. Template dikelola admin; placeholder seperti `{nama_pemohon}`, `{nomor_tiket}`, `{hasil_aktual}`, dan `{survey_url}` dirender oleh aplikasi.
 
-### Zoho webhook lama
+### Integrasi penerimaan permohonan
 
-Endpoint `POST /api/tickets/zoho` **masih ada** di source untuk kompatibilitas historis, tetapi alur utama saat ini menggunakan formulir internal. Jika tidak digunakan, jangan konfigurasi `ZOHO_WEBHOOK_SECRET`; controller akan menolak pemrosesan tanpa rahasia yang valid. Pertimbangkan menutup endpoint melalui kebijakan jaringan atau menghapusnya melalui perubahan kode terpisah setelah memastikan tidak ada dependensi integrasi.
+Semua permohonan baru diterima melalui formulir internal `GET/POST /permohonan` (`PublicTicketController`). Integrasi webhook Zoho sudah dinonaktifkan dan `POST /api/tickets/zoho` tidak lagi didaftarkan. Pastikan tidak ada sistem eksternal yang masih mengirim permohonan ke endpoint lama. Tiket historis dengan `source = zoho` tetap dapat dibaca.
 
 ---
 
@@ -762,9 +762,8 @@ Folder `docs/` dibersihkan dari petunjuk patch historis yang tidak lagi berlaku 
 | --- | --- |
 | [`PANDUAN-EMAIL-SMTP-DAN-RESET.md`](docs/PANDUAN-EMAIL-SMTP-DAN-RESET.md) | Setup SMTP, mailbox tiket baru, queue, reset password dan smoke test |
 | [`CONTOH-DIREKTORI-EMAIL-TEST.csv`](docs/CONTOH-DIREKTORI-EMAIL-TEST.csv) | Contoh data **sintetis** untuk menguji impor direktori, bukan data pegawai nyata |
-| [`zoho-payload.example.json`](docs/zoho-payload.example.json) | Contoh payload integrasi Zoho **legacy**; endpoint masih ada tetapi bukan alur utama |
 
-Panduan patch yang dihapus tetap tersedia dalam riwayat Git. Penghapusan ini **tidak menghapus** endpoint integrasi legacy, data aplikasi, migration, seeder, atau kode yang sedang digunakan.
+Panduan patch yang dihapus tetap tersedia dalam riwayat Git. Pembersihan integrasi legacy tidak menghapus data aplikasi, migration, seeder, atau tiket historis.
 
 ---
 

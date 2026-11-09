@@ -11,7 +11,7 @@ Paket merupakan patch kode, **tidak** menjalankan migration ketika file Python d
 3. Backup database produksi; gunakan kunci APP_KEY yang sama dengan data terenkripsi saat ini.
 4. Jalankan `php artisan migrate --force` **pada environment yang benar**.
 5. Jalankan `php artisan test` (bootstrap test memaksa SQLite :memory:).
-6. Validasi UI formulir publik, antrean, detail verifikator, dan webhook Zoho.
+6. Validasi UI formulir publik, antrean, detail verifikator, dan pemblokiran webhook lama (HTTP 404).
 7. Deploy kode dan migration dalam maintenance window yang sesuai.
 
 ## Aturan
@@ -21,8 +21,7 @@ Paket merupakan patch kode, **tidak** menjalankan migration ketika file Python d
 - Returned/Done: pengajuan ulang diperbolehkan.
 - Upaya pengajuan baru dicatat idempoten dengan submission ID dan tampak bagi
   verifikator (counter + aktivitas); tidak mengubah waktu `updated_at` tiket.
-- Zoho lama tanpa NIK/NIP tetap diterima karena tidak ada identifier tepercaya.
-  Untuk deduplikasi efektif dari Zoho, kirim NIK/NIP yang valid.
+- Integrasi Zoho lama telah dinonaktifkan pada v6.2. Permohonan baru hanya melalui formulir internal.
 - Alamat email tiket dapat dikoreksi oleh verifikator **pemilik** tiket aktif,
   hanya setelah pemeriksaan AMS dan pernyataan konfirmasi, dengan alasan wajib.
   Email dibatasi domain `@subang.go.id` dan disimpan dalam histori audit terenkripsi.
@@ -34,15 +33,13 @@ Paket merupakan patch kode, **tidak** menjalankan migration ketika file Python d
 ## Batasan dan risiko yang harus dikendalikan
 - Form publik belum memakai autentikasi OTP untuk NIK/NIP. Karena itu, blokir
   publik hanya memberi pesan umum tanpa status, nomor tiket atau PII lain.
-- Lock Cache melindungi request serempak yang memakai canonical identifier
-  dan shared driver yang sama; apabila Zoho hanya mengirim NIK dan form lokal
-  memakai NIP, dua request persis bersamaan mungkin memakai nama lock berbeda.
-  Mitigasi operasional: semua integrasi mengirim NIK dan NIP sesuai direktori,
-  gunakan single shared Redis/database lock store, dan monitor anomali duplikat.
+- Lock Cache melindungi request serempak dengan identitas kanonik yang sama
+  dan shared driver yang sama. Untuk multi-worker gunakan Redis/database
+  lock store serta monitor anomali permohonan ganda.
 - Identitas historis yang tidak menyimpan NIK/NIP valid tidak dapat dibackfill.
 - Migrasi memproses NIK terenkripsi lama melalui Eloquent; pastikan APP_KEY
   benar dan lakukan backup database lebih dahulu.
-- Notifikasi pengajuan ulang dari Zoho dikirim pada respons webhook HTTP 200,
-  bukan chat ke nomor WhatsApp pemohon. Komunikasi tetap oleh petugas.
+- Pemberitahuan permohonan aktif disampaikan melalui halaman hasil formulir;
+  komunikasi WhatsApp tetap dilakukan oleh petugas.
 - File patch menghapus dirinya setelah seluruh file terpasang dan `php -l`
   berhasil (jika PHP tersedia). Backup patch ada di `.tte-patch-backups/`.

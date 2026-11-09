@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Fingerprints are keyed, never raw NIK/NIP, and are evaluated for ALL services.
- * Requests without a trusted identifier (legacy Zoho integrations) cannot be
- * reliably deduplicated; do not fall back to user-controlled name or phone.
+ * Requests without a trusted identifier cannot be reliably deduplicated;
+ * do not fall back to a user-controlled name or phone.
  * Atomic cache locks must use a SHARED driver across web workers/servers.
  */
 class ActiveTicketGuard {
