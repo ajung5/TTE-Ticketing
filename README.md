@@ -285,6 +285,8 @@ Jika role belum ada, `TteBaselineSeeder` akan meminta **akun admin** dan **akun 
 - Jika akun dengan role tersebut sudah tersedia, provisioning tidak diulang; password dan profil existing tidak diubah.
 - Seeder mengisi **11 preset WhatsApp** yang belum ada, tanpa menimpa template kustom.
 - Seeder **tidak membuat tiket, survei, atau pegawai dummy**.
+- Fresh install tidak membuat tabel `webhook_events` (legacy Zoho); `tickets.source` default `direct`. Kolom `external_submission_id` tetap diperlukan untuk idempotensi form internal.
+- Audit migration/seeder dan prosedur instalasi bersih: [`docs/FRESH-INSTALL-DATABASE.md`](docs/FRESH-INSTALL-DATABASE.md).
 - Penambahan verifikator setelah bootstrap dilakukan melalui **Manajemen Verifikator** di akun admin.
 
 ### 5.4 Sinkronisasi direktori email
@@ -502,7 +504,7 @@ Jika pengaturan `TTE_EMAIL_DIRECTORY_MAX_AGE_HOURS=24`, direktori dianggap tidak
 
 ## 7. Pembaruan deployment pada database existing
 
-**Bagian ini berbeda dari instalasi baru.** Repository sekarang mempunyai **8 migration aktif** (3 bawaan Laravel, 4 skema domain, 1 kompatibilitas ukuran `wa_message_templates.event_type` untuk MySQL/PostgreSQL). Riwayat migration lama telah dikonsolidasikan; nama migration yang pernah tercatat dapat tetap ada di tabel `migrations` database existing.
+**Bagian ini berbeda dari instalasi baru.** Repository sekarang mempunyai **9 migration aktif** (3 bawaan Laravel, 4 skema domain, 1 kompatibilitas ukuran `wa_message_templates.event_type`, dan 1 migrasi v6.1 untuk tiket ganda/koreksi email AMS). Riwayat migration lama telah dikonsolidasikan; nama migration yang pernah tercatat dapat tetap ada di tabel `migrations` database existing.
 
 Prinsipnya:
 

@@ -48,17 +48,25 @@ Jangan membagikan passphrase, OTP, atau password.',
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nJenis layanan {layanan_diajukan} belum sesuai dengan kondisi akun. Setelah klarifikasi, layanan yang disarankan: {layanan_disarankan}. Ajukan melalui {form_url}.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}"
         ];
 
+        // Validasi seluruh preset SEBELUM ada perubahan database.
         foreach (WaMessageTemplate::TEMPLATE_SERVICE_CODES as $event => $serviceCode) {
-            if (!array_key_exists($event, $messages)) {
+            if (!array_key_exists($event, $messages) || trim($messages[$event]) === '') {
                 throw new RuntimeException('Preset wajib tidak tersedia: ' . $event);
             }
-            DB::table('wa_message_templates')->insertOrIgnore([
-                'service_code' => $serviceCode,
-                'event_type' => $event,
-                'body' => $messages[$event],
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
         }
+
+        // Seeder ini juga bisa dipanggil langsung, bukan hanya dari baseline.
+        // Transaction + insertOrIgnore = atomik, idempoten, tidak menimpa template kustom.
+        DB::transaction(function () use ($messages): void {
+            foreach (WaMessageTemplate::TEMPLATE_SERVICE_CODES as $event => $serviceCode) {
+                DB::table('wa_message_templates')->insertOrIgnore([
+                    'service_code' => $serviceCode,
+                    'event_type' => $event,
+                    'body' => $messages[$event],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+        });
     }
 }

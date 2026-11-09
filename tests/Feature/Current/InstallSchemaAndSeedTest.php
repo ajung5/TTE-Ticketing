@@ -17,16 +17,18 @@ it('creates the complete operational schema without legacy add-column migrations
             'tickets',
             'ticket_activities',
             'wa_notifications',
-            'webhook_events',
             'audit_logs',
             'wa_message_templates',
             'email_directories',
             'service_survey_responses',
+            'blocked_ticket_attempts',
+            'ticket_email_changes',
         ]
         as $table
     ) {
         expect(Schema::hasTable($table))->toBeTrue();
     }
+    expect(Schema::hasTable('webhook_events'))->toBeFalse();
     foreach (['role', 'initials', 'deleted_at'] as $column) {
         expect(Schema::hasColumn('users', $column))->toBeTrue();
     }
@@ -45,6 +47,14 @@ it('creates the complete operational schema without legacy add-column migrations
             'service_outcome',
             'signature_path',
             'consent_accepted_at',
+            'applicant_nik_hash',
+            'applicant_nip_hash',
+            'duplicate_attempts',
+            'last_duplicate_attempt_at',
+            'awaiting_applicant_action',
+            'directory_email',
+            'email_corrected_at',
+            'email_corrected_by',
         ]
         as $column
     ) {

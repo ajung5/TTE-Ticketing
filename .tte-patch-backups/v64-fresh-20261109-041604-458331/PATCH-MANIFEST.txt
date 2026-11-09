@@ -1,0 +1,11 @@
+TTE v6.4 fresh database schema/seed cleanup
+HEAD=4423a54014d5c49aa8d30c08c95afbba825e6be5
+Pemasangan kode saja; database tidak dimodifikasi.
+Kode lama tersalin ke folder backup dalam struktur path relatif.
+Perubahan:
+MOD database/migrations/2026_10_28_220000_create_tte_ticketing_tables.php sha256=2a8717e675f7079dda24cbc216817967f1c16f15974c172572fcbeffe6a30a3d
+MOD database/seeders/WaTemplatePresetsSeeder.php sha256=17589ce3c9b025f411644f335edcb2be235ef4aca6f064c47a5e46e1b03774c1
+MOD tests/Feature/Current/InstallSchemaAndSeedTest.php sha256=1e91666cd49fee1d9a25dc73a4cdbbfaca8565a59686ee948fa9ec2ecfab1951
+MOD README.md sha256=fc97095c41f921a0389002e74c100a8e1e068de44a7870b6b80200b226b05ad0
+ADD tests/Feature/TteFreshInstallV64Test.php
+ADD docs/FRESH-INSTALL-DATABASE.md

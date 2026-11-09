@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/** Skema final tiket TTE, tanpa migration add-column historis. */
+/** Skema inti tiket TTE. Penambahan v6.1 ada pada migration 2026_11_09. */
 return new class extends Migration {
     public function up(): void {
         Schema::create('tickets', function (Blueprint $table) {
@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('no_wa', 30);
             $table->string('layanan', 40);
             $table->string('status', 24)->default('Open');
-            $table->string('source', 20)->default('zoho');
+            $table->string('source', 20)->default('direct');
             $table->string('nip', 32)->nullable();
             $table->string('opd', 180)->nullable();
             // NULL: data lama belum mencatat UPTD; kosong: pemohon tanpa UPTD.
@@ -69,14 +69,6 @@ return new class extends Migration {
             $table->unique(['ticket_id', 'event_type']);
         });
 
-        Schema::create('webhook_events', function (Blueprint $table) {
-            $table->id();
-            $table->string('external_submission_id', 128)->nullable();
-            $table->string('outcome', 24);
-            $table->string('payload_sha256', 64)->nullable();
-            $table->timestamps();
-        });
-
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('actor_id')->nullable()->constrained('users')->nullOnDelete();
@@ -89,6 +81,7 @@ return new class extends Migration {
 
     public function down(): void {
         Schema::dropIfExists('audit_logs');
+        // Kompatibilitas rollback database lama yang dahulu memiliki tabel webhook.
         Schema::dropIfExists('webhook_events');
         Schema::dropIfExists('wa_notifications');
         Schema::dropIfExists('ticket_activities');
