@@ -19,6 +19,21 @@
         <span><strong>Unit Kerja</strong> {{ $ticket->opd ?: '-' }}</span>
         <span><strong>Verifikator</strong> {{ $ticket->claimant?->name ?? 'Belum diambil' }}</span>
     </div>
+    @if ($ticket->duplicate_attempts > 0 && in_array($ticket->status, ['Open', 'In Progress'], true))
+        <div class="alert warn" role="status"><strong>Permohonan berulang telah ditahan:
+                {{ $ticket->duplicate_attempts }} kali.</strong>
+            @if ($ticket->last_duplicate_attempt_at)
+                Terakhir {{ $ticket->last_duplicate_attempt_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}.
+            @endif
+            @if ($ticket->awaiting_applicant_action)
+                Pemohon perlu menindaklanjuti instruksi yang telah disampaikan melalui WhatsApp.
+            @else
+                Pastikan progres permohonan sebelumnya sebelum mengarahkan pemohon.
+            @endif
+            Jangan membuat tiket kedua untuk kasus yang sama.</div>
+    @elseif ($ticket->status === 'In Progress' && $ticket->awaiting_applicant_action)
+        <div class="alert warn" role="status">Menunggu tindak lanjut pemohon sesuai notifikasi layanan terakhir.</div>
+    @endif
     @if ($ticket->source === 'simulated')
         <div class="alert warn" role="status"><strong>Mode simulasi:</strong> Tiket ini menggunakan data dan nomor WhatsApp
             fiktif. Tombol kirim ke WhatsApp dinonaktifkan; gunakan tombol Salin Pesan untuk menguji format pesan.</div>
@@ -89,8 +104,16 @@
                         <div class="field-value">{{ $ticket->jabatan ?: '-' }}</div>
                     </div>
                     <div>
-                        <div class="field-name">Email Dinas</div>
+                        <div class="field-name">Email Dinas (digunakan pada tiket)</div>
                         <div class="field-value">{{ $ticket->email ?: '-' }}</div>
+                        @if ($ticket->source === 'direct' && $ticket->directory_email)
+                            <div class="small muted">Sesuai direktori saat pengajuan:
+                                {{ $ticket->directory_email }}</div>
+                        @endif
+                        @if ($ticket->email_corrected_at)
+                            <div class="small muted">Dikoreksi berdasarkan AMS:
+                                {{ $ticket->email_corrected_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</div>
+                        @endif
                     </div>
                     <div>
                         <div class="field-name">Tanggal Masuk</div>
@@ -102,6 +125,32 @@
                         <div class="field-value">{{ $ticket->claimant?->name ?? 'Belum diambil' }}</div>
                     </div>
                 </div>
+                @if ($ticket->status === 'In Progress' && $ticket->claimed_by === auth()->id() && $ticket->source !== 'simulated')
+                    <details class="note-box mt">
+                        <summary><strong>Koreksi Email berdasarkan AMS BSrE</strong></summary>
+                        <p class="small muted">Gunakan hanya apabila email pada tiket berbeda dengan email yang
+                            telah Anda periksa di AMS. Perubahan ini tidak mengubah direktori Email Gov.</p>
+                        <form method="post" action="{{ route('tickets.email.update', $ticket) }}" class="stack mt">
+                            @csrf
+                            @method('PATCH')
+                            <label>Email yang terdaftar di AMS BSrE
+                                <input type="email" name="email" maxlength="180" required
+                                    value="{{ old('email', $ticket->email) }}" autocomplete="off"
+                                    placeholder="nama@subang.go.id">
+                            </label>
+                            @error('email')<p class="small" role="alert">{{ $message }}</p>@enderror
+                            <label>Alasan koreksi
+                                <textarea name="reason" rows="2" minlength="10" maxlength="500" required
+                                    placeholder="Jelaskan ketidaksesuaian yang ditemukan">{{ old('reason') }}</textarea>
+                            </label>
+                            @error('reason')<p class="small" role="alert">{{ $message }}</p>@enderror
+                            <label><input type="checkbox" name="ams_confirmed" value="1" required>
+                                Saya telah memeriksa alamat email ini langsung di AMS BSrE.</label>
+                            @error('ams_confirmed')<p class="small" role="alert">{{ $message }}</p>@enderror
+                            <button class="btn btn-outline" type="submit">Simpan Koreksi Email</button>
+                        </form>
+                    </details>
+                @endif
                 <div class="note-box mt">
                     <strong>Pemeriksaan dan Hasil Pelayanan</strong>
                     <div class="detail-grid mt">
@@ -163,6 +212,8 @@
                                     'note' => 'Catatan tindak lanjut',
                                     'completed' => 'Tiket diselesaikan',
                                     'ams_checked' => 'Pemeriksaan akun, WA, penerbitan, dan status SE di AMS',
+                                    'duplicate_request_blocked' => 'Permohonan berulang ditahan',
+                                    'email_corrected_from_ams' => 'Koreksi email berdasarkan AMS',
                                     'wa_service_confirmed' => 'Pengiriman notifikasi layanan dikonfirmasi',
                                     'wa_confirmed' => 'Notifikasi selesai + survei dikonfirmasi',
                                     default => $entry->action

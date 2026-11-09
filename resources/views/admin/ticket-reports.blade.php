@@ -579,8 +579,7 @@
                     <div class="eyebrow">DATA PENDUKUNG</div>
                     <h2>Rincian Tiket Masuk</h2>
                 </div>
-                <span class="pill pill-neutral">{{ number_format($tickets->total(), 0, ',', '.') }} tiket sesuai
-                    filter</span>
+                <span class="pill pill-neutral">{{ number_format($tickets->total(), 0, ',', '.') }} tiket sesuai filter</span>
             </div>
             <p class="report-period-note">Status rincian:
                 <strong>{{ $statusLabels[$filters['status']] ?? 'Semua Status' }}</strong>.

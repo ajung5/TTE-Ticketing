@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
+use App\Services\ActiveTicketGuard;
 use App\Services\EmailDirectoryService;
 use App\Services\NewTicketEmailNotifier;
 use Illuminate\Database\QueryException;
@@ -66,7 +67,7 @@ class PublicTicketController extends Controller {
             ->header('X-Robots-Tag', 'noindex, nofollow');
     }
 
-    public function store(Request $request, EmailDirectoryService $directory, NewTicketEmailNotifier $notifier) {
+    public function store(Request $request, EmailDirectoryService $directory, NewTicketEmailNotifier $notifier, ActiveTicketGuard $guard) {
         $data = $request->validate(
             [
                 'layanan' => ['required', Rule::in(['Reset Passphrase', 'Pembaruan', 'Pendaftaran'])],
@@ -136,62 +137,75 @@ class PublicTicketController extends Controller {
                 'signature_data' => 'Tanda tangan tidak valid. Silakan gambar ulang.'
             ]);
         }
-        $path = 'signatures/' . Str::uuid() . '.png';
-        if (!Storage::disk('local')->put($path, $bytes)) {
-            throw new \RuntimeException('Gagal menyimpan tanda tangan secara privat.');
-        }
-        try {
-            $ticket = DB::transaction(function () use ($data, $phone, $externalId, $person, $path) {
-                $ticket = Ticket::create([
-                    'external_submission_id' => $externalId,
-                    'nama_user' => $data['nama_user'],
-                    'nik' => $person->nik ?: null,
-                    'nip' => $data['nip'] ?: $person->nip,
-                    'email' => $person->email,
-                    'no_wa' => $phone,
-                    'opd' => $data['opd'],
-                    // Nilai direktori disalin saat pengajuan; input UPTD dari browser diabaikan.
-                    // String kosong berarti pemohon diketahui tidak mempunyai UPTD.
-                    'uptd' => trim((string) ($person->uptd ?? '')),
-                    'jabatan' => $data['jabatan'],
-                    'keterangan' => $data['keterangan'] ?? null,
-                    'layanan' => $data['layanan'],
-                    'status' => 'Open',
-                    'source' => 'direct',
-                    'wa_verification_status' => 'unchecked',
-                    'consent_accepted_at' => now(),
-                    'signature_path' => $path
-                ]);
-                $ticket->update([
-                    'ticket_number' =>
-                        'TTE-' .
-                        now('Asia/Jakarta')->format('Ymd') .
-                        '-' .
-                        str_pad((string) $ticket->id, 6, '0', STR_PAD_LEFT)
-                ]);
-                return $ticket;
-            });
-        } catch (\Throwable $e) {
-            Storage::disk('local')->delete($path);
-            if (
-                $e instanceof QueryException &&
-                ($ticket = Ticket::where('external_submission_id', $externalId)->first())
-            ) {
-                return redirect()->route('public.success')->with('submission_success_ticket', $ticket->ticket_number);
+        // Only a directory-verified NIK/NIP is authoritative. The editable NIP
+        // form value is NOT used as the identity of the applicant.
+        $fingerprints = $guard->fingerprints((string) ($person->nik ?? ''), (string) ($person->nip ?? ''));
+        return $guard->synchronized($fingerprints, function () use (
+            $guard, $fingerprints, $externalId, $data, $person, $phone, $bytes, $notifier
+        ) {
+            // Recheck under the lock: two tabs or workers can submit simultaneously.
+            if ($existing = Ticket::where('external_submission_id', $externalId)->first()) {
+                return redirect()->route('public.success')->with('submission_success_ticket', $existing->ticket_number);
             }
-            throw $e;
-        }
-        $notifier->notify($ticket);
-        return redirect()->route('public.success')->with('submission_success_ticket', $ticket->ticket_number);
+            if ($active = $guard->active($fingerprints)) {
+                $guard->blocked($active, $externalId, 'direct', $data['layanan']);
+                return redirect()->route('public.success')->with('active_request_notice', true);
+            }
+            $path = 'signatures/' . Str::uuid() . '.png';
+            if (!Storage::disk('local')->put($path, $bytes)) {
+                throw new \RuntimeException('Gagal menyimpan tanda tangan secara privat.');
+            }
+            try {
+                $ticket = DB::transaction(function () use ($data, $phone, $externalId, $person, $path, $fingerprints) {
+                    $ticket = Ticket::create([
+                        'external_submission_id' => $externalId,
+                        'nama_user' => $data['nama_user'],
+                        'nik' => $person->nik ?: null,
+                        'nip' => $data['nip'] ?: $person->nip,
+                        'email' => $person->email,
+                        'directory_email' => $person->email,
+                        'applicant_nik_hash' => $fingerprints['nik'],
+                        'applicant_nip_hash' => $fingerprints['nip'],
+                        'no_wa' => $phone,
+                        'opd' => $data['opd'],
+                        'uptd' => trim((string) ($person->uptd ?? '')),
+                        'jabatan' => $data['jabatan'],
+                        'keterangan' => $data['keterangan'] ?? null,
+                        'layanan' => $data['layanan'],
+                        'status' => 'Open',
+                        'source' => 'direct',
+                        'wa_verification_status' => 'unchecked',
+                        'consent_accepted_at' => now(),
+                        'signature_path' => $path
+                    ]);
+                    $ticket->update([
+                        'ticket_number' => 'TTE-' . now('Asia/Jakarta')->format('Ymd') . '-' .
+                            str_pad((string) $ticket->id, 6, '0', STR_PAD_LEFT)
+                    ]);
+                    return $ticket;
+                });
+            } catch (\Throwable $e) {
+                Storage::disk('local')->delete($path);
+                if ($e instanceof QueryException &&
+                    ($existing = Ticket::where('external_submission_id', $externalId)->first())) {
+                    return redirect()->route('public.success')
+                        ->with('submission_success_ticket', $existing->ticket_number);
+                }
+                throw $e;
+            }
+            $notifier->notify($ticket);
+            return redirect()->route('public.success')->with('submission_success_ticket', $ticket->ticket_number);
+        });
     }
 
     public function success(Request $request) {
         $ticketNumber = $request->session()->get('submission_success_ticket');
-        if (!$ticketNumber) {
+        $activeRequestNotice = $request->session()->get('active_request_notice', false);
+        if (!$ticketNumber && !$activeRequestNotice) {
             return redirect()->route('public.form');
         }
         return response()
-            ->view('public.success', compact('ticketNumber'))
+            ->view('public.success', compact('ticketNumber', 'activeRequestNotice'))
             ->withHeaders(['Cache-Control' => 'no-store, private', 'X-Robots-Tag' => 'noindex, nofollow']);
     }
 }

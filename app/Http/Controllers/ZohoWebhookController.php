@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
+use App\Services\ActiveTicketGuard;
 use App\Services\NewTicketEmailNotifier;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ZohoWebhookController extends Controller {
-    public function store(Request $request, NewTicketEmailNotifier $notifier) {
+    public function store(Request $request, NewTicketEmailNotifier $notifier, ActiveTicketGuard $guard) {
         $secret = config('tte.zoho_webhook_secret');
         if (!is_string($secret) || strlen($secret) < 24) {
             return response()->json(['message' => 'Integrasi belum dikonfigurasi.'], 503);
@@ -52,44 +53,60 @@ class ZohoWebhookController extends Controller {
             return response()->json(['ticket_number' => $existing->ticket_number, 'duplicate' => true]);
         }
 
-        try {
-            $ticket = DB::transaction(function () use ($data, $externalId, $phone) {
-                $ticket = Ticket::create([
-                    'external_submission_id' => $externalId,
-                    'nama_user' => $data['nama_user'],
-                    'no_wa' => $phone,
-                    'layanan' => $data['layanan'],
-                    'nip' => $data['nip'] ?? null,
-                    'nik' => $data['nik'] ?? null,
-                    'opd' => $data['opd'] ?? null,
-                    'jabatan' => $data['jabatan'] ?? null,
-                    'email' => $data['email'] ?? null,
-                    'keterangan' => $data['keterangan'] ?? null,
-                    'status' => 'Open',
-                    'source' => 'zoho'
-                ]);
-                $ticket->update([
-                    'ticket_number' =>
-                        'TTE-' .
-                        now('Asia/Jakarta')->format('Ymd') .
-                        '-' .
-                        str_pad((string) $ticket->id, 6, '0', STR_PAD_LEFT)
-                ]);
-                return $ticket;
-            });
-        } catch (QueryException $e) {
-            // Kondisi bersamaan: unique external_submission_id menjamin idempoten.
-            $existing = Ticket::where('external_submission_id', $externalId)->first();
-            if (!$existing) {
-                throw $e;
+        $fingerprints = $guard->fingerprints($data['nik'] ?? null, $data['nip'] ?? null);
+        return $guard->synchronized($fingerprints, function () use (
+            $guard, $fingerprints, $data, $externalId, $phone, $digest, $notifier
+        ) {
+            if ($existing = Ticket::where('external_submission_id', $externalId)->first()) {
+                $this->log($externalId, 'duplicate', $digest);
+                return response()->json(['ticket_number' => $existing->ticket_number, 'duplicate' => true]);
             }
-            $this->log($externalId, 'duplicate', $digest);
-            return response()->json(['ticket_number' => $existing->ticket_number, 'duplicate' => true]);
-        }
-        $this->log($externalId, 'created', $digest);
-        $notifier->notify($ticket);
-
-        return response()->json(['ticket_number' => $ticket->ticket_number, 'duplicate' => false], 201);
+            if ($active = $guard->active($fingerprints)) {
+                $guard->blocked($active, $externalId, 'zoho', $data['layanan']);
+                $this->log($externalId, 'active_blocked', $digest);
+                // HTTP 200 acknowledges the webhook so the source does not retry forever.
+                return response()->json([
+                    'ticket_number' => $active->ticket_number,
+                    'duplicate' => true,
+                    'blocked_active' => true
+                ]);
+            }
+            try {
+                $ticket = DB::transaction(function () use ($data, $externalId, $phone, $fingerprints) {
+                    $ticket = Ticket::create([
+                        'external_submission_id' => $externalId,
+                        'nama_user' => $data['nama_user'],
+                        'no_wa' => $phone,
+                        'layanan' => $data['layanan'],
+                        'nip' => $data['nip'] ?? null,
+                        'nik' => $data['nik'] ?? null,
+                        'applicant_nik_hash' => $fingerprints['nik'],
+                        'applicant_nip_hash' => $fingerprints['nip'],
+                        'opd' => $data['opd'] ?? null,
+                        'jabatan' => $data['jabatan'] ?? null,
+                        'email' => $data['email'] ?? null,
+                        'keterangan' => $data['keterangan'] ?? null,
+                        'status' => 'Open',
+                        'source' => 'zoho'
+                    ]);
+                    $ticket->update([
+                        'ticket_number' => 'TTE-' . now('Asia/Jakarta')->format('Ymd') . '-' .
+                            str_pad((string) $ticket->id, 6, '0', STR_PAD_LEFT)
+                    ]);
+                    return $ticket;
+                });
+            } catch (QueryException $e) {
+                $existing = Ticket::where('external_submission_id', $externalId)->first();
+                if (!$existing) {
+                    throw $e;
+                }
+                $this->log($externalId, 'duplicate', $digest);
+                return response()->json(['ticket_number' => $existing->ticket_number, 'duplicate' => true]);
+            }
+            $this->log($externalId, 'created', $digest);
+            $notifier->notify($ticket);
+            return response()->json(['ticket_number' => $ticket->ticket_number, 'duplicate' => false], 201);
+        });
     }
 
     private function log(string $externalId, string $outcome, string $digest): void {

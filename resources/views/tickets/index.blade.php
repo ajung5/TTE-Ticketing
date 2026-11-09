@@ -6,6 +6,12 @@
             <div class="eyebrow">WORKSPACE / VERIFIKATOR</div>
             <h1>Antrean Permohonan TTE</h1>
             <p class="muted">Lihat antrean, ambil tiket secara mandiri, dan pantau pekerjaan Anda.</p>
+            @if (($stats['duplicate_alerts'] ?? 0) > 0)
+                <div class="alert warn" role="status">
+                    <strong>{{ $stats['duplicate_alerts'] }} tiket aktif memiliki permohonan berulang.</strong>
+                    Periksa penanda pada daftar dan tindak lanjuti tiket sebelumnya.
+                </div>
+            @endif
         </div><span class="pill pill-blue">● Self-Claim Aktif</span>
     </div>
     <div class="stat-grid">
@@ -35,8 +41,7 @@
             </div>
             <div class="stat-name">Perlu Pengajuan Ulang</div>
             <div class="stat-number">{{ number_format($stats['returned'], 0, ',', '.') }}</div>
-            <div class="stat-foot"><a href="{{ route('tickets.index', ['status' => 'Returned']) }}">Lihat tiket yang Anda
-                    kembalikan →</a></div>
+            <div class="stat-foot"><a href="{{ route('tickets.index', ['status' => 'Returned']) }}">Lihat tiket yang Anda kembalikan →</a></div>
         </div>
     </div>
     <nav class="tte-queue-tabs" aria-label="Filter cepat status tiket">
@@ -105,6 +110,13 @@
                                     {{ $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y · H:i') }}</div>
                                 @if ($ticket->source === 'simulated')
                                     <span class="demo-label">DATA SIMULASI</span>
+                                @endif
+                                @if ($ticket->duplicate_attempts > 0 && in_array($ticket->status, ['Open', 'In Progress'], true))
+                                    <div class="small" role="status"><strong>Permohonan berulang:
+                                        {{ $ticket->duplicate_attempts }} kali</strong></div>
+                                @endif
+                                @if ($ticket->status === 'In Progress' && $ticket->awaiting_applicant_action)
+                                    <div class="small"><strong>Menunggu tindak lanjut pemohon</strong></div>
                                 @endif
                             </td>
                             <td data-label="Pemohon"><strong>{{ $ticket->nama_user }}</strong>

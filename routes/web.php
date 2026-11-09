@@ -74,6 +74,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/tickets/{ticket}/return-for-correction', [TicketController::class, 'returnForCorrection'])->name(
         'tickets.return-for-correction'
     );
+    Route::patch('/tickets/{ticket}/email', [TicketController::class, 'updateEmail'])
+        ->middleware('throttle:8,10')->name('tickets.email.update');
     Route::post('/tickets/{ticket}/note', [TicketController::class, 'note'])->name('tickets.note');
     Route::post('/tickets/{ticket}/complete', [TicketController::class, 'complete'])->name('tickets.complete');
     Route::post('/tickets/{ticket}/whatsapp', [TicketController::class, 'openWhatsApp'])->name('tickets.whatsapp');

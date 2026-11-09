@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Models\TicketActivity;
+use App\Models\TicketEmailChange;
 use App\Models\WaNotification;
 use App\Models\WaMessageTemplate;
 use App\Services\WhatsAppMessage;
 use App\Services\TicketNextAction;
+use App\Services\EmailDirectoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -51,6 +53,10 @@ class TicketController extends Controller {
             ->orderBy('id', $status === 'Open' ? 'asc' : 'desc');
         $tickets = $query->paginate(12)->withQueryString();
         $stats = [
+            'duplicate_alerts' => Ticket::where('duplicate_attempts', '>', 0)
+                ->whereIn('status', ['Open', 'In Progress'])
+                ->where(fn($q) => $q->where('status', 'Open')
+                    ->orWhere('claimed_by', $request->user()->id))->count(),
             'new' => Ticket::where('status', 'Open')->count(),
             'mine' => Ticket::where('claimed_by', $request->user()->id)->where('status', 'In Progress')->count(),
             'completed' => Ticket::where('claimed_by', $request->user()->id)->where('status', 'Done')->count(),
@@ -268,7 +274,8 @@ class TicketController extends Controller {
         if ($applicantUptd === null && $ticket->source !== 'simulated') {
             $identifier = trim((string) ($ticket->nik ?: $ticket->nip));
             $person = app(\App\Services\EmailDirectoryService::class)->findByIdentifier($identifier);
-            if ($person && $ticket->email && strcasecmp((string) $person->email, (string) $ticket->email) === 0) {
+            $directoryEmail = $ticket->directory_email ?: $ticket->email;
+            if ($person && $directoryEmail && strcasecmp((string) $person->email, (string) $directoryEmail) === 0) {
                 $applicantUptd = $person->uptd;
             }
         }
@@ -520,6 +527,7 @@ class TicketController extends Controller {
             $event = $this->serviceEvent($record);
             $record->forceFill(['actual_process' => $this->actualProcess($record, $event)])->save();
             if ($changed) {
+                $record->forceFill(['awaiting_applicant_action' => false])->save();
                 WaNotification::where('ticket_id', $record->id)
                     ->whereIn('event_type', array_keys(WaMessageTemplate::EVENTS))
                     ->update(['opened_at' => null, 'confirmed_at' => null]);
@@ -618,6 +626,7 @@ class TicketController extends Controller {
                     'action' => 'wa_service_confirmed',
                     'note' => WaMessageTemplate::EVENTS[$event]
                 ]);
+                $record->forceFill(['awaiting_applicant_action' => true])->save();
             }
             // Penyelesaian administratif Pendaftaran: Notifikasi 4 telah DIKONFIRMASI
             // dikirim verifikator. Ini BUKAN bukti akun sudah aktivasi atau SE sudah terbit.
@@ -628,7 +637,8 @@ class TicketController extends Controller {
                     'completed_at' => now(),
                     'resolution_note' => null,
                     'actual_process' => 'registration_followup',
-                    'service_outcome' => 'registration_processed'
+                    'service_outcome' => 'registration_processed',
+                    'awaiting_applicant_action' => false
                 ]);
                 TicketActivity::create([
                     'ticket_id' => $record->id,
@@ -683,7 +693,8 @@ class TicketController extends Controller {
             $record->update([
                 'status' => 'Returned',
                 'completed_at' => null,
-                'resolution_note' => 'Pengajuan ulang disarankan: ' . $record->recommended_service
+                'resolution_note' => 'Pengajuan ulang disarankan: ' . $record->recommended_service,
+                'awaiting_applicant_action' => false
             ]);
             TicketActivity::create([
                 'ticket_id' => $record->id,
@@ -695,6 +706,78 @@ class TicketController extends Controller {
         return redirect()
             ->route('tickets.show', $ticket)
             ->with('success', 'Permohonan dikembalikan dengan status Perlu Pengajuan Ulang.');
+    }
+
+    /** Correct ticket-level contact only; directory/AMS account remains authoritative upstream. */
+    public function updateEmail(Request $request, Ticket $ticket, EmailDirectoryService $directory) {
+        $this->owner($request, $ticket);
+        abort_unless($ticket->status === 'In Progress' && $ticket->source !== 'simulated', 409);
+        $data = $request->validate([
+            'email' => ['required', 'string', 'email', 'max:180'],
+            'reason' => ['required', 'string', 'min:10', 'max:500'],
+            'ams_confirmed' => ['accepted']
+        ]);
+        $email = $directory->normalizedEmail($data['email']);
+        if (!$email || !str_contains(trim($data['email']), '@')) {
+            throw ValidationException::withMessages([
+                'email' => 'Alamat email hasil pemeriksaan AMS harus merupakan Email Gov @subang.go.id yang valid.'
+            ]);
+        }
+        $changed = DB::transaction(function () use ($request, $ticket, $email, $data) {
+            $record = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+            abort_unless($record->status === 'In Progress' &&
+                $record->claimed_by === $request->user()->id && $record->source !== 'simulated', 409);
+            $oldEmail = strtolower(trim((string) $record->email));
+            if ($oldEmail === $email) {
+                return false;
+            }
+            $record->forceFill([
+                'email' => $email,
+                'directory_email' => $record->directory_email ??
+                    ($record->source === 'direct' ? $record->email : null),
+                'email_corrected_at' => now(),
+                'email_corrected_by' => $request->user()->id
+            ])->save();
+            TicketEmailChange::create([
+                'ticket_id' => $record->id,
+                'actor_id' => $request->user()->id,
+                'old_email' => $oldEmail,
+                'new_email' => $email,
+                'reason' => trim($data['reason'])
+            ]);
+            TicketActivity::create([
+                'ticket_id' => $record->id,
+                'actor_id' => $request->user()->id,
+                'action' => 'email_corrected_from_ams',
+                'note' => 'Alamat email tiket dikoreksi berdasarkan pemeriksaan AMS BSrE. ' .
+                    'Alasan: ' . trim($data['reason'])
+            ]);
+            DB::table('audit_logs')->insert([
+                'actor_id' => $request->user()->id,
+                'action' => 'ticket_email_corrected_from_ams',
+                'target_type' => 'ticket',
+                'target_id' => $record->id,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            // A prior template containing the obsolete email must be resent.
+            // Activity logs preserve the original confirmed-send evidence.
+            if ($oldEmail !== '') {
+                $notifications = WaNotification::where('ticket_id', $record->id)
+                    ->where('event_type', '!=', 'completed')
+                    ->whereNotNull('confirmed_at')->get();
+                foreach ($notifications as $notice) {
+                    if (str_contains(strtolower((string) $notice->message), $oldEmail)) {
+                        $notice->update(['opened_at' => null, 'confirmed_at' => null]);
+                        $record->forceFill(['awaiting_applicant_action' => false])->save();
+                    }
+                }
+            }
+            return true;
+        });
+        return back()->with('success', $changed
+            ? 'Email pada tiket berhasil dikoreksi berdasarkan AMS. Periksa dan kirim ulang notifikasi bila diperlukan.'
+            : 'Email tidak berubah; alamat yang dimasukkan sudah sama dengan email pada tiket.');
     }
 
     public function note(Request $request, Ticket $ticket) {
@@ -759,7 +842,8 @@ class TicketController extends Controller {
                 'completed_at' => now(),
                 'resolution_note' => null,
                 'actual_process' => $process,
-                'service_outcome' => $outcome
+                'service_outcome' => $outcome,
+                'awaiting_applicant_action' => false
             ]);
             TicketActivity::create([
                 'ticket_id' => $record->id,

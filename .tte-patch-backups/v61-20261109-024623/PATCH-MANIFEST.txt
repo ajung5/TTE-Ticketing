@@ -1,0 +1,21 @@
+Patch: v61
+Base: 8bcaa8c1af870c824fdcc38c7bed1b59e6b706e3
+
+Edited:
+app/Http/Controllers/PublicTicketController.php
+app/Http/Controllers/TicketController.php
+app/Http/Controllers/ZohoWebhookController.php
+app/Models/Ticket.php
+resources/views/public/success.blade.php
+resources/views/tickets/index.blade.php
+resources/views/tickets/show.blade.php
+routes/web.php
+
+New:
+app/Models/TicketEmailChange.php
+app/Services/ActiveTicketGuard.php
+database/migrations/2026_11_09_090000_add_active_ticket_guard_and_ams_email.php
+docs/PATCH-V61-PERMOHONAN-GANDA-EMAIL-AMS.md
+tests/Feature/TteDuplicateAndAmsEmailV61Test.php
+
+Migration: apply manually with php artisan migrate --force.

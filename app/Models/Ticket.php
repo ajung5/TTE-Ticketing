@@ -41,7 +41,15 @@ class Ticket extends Model {
         'wa_checked_at',
         'wa_checked_by',
         'consent_accepted_at',
-        'signature_path'
+        'signature_path',
+        'applicant_nik_hash',
+        'applicant_nip_hash',
+        'directory_email',
+        'duplicate_attempts',
+        'last_duplicate_attempt_at',
+        'awaiting_applicant_action',
+        'email_corrected_at',
+        'email_corrected_by'
     ];
 
     protected function casts(): array {
@@ -50,6 +58,11 @@ class Ticket extends Model {
             'completed_at' => 'datetime',
             'wa_checked_at' => 'datetime',
             'nik' => 'encrypted',
+            'directory_email' => 'encrypted',
+            'duplicate_attempts' => 'integer',
+            'last_duplicate_attempt_at' => 'datetime',
+            'awaiting_applicant_action' => 'boolean',
+            'email_corrected_at' => 'datetime',
             'consent_accepted_at' => 'datetime'
         ];
     }
