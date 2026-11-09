@@ -11,8 +11,8 @@ if (str_starts_with($contactNumber, '0')) {
 
 $contactUrl = null;
 if (preg_match('/^628[0-9]{7,12}$/D', $contactNumber)) {
-    $message = 'Assalamualaikum Admin Pengelola Email Dinas,
-        saya memerlukan bantuan terkait akun Email mail.subang.go.id untuk pengajuan layanan TTE.';
+    $message =
+        'Assalamu’alaikum, Admin Pengelola Email Dinas. Saya memerlukan bantuan terkait username dan password email mail.subang.go.id untuk keperluan layanan TTE. Terima kasih.';
     $contactUrl = 'https://wa.me/' . $contactNumber . '?text=' . rawurlencode($message);
 } else {
     // Kompatibilitas dengan konfigurasi pada versi sebelumnya.

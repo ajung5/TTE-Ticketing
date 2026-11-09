@@ -191,7 +191,7 @@
                 @php($contactUrl = config('email_directory.admin_contact_url'))
                 @if (is_string($contactUrl) && str_starts_with($contactUrl, 'https://wa.me/'))
                     <a href="{{ $contactUrl }}" class="btn btn-primary" target="_blank"
-                        rel="noopener noreferrer">Hubungi Pengelola via WhatsApp</a>
+                        rel="noopener noreferrer" data-email-admin-wa="1">Hubungi Pengelola via WhatsApp</a>
                 @else
                     <span class="small muted">Nomor WhatsApp pengelola email belum dikonfigurasi. Silakan hubungi helpdesk
                         internal.</span>
@@ -204,4 +204,5 @@
     <link rel="stylesheet" href="{{ asset('css/public-request-official.css') }}?v=1">
     <link rel="stylesheet" href="{{ asset('css/wa-phone-prefix.css') }}?v=1">
     <script src="{{ asset('js/public-request.js') }}?v=24" defer></script>
+    <script src="{{ asset('js/public-email-admin-whatsapp.js') }}?v=65" defer></script>
 @endsection
