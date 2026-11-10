@@ -29,8 +29,7 @@
                 <form method="post" action="{{ request()->fullUrl() }}" class="survey-form">
                     @csrf
                     <div class="honeypot" aria-hidden="true">
-                        <label
-                            >Biarkan kosong
+                        <label>Biarkan kosong
                             <input type="text" name="website" tabindex="-1" autocomplete="off"
                         /></label>
                     </div>

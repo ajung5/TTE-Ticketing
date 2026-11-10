@@ -8,18 +8,15 @@
         <form method="post" action="{{ route('password.update') }}" class="stack mt-lg">
             @csrf
             <input type="hidden" name="token" value="{{ $token }}" />
-            <label
-                >Email<input type="email" name="email" value="{{ old('email', $email) }}" required
+            <label>Email<input type="email" name="email" value="{{ old('email', $email) }}" required
             /></label>
-            <label
-                >Password baru<input
+            <label>Password baru<input
                     type="password"
                     name="password"
                     autocomplete="new-password"
                     required
             /></label>
-            <label
-                >Konfirmasi password<input
+            <label>Konfirmasi password<input
                     type="password"
                     name="password_confirmation"
                     autocomplete="new-password"

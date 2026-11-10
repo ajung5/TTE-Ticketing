@@ -179,8 +179,7 @@
                             class="stack mt">
                             @csrf
                             @method ('PATCH')
-                            <label
-                                >Email yang terdaftar di AMS BSrE
+                            <label>Email yang terdaftar di AMS BSrE
                                 <input
                                     type="email"
                                     name="email"
@@ -193,8 +192,7 @@
                             @error ('email')
                                 <p class="small" role="alert">{{ $message }}</p>
                             @enderror
-                            <label
-                                >Alasan koreksi
+                            <label>Alasan koreksi
                                 <textarea
                                     name="reason"
                                     rows="2"
@@ -208,8 +206,7 @@
                             @error ('reason')
                                 <p class="small" role="alert">{{ $message }}</p>
                             @enderror
-                            <label
-                                ><input type="checkbox" name="ams_confirmed" value="1" required />
+                            <label><input type="checkbox" name="ams_confirmed" value="1" required />
                                 Saya telah memeriksa alamat email ini langsung di AMS BSrE.</label>
                             @error ('ams_confirmed')
                                 <p class="small" role="alert">{{ $message }}</p>
@@ -782,8 +779,7 @@
                         action="{{ route('tickets.note', $ticket) }}"
                         class="stack mt">
                         @csrf
-                        <label
-                            >Catatan tindak lanjut (opsional)
+                        <label>Catatan tindak lanjut (opsional)
                             <textarea
                                 name="note"
                                 rows="3"

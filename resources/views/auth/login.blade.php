@@ -7,8 +7,7 @@
         <p class="muted">Masuk untuk mengelola permohonan sertifikat elektronik.</p>
         <form method="post" action="{{ route('login.submit') }}" class="stack mt-lg">
             @csrf
-            <label
-                >Email akun<input
+            <label>Email akun<input
                     name="email"
                     type="email"
                     autocomplete="username"
@@ -16,8 +15,7 @@
                     required
                     autofocus
             /></label>
-            <label
-                >Password<input
+            <label>Password<input
                     name="password"
                     type="password"
                     autocomplete="current-password"

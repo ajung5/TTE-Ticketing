@@ -46,3 +46,35 @@ test('produces stable output when applied repeatedly', () => {
     assert.equal(once, '<span>Halo</span><span>lagi</span>');
     assert.equal(normalize(once), once);
 });
+test('compacts the split opening label tag reported in the public form', () => {
+    const input = '<label\n                    >Inisial (opsional)</label>';
+    assert.equal(normalize(input), '<label>Inisial (opsional)</label>');
+});
+
+test('handles ordinary and custom opening tags without attributes', () => {
+    const input = '<section\n  ><div\n >A</div\n ><x-label\n >B</x-label\n ></section>';
+    assert.equal(normalize(input), '<section><div>A</div><x-label>B</x-label></section>');
+});
+
+test('does not combine attributes or change significant whitespace between siblings', () => {
+    const input = '<label class="required"\n id="a">Nama</label\n >\n <span\n >Keterangan</span>';
+    assert.equal(normalize(input), '<label class="required"\n id="a">Nama</label>\n <span>Keterangan</span>');
+});
+
+test('protects literal split label tags inside Blade expressions, comments and scripts', () => {
+    for (const part of [
+        '<script>const label = "<label\\n >";</script>',
+        '<!-- <label\n > -->',
+        '{{-- <label\n > --}}',
+        '{{ "<label\n >" }}',
+        '@verbatim <label\n > @endverbatim',
+    ]) {
+        assert.equal(normalize(part), part);
+    }
+});
+
+test('keeps generic opening-tag normalization idempotent', () => {
+    const original = '<label\n >Inisial</label\n ><span\n >X</span>';
+    const formatted = normalize(original);
+    assert.equal(normalize(formatted), formatted);
+});

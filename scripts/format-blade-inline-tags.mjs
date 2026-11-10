@@ -5,7 +5,11 @@
  * whitespace between adjacent inline elements: that can affect rendering.
  * Protect literal JS/CSS/textarea content and common Blade/HTML comments.
  */
-const openingWithoutAttributes = /<(strong|em|b|i|span|small|code|mark)[ \t]*\r?\n[ \t]*>/gi;
+// All opening HTML/component tags without attributes (including <label>) may
+// have the closing bracket moved to a new line by Prettier Blade. Normalize
+// *only* newline whitespace between a standalone tag name and '>'.
+// Keep attribute-bearing openings untouched and do not alter inter-tag spaces.
+const openingWithoutAttributes = /<([A-Za-z][A-Za-z0-9:-]*)[ \t]*(?:\r?\n[ \t]*)+>/g;
 const splitClosingTag = /<\/([A-Za-z][A-Za-z0-9:-]*)[ \t]*(?:\r?\n[ \t]*)+>/g;
 const protectedBlock = /(<script\b[^>]*>[\s\S]*?<\/script\s*>|<style\b[^>]*>[\s\S]*?<\/style\s*>|<textarea\b[^>]*>[\s\S]*?<\/textarea\s*>|\{\{--[\s\S]*?--\}\}|<!--[\s\S]*?-->|@verbatim\b[\s\S]*?@endverbatim|@php\s+[\s\S]*?@endphp|<\?php[\s\S]*?\?>|\{\{[\s\S]*?\}\}|\{!![\s\S]*?!!\})/gi;
 

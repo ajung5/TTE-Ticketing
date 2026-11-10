@@ -98,3 +98,25 @@ php artisan test
 Format on Save yang menggunakan `scripts/format-source.mjs --write --file` akan
 memakai normalisasi yang sama. `npm run build` tetap hanya membangun aset, bukan
 memformat source.
+
+## TTE v6.11 — Tag pembuka HTML/Blade tanpa atribut
+
+Normalizer sekarang juga merapikan **semua tag pembuka tanpa atribut** yang tanda
+`>`-nya dipisahkan oleh baris baru, misalnya `<label\n >` menjadi `<label>`.
+Tag seperti `<section>`, `<div>`, `<span>`, dan `<x-label>` ikut tercakup.
+Tag **dengan atribut** tetap mengikuti aturan multiline Prettier. Spasi
+antar-elemen tidak ditambah atau dihapus. Isi script/style/textarea, komentar,
+dan ekspresi Blade dikecualikan.
+
+Untuk menerapkan pada view yang sudah terformat sebelumnya:
+
+```bash
+node --test tests/FormatterBladeInlineTags.test.mjs
+npm run format:blade
+npm run format:check
+php artisan test
+```
+
+Format on Save harus menjalankan `scripts/format-source.mjs` dari root proyek
+(ekstensi Run On Save), bukan format native Prettier yang melewati normalizer.
+`npm run build` adalah build Vite dan **tidak** melakukan formatting.

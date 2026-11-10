@@ -120,8 +120,7 @@
             autocomplete="off">
             @csrf
             <div class="verifier-form-grid">
-                <label
-                    >Nama lengkap <span class="required-mark">*</span>
+                <label>Nama lengkap <span class="required-mark">*</span>
                     <input
                         name="name"
                         type="text"
@@ -132,8 +131,7 @@
                         autocomplete="off"
                         placeholder="Nama petugas" />
                 </label>
-                <label
-                    >Email akun <span class="required-mark">*</span>
+                <label>Email akun <span class="required-mark">*</span>
                     <input
                         name="email"
                         type="email"
@@ -143,8 +141,7 @@
                         autocomplete="off"
                         placeholder="petugas@subang.go.id" />
                 </label>
-                <label
-                    >Inisial (opsional)
+                <label>Inisial (opsional)
                     <input
                         name="initials"
                         type="text"
@@ -154,8 +151,7 @@
                         placeholder="Contoh: AWN" />
                 </label>
                 <div></div>
-                <label
-                    >Password awal <span class="required-mark">*</span>
+                <label>Password awal <span class="required-mark">*</span>
                     <input
                         name="password"
                         type="password"
@@ -164,8 +160,7 @@
                         autocomplete="new-password"
                         placeholder="Minimal 12 karakter" />
                 </label>
-                <label
-                    >Konfirmasi password <span class="required-mark">*</span>
+                <label>Konfirmasi password <span class="required-mark">*</span>
                     <input
                         name="password_confirmation"
                         type="password"
@@ -302,8 +297,7 @@
                 @method ('PUT')
                 <input type="hidden" name="_edit_id" value="{{ $verifier->id }}" />
                 <div class="verifier-form-grid">
-                    <label
-                        >Nama lengkap
+                    <label>Nama lengkap
                         <input
                             type="text"
                             name="name"
@@ -312,8 +306,7 @@
                             required
                             value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('name', $verifier->name) : $verifier->name }}" />
                     </label>
-                    <label
-                        >Email akun
+                    <label>Email akun
                         <input
                             type="email"
                             name="email"
@@ -321,8 +314,7 @@
                             required
                             value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('email', $verifier->email) : $verifier->email }}" />
                     </label>
-                    <label
-                        >Inisial
+                    <label>Inisial
                         <input
                             type="text"
                             name="initials"
@@ -333,8 +325,7 @@
                 </div>
                 <p class="small muted">Kosongkan kedua kolom password apabila hanya mengubah profil.</p>
                 <div class="verifier-form-grid">
-                    <label
-                        >Password baru (opsional)
+                    <label>Password baru (opsional)
                         <input
                             type="password"
                             name="password"
@@ -342,8 +333,7 @@
                             autocomplete="new-password"
                             placeholder="Biarkan kosong jika tidak diganti" />
                     </label>
-                    <label
-                        >Konfirmasi password baru
+                    <label>Konfirmasi password baru
                         <input
                             type="password"
                             name="password_confirmation"
