@@ -29,7 +29,13 @@
             <div class="eyebrow">PERMOHONAN BERHASIL DIKIRIM</div>
             <h1>Terima kasih, permohonan Anda tercatat.</h1>
             <p class="muted">Simpan nomor tiket berikut sebagai referensi saat menghubungi petugas layanan TTE.</p>
-            <div class="public-ticket-number">{{ $ticketNumber }}</div>
+            <div class="public-ticket-number" id="tte-ux-ticket-number">{{ $ticketNumber }}</div>
+            <div class="tte-ux-copy-controls">
+                <button type="button" class="btn btn-outline" data-tte-ticket-copy>
+                    Salin Nomor Tiket
+                </button>
+                <span id="tte-ux-copy-feedback" class="tte-ux-copy-feedback" role="status" aria-live="polite"></span>
+            </div>
             <div class="note-box">
                 <strong>Langkah selanjutnya</strong>
                 <p class="small muted">Permohonan akan ditangani oleh verifikator. Pastikan nomor WhatsApp aktif dan telah terverifikasi di AMS BSrE. Petugas tidak pernah meminta OTP, password, atau passphrase.</p>
@@ -38,4 +44,7 @@
                 >Kembali ke Formulir</a>
         @endif
     </div>
+    @if (!$activeRequestNotice)
+        <script src="{{ asset('js/public-success-copy.js') }}?v=613" defer></script>
+    @endif
 @endsection

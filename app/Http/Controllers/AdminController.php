@@ -74,6 +74,34 @@ class AdminController extends Controller {
             ->selectRaw('COUNT(*) as total')
             ->groupBy('service_outcome')
             ->pluck('total', 'service_outcome');
+        // UX-V613: period metrics are distinct from all-time KPI and current backlog snapshots.
+        $period = in_array($request->query('period'), ['week', 'month', 'all'], true)
+            ? $request->query('period')
+            : 'month';
+        $periodStart = match ($period) {
+            'week' => now()->subDays(6)->startOfDay(),
+            'month' => now()->startOfMonth(),
+            default => null,
+        };
+        $periodLabel = match ($period) {
+            'week' => '7 hari kalender terakhir',
+            'month' => 'Bulan berjalan',
+            default => 'Seluruh periode',
+        };
+        $incoming = Ticket::query();
+        $completedInPeriod = Ticket::query()->where('status', 'Done')->whereNotNull('completed_at');
+        if ($periodStart !== null) {
+            $incoming->where('created_at', '>=', $periodStart);
+            $completedInPeriod->where('completed_at', '>=', $periodStart);
+        }
+        $periodStats = [
+            'incoming' => $incoming->count(),
+            'completed' => $completedInPeriod->count(),
+            'waiting_applicant' => Ticket::where('status', 'In Progress')
+                ->where('awaiting_applicant_action', true)
+                ->count(),
+            'aged_open' => $attention['waiting'],
+        ];
         return view(
             'admin.dashboard',
             compact(
@@ -85,6 +113,9 @@ class AdminController extends Controller {
                 'outcomes',
                 'health',
                 'attention',
+                'period',
+                'periodLabel',
+                'periodStats',
             ),
         );
     }

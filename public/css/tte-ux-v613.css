@@ -1,0 +1,214 @@
+/* TTE v6.13 — scoped UX enhancements. No changes to business workflows. */
+.tte-ux-focus-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0;
+}
+.tte-ux-focus-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 42px;
+    padding: 9px 14px;
+    border: 1px solid #cfdded;
+    border-radius: 10px;
+    background: #fff;
+    color: #24466f;
+    text-decoration: none;
+    font-weight: 700;
+}
+.tte-ux-focus-link:hover,
+.tte-ux-focus-link:focus-visible {
+    background: #ebf3ff;
+    border-color: #7da9df;
+    text-decoration: none;
+}
+.tte-ux-focus-link.is-active {
+    background: #e8f1ff;
+    border-color: #5d91d1;
+    color: #154a8b;
+}
+.tte-ux-focus-link strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 25px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #eef2f8;
+    font-variant-numeric: tabular-nums;
+}
+.tte-ux-ticket-ams {
+    margin: 0 0 16px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #dfe8f3;
+    border-radius: 12px;
+}
+.tte-ux-ticket-ams h2 {
+    margin: 0 0 4px;
+    font-size: 16px;
+}
+.tte-ux-ams-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+    margin-top: 12px;
+}
+.tte-ux-ams-item {
+    min-width: 0;
+    padding: 11px;
+    border: 1px solid #e5ebf3;
+    background: #f8fafc;
+    border-radius: 9px;
+}
+.tte-ux-ams-item span {
+    display: block;
+    color: #637692;
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+.tte-ux-ams-item strong {
+    font-size: 12px;
+    color: #233d60;
+    overflow-wrap: anywhere;
+}
+.tte-ux-ams-note {
+    margin: 12px 0 0;
+    color: #64738b;
+    font-size: 12px;
+}
+.tte-ux-period-card {
+    margin-bottom: 16px;
+}
+.tte-ux-period-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.tte-ux-period-head h2 {
+    font-size: 18px;
+    margin: 3px 0 5px;
+}
+.tte-ux-period-form {
+    display: flex;
+    align-items: end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.tte-ux-period-form label {
+    display: grid;
+    gap: 5px;
+    font-weight: 650;
+    color: #50647d;
+    font-size: 12px;
+}
+.tte-ux-period-form select {
+    min-height: 39px;
+    border: 1px solid #d3deed;
+    border-radius: 8px;
+    padding: 7px 11px;
+    background: white;
+    color: #223e63;
+}
+.tte-ux-period-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 11px;
+    margin-top: 14px;
+}
+.tte-ux-period-metric {
+    border: 1px solid #e0e7f1;
+    background: #f8fafd;
+    border-radius: 10px;
+    padding: 13px;
+}
+.tte-ux-period-metric .label {
+    color: #62748e;
+    font-size: 11px;
+}
+.tte-ux-period-metric strong {
+    display: block;
+    margin-top: 5px;
+    font-size: 24px;
+    line-height: 1.2;
+    color: #1d416e;
+    font-variant-numeric: tabular-nums;
+}
+.tte-ux-period-metric small {
+    display: block;
+    margin-top: 5px;
+    color: #70809a;
+}
+.tte-ux-lifetime-label {
+    margin: 14px 0 9px;
+    color: #657994;
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+}
+.tte-ux-help-link {
+    margin-top: 9px;
+    min-height: 36px;
+    padding: 8px 11px;
+    border-radius: 8px;
+    border: 1px solid #c7d8eb;
+    color: #25558a;
+    background: #f0f6ff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+}
+.tte-ux-help-link:hover,
+.tte-ux-help-link:focus-visible {
+    background: #e5f0ff;
+    border-color: #7da9dd;
+}
+.tte-ux-copy-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    align-items: center;
+    margin: 12px 0;
+}
+.tte-ux-copy-feedback {
+    font-size: 12px;
+    color: #476b86;
+    min-height: 18px;
+}
+@media (max-width: 850px) {
+    .tte-ux-ams-grid,
+    .tte-ux-period-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 520px) {
+    .tte-ux-focus-nav {
+        flex-direction: column;
+    }
+    .tte-ux-focus-link {
+        justify-content: space-between;
+    }
+    .tte-ux-period-form {
+        width: 100%;
+    }
+    .tte-ux-period-form label {
+        flex: 1;
+        min-width: 145px;
+    }
+    .tte-ux-period-form select {
+        width: 100%;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .tte-ux-focus-link,
+    .tte-ux-help-link {
+        transition: none;
+    }
+}

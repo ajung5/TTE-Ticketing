@@ -79,6 +79,29 @@
                 >{{ $nextAction['button'] }} →</a>
         @endif
     </section>
+    @if ($ticket->status === 'In Progress')
+        <section class="tte-ux-ticket-ams" aria-labelledby="tte-ux-ams-heading">
+            <h2 id="tte-ux-ams-heading">Ringkasan Pemeriksaan AMS</h2>
+            <p class="small muted">Ringkasan hasil pemeriksaan terakhir, bukan pembacaan real-time AMS BSrE.</p>
+            <div class="tte-ux-ams-grid">
+                <div class="tte-ux-ams-item">
+                    <span>Aktivasi akun</span><strong>{{ $ticket->activation_label }}</strong>
+                </div>
+                <div class="tte-ux-ams-item">
+                    <span>Verifikasi WhatsApp</span><strong>{{ $ticket->wa_verification_label }}</strong>
+                </div>
+                <div class="tte-ux-ams-item">
+                    <span>Penerbitan dan status SE</span><strong>{{ $ticket->certificate_status_label }}</strong>
+                </div>
+                <div class="tte-ux-ams-item">
+                    <span>Status tiket</span><strong>{{ $ticket->status_label }}</strong>
+                </div>
+            </div>
+            @if (!$completionReady)
+                <p class="tte-ux-ams-note">Ikuti <strong>Tindakan Berikutnya</strong> dan periksa hasil AMS serta konfirmasi WhatsApp sesuai proses yang berlaku sebelum menutup tiket.</p>
+            @endif
+        </section>
+    @endif
     <div class="columns detail-columns">
         <div class="stack">
             <section class="card">

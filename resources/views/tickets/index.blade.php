@@ -88,6 +88,20 @@
             </div>
         </div>
     </div>
+    <nav class="tte-ux-focus-nav" aria-label="Fokus pekerjaan verifikator">
+        <a
+            href="{{ route('tickets.index', ['focus' => 'action']) }}"
+            class="tte-ux-focus-link {{ request('focus') === 'action' ? 'is-active' : '' }}"
+            @if (request('focus') === 'action') aria-current="page" @endif>
+            Perlu Tindakan <strong>{{ $stats['actionable'] }}</strong>
+        </a>
+        <a
+            href="{{ route('tickets.index', ['focus' => 'waiting']) }}"
+            class="tte-ux-focus-link {{ request('focus') === 'waiting' ? 'is-active' : '' }}"
+            @if (request('focus') === 'waiting') aria-current="page" @endif>
+            Menunggu Pemohon <strong>{{ $stats['waiting'] }}</strong>
+        </a>
+    </nav>
     <nav class="tte-queue-tabs" aria-label="Filter cepat status tiket">
         <a
             href="{{ route('tickets.index', ['status' => 'all']) }}"
@@ -102,9 +116,9 @@
         <a
             href="{{ route('tickets.index', ['status' => 'In Progress']) }}"
             @class ([
-                'is-active' => in_array(request('status'), [null, 'In Progress'], true)
+                'is-active' => in_array(request('status'), [null, 'In Progress'], true) && !request('focus')
             ])
-            @if (in_array(request('status'), [null, 'In Progress'], true)) aria-current="page" @endif
+            @if (in_array(request('status'), [null, 'In Progress'], true) && !request('focus')) aria-current="page" @endif
             >Milik Saya <strong>{{ $stats['mine'] }}</strong></a>
         <a
             href="{{ route('tickets.index', ['status' => 'Done']) }}"

@@ -11,7 +11,8 @@
 // Keep attribute-bearing openings untouched and do not alter inter-tag spaces.
 const openingWithoutAttributes = /<([A-Za-z][A-Za-z0-9:-]*)[ \t]*(?:\r?\n[ \t]*)+>/g;
 const splitClosingTag = /<\/([A-Za-z][A-Za-z0-9:-]*)[ \t]*(?:\r?\n[ \t]*)+>/g;
-const protectedBlock = /(<script\b[^>]*>[\s\S]*?<\/script\s*>|<style\b[^>]*>[\s\S]*?<\/style\s*>|<textarea\b[^>]*>[\s\S]*?<\/textarea\s*>|\{\{--[\s\S]*?--\}\}|<!--[\s\S]*?-->|@verbatim\b[\s\S]*?@endverbatim|@php\s+[\s\S]*?@endphp|<\?php[\s\S]*?\?>|\{\{[\s\S]*?\}\}|\{!![\s\S]*?!!\})/gi;
+const protectedBlock =
+    /(<script\b[^>]*>[\s\S]*?<\/script\s*>|<style\b[^>]*>[\s\S]*?<\/style\s*>|<textarea\b[^>]*>[\s\S]*?<\/textarea\s*>|\{\{--[\s\S]*?--\}\}|<!--[\s\S]*?-->|@verbatim\b[\s\S]*?@endverbatim|@php\s+[\s\S]*?@endphp|<\?php[\s\S]*?\?>|\{\{[\s\S]*?\}\}|\{!![\s\S]*?!!\})/gi;
 
 export function compactBladeInlineOpeningTags(source) {
     return source
@@ -19,9 +20,7 @@ export function compactBladeInlineOpeningTags(source) {
         .map((part, index) =>
             index % 2 === 1
                 ? part
-                : part
-                      .replace(openingWithoutAttributes, '<$1>')
-                      .replace(splitClosingTag, '</$1>'),
+                : part.replace(openingWithoutAttributes, '<$1>').replace(splitClosingTag, '</$1>'),
         )
         .join('');
 }

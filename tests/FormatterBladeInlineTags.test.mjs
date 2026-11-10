@@ -3,14 +3,19 @@ import { test } from 'node:test';
 import { compactBladeInlineOpeningTags as normalize } from '../scripts/format-blade-inline-tags.mjs';
 
 test('keeps adjacent span tags inline without inserting a space', () => {
-    const input = '<span class="stat-icon stat-sky">↻</span\n                ><span class="stat-micro">PEKERJAAN SAYA</span>';
-    const expected = '<span class="stat-icon stat-sky">↻</span><span class="stat-micro">PEKERJAAN SAYA</span>';
+    const input =
+        '<span class="stat-icon stat-sky">↻</span\n                ><span class="stat-micro">PEKERJAAN SAYA</span>';
+    const expected =
+        '<span class="stat-icon stat-sky">↻</span><span class="stat-micro">PEKERJAAN SAYA</span>';
     assert.equal(normalize(input), expected);
 });
 
 test('compacts simple Blade inline opening and closing tags', () => {
-    const input = '<strong\n  >{{ $stats[\'duplicate_alerts\'] }} tiket aktif.</strong\n  >';
-    assert.equal(normalize(input), '<strong>{{ $stats[\'duplicate_alerts\'] }} tiket aktif.</strong>');
+    const input = "<strong\n  >{{ $stats['duplicate_alerts'] }} tiket aktif.</strong\n  >";
+    assert.equal(
+        normalize(input),
+        "<strong>{{ $stats['duplicate_alerts'] }} tiket aktif.</strong>",
+    );
 });
 
 test('handles generic closing tags (including custom elements), not just span', () => {
@@ -58,7 +63,10 @@ test('handles ordinary and custom opening tags without attributes', () => {
 
 test('does not combine attributes or change significant whitespace between siblings', () => {
     const input = '<label class="required"\n id="a">Nama</label\n >\n <span\n >Keterangan</span>';
-    assert.equal(normalize(input), '<label class="required"\n id="a">Nama</label>\n <span>Keterangan</span>');
+    assert.equal(
+        normalize(input),
+        '<label class="required"\n id="a">Nama</label>\n <span>Keterangan</span>',
+    );
 });
 
 test('protects literal split label tags inside Blade expressions, comments and scripts', () => {

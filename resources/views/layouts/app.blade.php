@@ -17,6 +17,7 @@
     <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=53" />
     <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3" />
     <link rel="stylesheet" href="{{ asset('css/tte-ui-fixes.css') }}?v=1" />
+    <link rel="stylesheet" href="{{ asset('css/tte-ux-v613.css') }}?v=613" />
     <link rel="stylesheet" href="{{ asset('css/tte-footer.css') }}?v=60.1" />
     @if (request()->routeIs('public.success'))
         <link rel="stylesheet" href="{{ asset('css/tte-active-request-alert.css') }}?v=61.2" />

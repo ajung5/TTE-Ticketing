@@ -38,9 +38,31 @@ class TicketController extends Controller {
             ->where(
                 fn($q) => $q->where('status', 'Open')->orWhere('claimed_by', $request->user()->id),
             );
+        // UX-V613: focus filters preserve ownership/self-claim and never expose another verifier's tickets.
+        $focus = in_array($request->query('focus'), ['waiting', 'action'], true)
+            ? $request->query('focus')
+            : null;
         // Default to actionable work. Explicit status=all keeps full queue visible.
         $status = $request->query('status', 'In Progress');
-        if (in_array($status, ['Open', 'In Progress', 'Done', 'Returned'], true)) {
+        if ($focus === 'waiting') {
+            $query
+                ->where('status', 'In Progress')
+                ->where('claimed_by', $request->user()->id)
+                ->where('awaiting_applicant_action', true);
+        } elseif ($focus === 'action') {
+            $query->where(function ($q) use ($request) {
+                $q->where('status', 'Open')->orWhere(function ($owned) use ($request) {
+                    $owned
+                        ->where('status', 'In Progress')
+                        ->where('claimed_by', $request->user()->id)
+                        ->where(function ($flag) {
+                            $flag
+                                ->where('awaiting_applicant_action', false)
+                                ->orWhereNull('awaiting_applicant_action');
+                        });
+                });
+            });
+        } elseif (in_array($status, ['Open', 'In Progress', 'Done', 'Returned'], true)) {
             $query->where('status', $status);
         }
         if (
@@ -59,10 +81,18 @@ class TicketController extends Controller {
                     ->orWhere('ticket_number', 'like', '%' . $search . '%'),
             );
         }
-        // FIFO for the shared unclaimed queue; most recent first elsewhere.
-        $query
-            ->orderBy('created_at', $status === 'Open' ? 'asc' : 'desc')
-            ->orderBy('id', $status === 'Open' ? 'asc' : 'desc');
+        // In actionable focus, prioritize new (unclaimed) tickets FIFO.
+        if ($focus === 'action') {
+            $query
+                ->orderByRaw("CASE WHEN status = 'Open' THEN 0 ELSE 1 END")
+                ->orderBy('created_at', 'asc')
+                ->orderBy('id', 'asc');
+        } else {
+            $oldestFirst = $status === 'Open' || $focus === 'waiting';
+            $query
+                ->orderBy('created_at', $oldestFirst ? 'asc' : 'desc')
+                ->orderBy('id', $oldestFirst ? 'asc' : 'desc');
+        }
         $tickets = $query->paginate(12)->withQueryString();
         $stats = [
             'duplicate_alerts' => Ticket::where('duplicate_attempts', '>', 0)
@@ -84,6 +114,20 @@ class TicketController extends Controller {
                 ->where('status', 'Returned')
                 ->count(),
         ];
+        $stats['waiting'] = Ticket::where('status', 'In Progress')
+            ->where('claimed_by', $request->user()->id)
+            ->where('awaiting_applicant_action', true)
+            ->count();
+        $stats['actionable'] =
+            $stats['new'] +
+            Ticket::where('status', 'In Progress')
+                ->where('claimed_by', $request->user()->id)
+                ->where(function ($flag) {
+                    $flag
+                        ->where('awaiting_applicant_action', false)
+                        ->orWhereNull('awaiting_applicant_action');
+                })
+                ->count();
         return view('tickets.index', compact('tickets', 'stats'));
     }
 

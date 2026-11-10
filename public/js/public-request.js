@@ -16,6 +16,7 @@
     const submit = document.getElementById('public-submit');
     const modal = document.getElementById('email-help-modal');
     const modalClose = document.getElementById('email-modal-close');
+    const helpTrigger = document.getElementById('email-help-trigger');
     const canvas = document.getElementById('signature-pad');
     const signatureInput = document.getElementById('signature_data');
     const signatureStatus = document.getElementById('signature-status');
@@ -50,18 +51,52 @@
         pending.hidden = value;
         refreshSubmit();
     }
+    let modalReturnFocus = nik;
     function openModal() {
+        modalReturnFocus =
+            document.activeElement instanceof HTMLElement ? document.activeElement : nik;
         modal.hidden = false;
         modal.querySelector('.directory-modal-body').focus();
     }
     function closeModal() {
         modal.hidden = true;
-        nik.focus();
+        (modalReturnFocus?.isConnected ? modalReturnFocus : nik).focus();
     }
     modalClose.addEventListener('click', closeModal);
     modal.querySelector('[data-close-directory-modal]').addEventListener('click', closeModal);
+    helpTrigger.addEventListener('click', openModal);
+    // UX-V613: trap focus inside the public help dialog, including Shift+Tab.
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !modal.hidden) closeModal();
+        if (modal.hidden) return;
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closeModal();
+            return;
+        }
+        if (e.key === 'Tab') {
+            const focusable = [...modal.querySelectorAll('a[href], button:not([disabled])')].filter(
+                (element) => element.getClientRects().length > 0,
+            );
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (!first) {
+                e.preventDefault();
+                modal.querySelector('.directory-modal-body').focus();
+            } else if (
+                e.shiftKey &&
+                (document.activeElement === first ||
+                    document.activeElement === modal.querySelector('.directory-modal-body'))
+            ) {
+                e.preventDefault();
+                last.focus();
+            } else if (
+                !e.shiftKey &&
+                (document.activeElement === last || !modal.contains(document.activeElement))
+            ) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
     });
     consent.addEventListener('change', refreshSubmit);
     layanan.addEventListener('change', refreshSubmit);
@@ -106,6 +141,7 @@
         const currentSequence = ++sequence;
         const currentNik = nik.value;
         setMatch(false);
+        helpTrigger.hidden = true;
         email.value = '';
         setUptd('');
         nikStatus.textContent = [16, 18].includes(currentNik.length)
@@ -137,6 +173,7 @@
                         nikStatus.textContent = 'Data pegawai ditemukan.';
                         setMatch(true);
                     } else if (result.status === 'not_found') {
+                        helpTrigger.hidden = false;
                         nikStatus.textContent =
                             currentNik.length === 16
                                 ? 'NIK tidak ditemukan. Coba gunakan NIP 18 digit.'

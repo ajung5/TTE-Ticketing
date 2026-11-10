@@ -14,6 +14,71 @@
         </div>
         <span class="pill pill-blue">● Monitoring aktif</span>
     </div>
+    <section class="card tte-ux-period-card" aria-labelledby="tte-ux-period-heading">
+        <div class="tte-ux-period-head">
+            <div>
+                <div class="eyebrow">MONITORING / RENTANG WAKTU</div>
+                <h2 id="tte-ux-period-heading">Ringkasan Periode</h2>
+                <p class="small muted">{{ $periodLabel }}. Tiket masuk dihitung dari tanggal pengajuan, sedangkan tiket selesai dihitung dari tanggal penyelesaian.</p>
+            </div>
+            <form method="get" action="{{ route('admin.dashboard') }}" class="tte-ux-period-form">
+                <label for="tte-ux-period"
+                    >Pilih periode
+                    <select id="tte-ux-period" name="period">
+                        <option value="month" @selected ($period === 'month')>
+                            Bulan Berjalan
+                        </option>
+                        <option value="week" @selected ($period === 'week')>7 Hari Terakhir</option>
+                        <option value="all" @selected ($period === 'all')>Semua Waktu</option>
+                    </select>
+                </label>
+                <button class="btn btn-primary" type="submit">Tampilkan</button>
+            </form>
+        </div>
+        <div class="tte-ux-period-grid">
+            <div class="tte-ux-period-metric">
+                <span class="label">Tiket Masuk dalam Periode</span><strong>{{
+                    number_format(
+                        $periodStats['incoming'],
+                        0,
+                        ',',
+                        '.',
+                    )
+                }}</strong><small>Berdasarkan tanggal masuk</small>
+            </div>
+            <div class="tte-ux-period-metric">
+                <span class="label">Selesai dalam periode</span><strong>{{
+                    number_format(
+                        $periodStats['completed'],
+                        0,
+                        ',',
+                        '.',
+                    )
+                }}</strong><small>Berdasarkan tanggal selesai</small>
+            </div>
+            <div class="tte-ux-period-metric">
+                <span class="label">Menunggu Pemohon Saat Ini</span><strong>{{
+                    number_format(
+                        $periodStats['waiting_applicant'],
+                        0,
+                        ',',
+                        '.',
+                    )
+                }}</strong><small>Snapshot saat ini; tidak difilter periode</small>
+            </div>
+            <div class="tte-ux-period-metric">
+                <span class="label">Antrean Baru Melewati Ambang</span><strong>{{
+                    number_format(
+                        $periodStats['aged_open'],
+                        0,
+                        ',',
+                        '.',
+                    )
+                }}</strong><small>Belum diambil lebih dari {{ $attention['hours'] }} jam; snapshot</small>
+            </div>
+        </div>
+    </section>
+    <h2 class="tte-ux-lifetime-label">Akumulasi seluruh periode</h2>
     <div class="stat-grid admin-statistics">
         <div class="stat-card">
             <div class="stat-top">

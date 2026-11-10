@@ -85,6 +85,13 @@
                                     id="nik-status"
                                     role="status"
                                     aria-live="polite"></p>
+                                <button
+                                    type="button"
+                                    id="email-help-trigger"
+                                    class="tte-ux-help-link"
+                                    hidden>
+                                    Data belum ditemukan? Hubungi Pengelola Email Dinas
+                                </button>
                             </div>
 
                             <label for="layanan">
@@ -305,6 +312,6 @@
     <link rel="stylesheet" href="{{ asset('css/public-request-v5.css') }}?v=23" />
     <link rel="stylesheet" href="{{ asset('css/public-request-official.css') }}?v=1" />
     <link rel="stylesheet" href="{{ asset('css/wa-phone-prefix.css') }}?v=1" />
-    <script src="{{ asset('js/public-request.js') }}?v=24" defer></script>
+    <script src="{{ asset('js/public-request.js') }}?v=613" defer></script>
     <script src="{{ asset('js/public-email-admin-whatsapp.js') }}?v=65" defer></script>
 @endsection
