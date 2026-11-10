@@ -11,7 +11,9 @@ class GoogleSheetDirectoryReader {
         $id = (string) config('email_directory.spreadsheet_id');
         $range = (string) config('email_directory.range');
         if (!preg_match('/^[\w\-]{20,}$/', $id) || $path === '' || !is_readable($path)) {
-            throw new \RuntimeException('TTE_EMAIL_SHEET_ID atau path JSON service account belum dikonfigurasi.');
+            throw new \RuntimeException(
+                'TTE_EMAIL_SHEET_ID atau path JSON service account belum dikonfigurasi.',
+            );
         }
         $account = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
         if (
@@ -25,7 +27,7 @@ class GoogleSheetDirectoryReader {
         $now = time();
         $encode = static fn(array $data) => rtrim(
             strtr(base64_encode(json_encode($data, JSON_THROW_ON_ERROR)), '+/', '-_'),
-            '='
+            '=',
         );
         $head = $encode(['alg' => 'RS256', 'typ' => 'JWT']);
         $payload = $encode([
@@ -33,17 +35,25 @@ class GoogleSheetDirectoryReader {
             'scope' => 'https://www.googleapis.com/auth/spreadsheets.readonly',
             'aud' => 'https://oauth2.googleapis.com/token',
             'iat' => $now,
-            'exp' => $now + 3600
+            'exp' => $now + 3600,
         ]);
-        if (!openssl_sign($head . '.' . $payload, $signature, $account['private_key'], OPENSSL_ALGO_SHA256)) {
+        if (
+            !openssl_sign(
+                $head . '.' . $payload,
+                $signature,
+                $account['private_key'],
+                OPENSSL_ALGO_SHA256,
+            )
+        ) {
             throw new \RuntimeException('Gagal menandatangani JWT Google API.');
         }
-        $jwt = $head . '.' . $payload . '.' . rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+        $jwt =
+            $head . '.' . $payload . '.' . rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
         $response = Http::timeout(20)
             ->asForm()
             ->post('https://oauth2.googleapis.com/token', [
                 'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                'assertion' => $jwt
+                'assertion' => $jwt,
             ])
             ->throw()
             ->json();
@@ -53,9 +63,15 @@ class GoogleSheetDirectoryReader {
         }
         $response = Http::timeout(30)
             ->withToken($token)
-            ->get('https://sheets.googleapis.com/v4/spreadsheets/' . $id . '/values/' . rawurlencode($range), [
-                'valueRenderOption' => 'FORMATTED_VALUE'
-            ])
+            ->get(
+                'https://sheets.googleapis.com/v4/spreadsheets/' .
+                    $id .
+                    '/values/' .
+                    rawurlencode($range),
+                [
+                    'valueRenderOption' => 'FORMATTED_VALUE',
+                ],
+            )
             ->throw()
             ->json();
 

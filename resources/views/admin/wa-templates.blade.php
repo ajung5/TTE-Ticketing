@@ -1,84 +1,127 @@
-@extends('layouts.app')
-@section('title', 'Preset WhatsApp')
-@section('content')
+@extends ('layouts.app')
+@section ('title', 'Preset WhatsApp')
+@section ('content')
     <div class="page-heading">
         <div>
             <div class="eyebrow">ADMIN / PENGATURAN</div>
             <h1>Preset Pesan WhatsApp</h1>
             <p class="muted">Preset notifikasi untuk alur pemeriksaan AMS BSrE dan penyelesaian tiket.</p>
         </div>
-        <span class="pill pill-blue">{{ count(\App\Models\WaMessageTemplate::EVENTS) }} jenis notifikasi</span>
+        <span
+            class="pill pill-blue">{{ count(\App\Models\WaMessageTemplate::EVENTS) }} jenis notifikasi</span>
     </div>
     <div class="note-box notice-blue">
         <strong>Pengiriman dilakukan secara manual oleh verifikator.</strong>
-        <p class="small muted">Preset untuk Reset, Pembaruan, dan Pendaftaran dipisahkan. Tautan survei internal otomatis
-            ditambahkan ke notifikasi Selesai. Jangan meminta OTP, password, atau passphrase.</p>
+        <p class="small muted">Preset untuk Reset, Pembaruan, dan Pendaftaran dipisahkan. Tautan survei internal otomatis ditambahkan ke notifikasi Selesai. Jangan meminta OTP, password, atau passphrase.</p>
     </div>
     <p class="small muted tte-preset-hint">Pilih satu jenis notifikasi untuk membuka editor pesan.</p>
     <div class="columns template-columns">
         <section class="stack">
             @foreach (\App\Models\WaMessageTemplate::EVENTS as $eventCode => $eventLabel)
-                @php($template = $templates->get($eventCode))
-                <details class="card template-card tte-preset-detail" name="tte-wa-preset"
+                @php ($template = $templates->get($eventCode))
+                <details
+                    class="card template-card tte-preset-detail"
+                    name="tte-wa-preset"
                     @if ($loop->first) open @endif>
                     <summary class="section-heading tte-preset-summary">
                         <div>
                             <div class="eyebrow">NOTIFIKASI {{ $loop->iteration }}</div>
                             <h2>{{ $eventLabel }}</h2>
                         </div>
-                        <span class="pill {{ $eventCode === 'completed' ? 'pill-green' : 'pill-blue' }}">
-                            {{ \App\Models\WaMessageTemplate::TEMPLATE_SERVICE_CODES[$eventCode] === '*' ? 'Semua Layanan' : \App\Models\WaMessageTemplate::TEMPLATE_SERVICE_CODES[$eventCode] }}
+                        <span
+                            class="pill {{ $eventCode === 'completed' ? 'pill-green' : 'pill-blue' }}">
+                            {{
+                                \App\Models\WaMessageTemplate::TEMPLATE_SERVICE_CODES[
+                                    $eventCode
+                                ] === '*'
+                                    ? 'Semua Layanan'
+                                    : \App\Models\WaMessageTemplate::TEMPLATE_SERVICE_CODES[$eventCode]
+                            }}
                         </span>
                     </summary>
                     @if ($template)
-                        <form method="post" action="{{ route('admin.templates.update', $template) }}" class="stack">
-                            @csrf @method('PUT')
+                        <form
+                            method="post"
+                            action="{{ route('admin.templates.update', $template) }}"
+                            class="stack">
+                            @csrf
+                            @method ('PUT')
                             <label for="body-{{ $eventCode }}">Isi pesan WhatsApp</label>
-                            <textarea id="body-{{ $eventCode }}" name="body" rows="9" minlength="40" maxlength="3500" required
-                                class="template-textarea">{{ old('body', $template->body) }}</textarea>
+                            <textarea
+                                id="body-{{ $eventCode }}"
+                                name="body"
+                                rows="9"
+                                minlength="40"
+                                maxlength="3500"
+                                required
+                                class="template-textarea"
+                                >{{ old('body', $template->body) }}</textarea
+                            >
                             <div class="tte-preset-quick-tokens" aria-label="Placeholder penting">
                                 <span>Masukkan placeholder:</span>
-                                <button type="button" class="token-insert"
-                                    data-insert-token="{nama_pemohon}">{nama_pemohon}</button>
-                                <button type="button" class="token-insert"
-                                    data-insert-token="{nomor_tiket}">{nomor_tiket}</button>
-                                <button type="button" class="token-insert"
-                                    data-insert-token="{nama_verifikator}">{nama_verifikator}</button>
+                                <button
+                                    type="button"
+                                    class="token-insert"
+                                    data-insert-token="{nama_pemohon}">
+                                    {nama_pemohon}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="token-insert"
+                                    data-insert-token="{nomor_tiket}">
+                                    {nomor_tiket}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="token-insert"
+                                    data-insert-token="{nama_verifikator}">
+                                    {nama_verifikator}
+                                </button>
                             </div>
                             <details class="tte-preset-inline-guide">
                                 <summary>Semua Placeholder dan Panduan Penulisan</summary>
                                 <div class="tte-preset-inline-guide-body">
-                                    <p class="small muted">Ketuk placeholder untuk memasukkannya langsung ke preset ini. NIK
-                                        pada pesan tetap tersamarkan.</p>
+                                    <p class="small muted">Ketuk placeholder untuk memasukkannya langsung ke preset ini. NIK pada pesan tetap tersamarkan.</p>
                                     <div class="token-list">
                                         @foreach (\App\Models\WaMessageTemplate::VARIABLE_DESCRIPTIONS as $token => $desc)
                                             <div class="token-row">
-                                                <button type="button" class="token-insert"
+                                                <button
+                                                    type="button"
+                                                    class="token-insert"
                                                     data-insert-token="{{ $token }}"
-                                                    title="Masukkan ke preset ini">{{ $token }}</button>
+                                                    title="Masukkan ke preset ini">
+                                                    {{ $token }}
+                                                </button>
                                                 <span class="small muted">{{ $desc }}</span>
                                             </div>
                                         @endforeach
                                     </div>
-                                    <p class="small muted mt">Wajib: {nama_pemohon}, {nomor_tiket}, dan {nama_verifikator}.
-                                        Gunakan {survey_url} untuk notifikasi Selesai.</p>
+                                    <p class="small muted mt">Wajib: {nama_pemohon}, {nomor_tiket}, dan {nama_verifikator}. Gunakan {survey_url} untuk notifikasi Selesai.</p>
                                 </div>
                             </details>
                             <div class="tte-preset-sample">
                                 <strong>Pratinjau dengan data contoh</strong>
-                                <p class="tte-preview-caption">Contoh fiktif di browser, tanpa mengambil identitas pemohon
-                                    atau mengirim pesan.</p>
-                                <div class="tte-preset-preview" data-tte-preset-preview aria-live="off"></div>
+                                <p class="tte-preview-caption">Contoh fiktif di browser, tanpa mengambil identitas pemohon atau mengirim pesan.</p>
+                                <div
+                                    class="tte-preset-preview"
+                                    data-tte-preset-preview
+                                    aria-live="off"></div>
                             </div>
                             <div class="template-actions">
-                                <span class="small muted">Terakhir diperbarui
-                                    {{ $template->updated_at?->timezone('Asia/Jakarta')->format('d M Y H:i') }}</span>
+                                <span class="small muted">Terakhir diperbarui {{
+                                    $template->updated_at
+                                        ?->timezone('Asia/Jakarta')
+                                        ->format('d M Y H:i')
+                                }}</span>
                                 <button class="btn btn-primary" type="submit">Simpan Preset</button>
                             </div>
                         </form>
                     @else
-                        <div class="alert error">Preset belum tersedia. Jalankan <code>php artisan db:seed
-                                --class=WaTemplatePresetsSeeder --force</code>.</div>
+                        <div class="alert error">
+                            Preset belum tersedia. Jalankan
+                            <code>php artisan db:seed --class=WaTemplatePresetsSeeder --force</code
+                            >.
+                        </div>
                     @endif
                 </details>
             @endforeach
@@ -87,25 +130,28 @@
             <section class="card sticky-guide">
                 <div class="eyebrow">PANDUAN PENULISAN</div>
                 <h2>Placeholder Dinamis</h2>
-                <p class="small muted">Klik token setelah memilih textarea tujuan. Token NIK tetap tersamarkan di pesan
-                    WhatsApp.</p>
+                <p class="small muted">Klik token setelah memilih textarea tujuan. Token NIK tetap tersamarkan di pesan WhatsApp.</p>
                 <div class="token-list">
                     @foreach (\App\Models\WaMessageTemplate::VARIABLE_DESCRIPTIONS as $token => $desc)
                         <div class="token-row">
-                            <button type="button" class="token-insert" data-insert-token="{{ $token }}"
-                                title="Masukkan token ke editor">{{ $token }}</button>
+                            <button
+                                type="button"
+                                class="token-insert"
+                                data-insert-token="{{ $token }}"
+                                title="Masukkan token ke editor">
+                                {{ $token }}
+                            </button>
                             <span class="small muted">{{ $desc }}</span>
                         </div>
                     @endforeach
                 </div>
-                <div class="note-box"><strong>Survei internal</strong>
-                    <p class="small muted">Gunakan <code>{survey_url}</code> pada preset Selesai. Tautan berlaku 30 hari,
-                        dan satu tiket hanya boleh mengisi satu survei.</p>
+                <div class="note-box">
+                    <strong>Survei internal</strong>
+                    <p class="small muted">Gunakan <code>{survey_url}</code> pada preset Selesai. Tautan berlaku 30 hari, dan satu tiket hanya boleh mengisi satu survei.</p>
                 </div>
-                <div class="note-box"><strong>Token wajib</strong>
-                    <p class="small muted"><code>{nama_pemohon}</code>, <code>{nomor_tiket}</code>,
-                        <code>{nama_verifikator}</code>.
-                    </p>
+                <div class="note-box">
+                    <strong>Token wajib</strong>
+                    <p class="small muted"><code>{nama_pemohon}</code>, <code>{nomor_tiket}</code>, <code>{nama_verifikator}</code>.</p>
                 </div>
             </section>
         </aside>

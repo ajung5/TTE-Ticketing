@@ -1,6 +1,6 @@
-@extends('layouts.app')
-@section('title', 'Laporan Tiket')
-@section('content')
+@extends ('layouts.app')
+@section ('title', 'Laporan Tiket')
+@section ('content')
     <style>
         .report-page {
             display: grid;
@@ -313,14 +313,19 @@
                 <p class="muted">Rekap permohonan layanan berdasarkan bulan atau periode yang ditentukan.</p>
             </div>
             <div class="report-actions">
-                <a class="btn btn-outline" href="{{ route('admin.reports.tickets.csv', $filters) }}">Unduh CSV Lengkap</a>
-                <button type="button" class="btn btn-primary" onclick="window.print()">Cetak Ringkasan / Simpan PDF</button>
+                <a class="btn btn-outline" href="{{ route('admin.reports.tickets.csv', $filters) }}"
+                    >Unduh CSV Lengkap</a
+                >
+                <button type="button" class="btn btn-primary" onclick="window.print()">
+                    Cetak Ringkasan / Simpan PDF
+                </button>
             </div>
         </div>
 
         <nav class="tte-report-jumps report-no-print" aria-label="Navigasi bagian laporan">
             <a href="#tte-report-filters">Periode</a><a href="#tte-report-summary">Ringkasan</a>
-            <a href="#tte-report-ams">Pemeriksaan AMS</a><a href="#tte-report-services">Jenis Layanan</a>
+            <a href="#tte-report-ams">Pemeriksaan AMS</a
+            ><a href="#tte-report-services">Jenis Layanan</a>
             <a href="#tte-report-details">Rincian Tiket</a>
         </nav>
         <section class="card report-filter-card" id="tte-report-filters">
@@ -330,89 +335,167 @@
                     <h2>Periode dan Filter Rincian</h2>
                 </div>
             </div>
-            <form method="get" action="{{ route('admin.reports.tickets.index') }}" class="report-controls"
+            <form
+                method="get"
+                action="{{ route('admin.reports.tickets.index') }}"
+                class="report-controls"
                 id="ticket-report-filter">
-                <label for="report-mode">Jenis periode
+                <label for="report-mode"
+                    >Jenis periode
                     <select id="report-mode" name="mode">
-                        <option value="month" @selected($filters['mode'] === 'month')>Per Bulan</option>
-                        <option value="custom" @selected($filters['mode'] === 'custom')>Tanggal Custom</option>
+                        <option value="month" @selected ($filters['mode'] === 'month')>
+                            Per Bulan
+                        </option>
+                        <option value="custom" @selected ($filters['mode'] === 'custom')>
+                            Tanggal Custom
+                        </option>
                     </select>
                 </label>
-                <label for="report-month" id="report-month-wrap">Bulan
-                    <input id="report-month" type="month" name="month"
-                        value="{{ $filters['month'] ?? now('Asia/Jakarta')->format('Y-m') }}" min="2020-01" required>
+                <label for="report-month" id="report-month-wrap"
+                    >Bulan
+                    <input
+                        id="report-month"
+                        type="month"
+                        name="month"
+                        value="{{ $filters['month'] ?? now('Asia/Jakarta')->format('Y-m') }}"
+                        min="2020-01"
+                        required />
                 </label>
-                <div class="report-custom-fields" id="report-custom-fields" @if ($filters['mode'] !== 'custom') hidden @endif>
-                    <label for="report-from">Dari tanggal
-                        <input id="report-from" type="date" name="from"
+                <div
+                    class="report-custom-fields"
+                    id="report-custom-fields"
+                    @if ($filters['mode'] !== 'custom') hidden @endif>
+                    <label for="report-from"
+                        >Dari tanggal
+                        <input
+                            id="report-from"
+                            type="date"
+                            name="from"
                             value="{{ $filters['from'] ?? now('Asia/Jakarta')->startOfMonth()->format('Y-m-d') }}"
-                            @if ($filters['mode'] === 'custom') required @endif>
+                            @if ($filters['mode'] === 'custom') required @endif />
                     </label>
-                    <label for="report-to">Sampai tanggal
-                        <input id="report-to" type="date" name="to"
+                    <label for="report-to"
+                        >Sampai tanggal
+                        <input
+                            id="report-to"
+                            type="date"
+                            name="to"
                             value="{{ $filters['to'] ?? now('Asia/Jakarta')->format('Y-m-d') }}"
-                            @if ($filters['mode'] === 'custom') required @endif>
+                            @if ($filters['mode'] === 'custom') required @endif />
                     </label>
                 </div>
-                <label for="report-status">Status rincian &amp; CSV
+                <label for="report-status"
+                    >Status rincian &amp; CSV
                     <select id="report-status" name="status" aria-describedby="report-status-help">
                         <option value="">Semua Status</option>
                         @foreach ($statusLabels as $value => $label)
-                            <option value="{{ $value }}" @selected($filters['status'] === $value)>{{ $label }}</option>
+                            <option value="{{ $value }}" @selected ($filters['status'] === $value)>
+                                {{ $label }}
+                            </option>
                         @endforeach
                     </select>
                 </label>
-                <button type="submit" class="btn btn-primary report-action">Tampilkan Laporan</button>
+                <button type="submit" class="btn btn-primary report-action">
+                    Tampilkan Laporan
+                </button>
             </form>
-            <p class="report-period-note" id="report-status-help">Filter status berlaku untuk rincian tiket dan unduhan CSV.
-                Ringkasan serta tabel rekap tetap menampilkan semua status dalam periode.</p>
+            <p class="report-period-note" id="report-status-help">Filter status berlaku untuk rincian tiket dan unduhan CSV. Ringkasan serta tabel rekap tetap menampilkan semua status dalam periode.</p>
         </section>
 
         <section class="report-no-print">
             <div class="report-info">
-                <strong>Periode: {{ $periodLabel }}</strong>. Tiket masuk dihitung berdasarkan tanggal diterima dalam WIB.
-                Status mengikuti kondisi saat laporan dibuka, bukan riwayat pada akhir periode.
-                <strong>Perlu Pengajuan Ulang</strong> dipisahkan dari <strong>Selesai</strong>.
-                Indikator <strong>Selesai Selama Periode</strong> berdasarkan tanggal penyelesaian dan dapat mencakup
-                tiket yang masuk sebelum periode ini.
+                <strong>Periode: {{ $periodLabel }}</strong>. Tiket masuk dihitung berdasarkan
+                tanggal diterima dalam WIB. Status mengikuti kondisi saat laporan dibuka, bukan
+                riwayat pada akhir periode. <strong>Perlu Pengajuan Ulang</strong> dipisahkan dari
+                <strong>Selesai</strong>. Indikator
+                <strong>Selesai Selama Periode</strong> berdasarkan tanggal penyelesaian dan dapat
+                mencakup tiket yang masuk sebelum periode ini.
             </div>
         </section>
         <div class="report-print-meta">
-            Periode: <strong>{{ $periodLabel }}</strong><br>
-            Dicetak: {{ now('Asia/Jakarta')->translatedFormat('d F Y, H:i') }} WIB<br>
-            Sumber: TTE-Ticketing (status sesuai kondisi saat laporan dibuat).<br>
-            Rekap mencakup seluruh status tiket masuk periode. Perlu Pengajuan Ulang tidak dihitung sebagai Selesai.<br>
-            Selesai Selama Periode berdasarkan tanggal penyelesaian, termasuk tiket masuk periode sebelumnya.
+            Periode: <strong>{{ $periodLabel }}</strong><br />
+            Dicetak: {{
+                now('Asia/Jakarta')->translatedFormat(
+                    'd F Y, H:i',
+                )
+            }} WIB<br />
+            Sumber: TTE-Ticketing (status sesuai kondisi saat laporan dibuat).<br />
+            Rekap mencakup seluruh status tiket masuk periode. Perlu Pengajuan Ulang tidak dihitung
+            sebagai Selesai.<br />
+            Selesai Selama Periode berdasarkan tanggal penyelesaian, termasuk tiket masuk periode
+            sebelumnya.
         </div>
 
         <div class="report-metrics" id="tte-report-summary">
-            <div class="report-metric"><small>Tiket
-                    Masuk</small><strong>{{ number_format((int) $summary->total, 0, ',', '.') }}</strong><small>Dalam
-                    periode</small></div>
-            <div class="report-metric"><small>Belum
-                    Diambil</small><strong>{{ number_format((int) $summary->open_count, 0, ',', '.') }}</strong><small>Dari
-                    tiket masuk periode</small></div>
-            <div class="report-metric"><small>Dalam
-                    Proses</small><strong>{{ number_format((int) $summary->progress_count, 0, ',', '.') }}</strong><small>Dari
-                    tiket masuk periode</small></div>
+            <div class="report-metric"><small>Tiket Masuk</small><strong>{{
+                    number_format(
+                        (int) $summary->total,
+                        0,
+                        ',',
+                        '.',
+                    )
+                }}</strong><small>Dalam periode</small></div>
+            <div class="report-metric"><small>Belum Diambil</small><strong>{{
+                    number_format(
+                        (int) $summary->open_count,
+                        0,
+                        ',',
+                        '.',
+                    )
+                }}</strong><small>Dari tiket masuk periode</small></div>
+            <div class="report-metric"><small>Dalam Proses</small><strong>{{
+                    number_format(
+                        (int) $summary->progress_count,
+                        0,
+                        ',',
+                        '.',
+                    )
+                }}</strong><small>Dari tiket masuk periode</small></div>
             <div class="report-metric">
                 <small>Selesai (Tiket Masuk)</small>
                 <strong>
-                    {{ number_format((int) $summary->done_count, 0, ',', '.') }}
+                    {{
+                        number_format(
+                            (int) $summary->done_count,
+                            0,
+                            ',',
+                            '.',
+                        )
+                    }}
                 </strong>
-                <small>{{ (int) $summary->total > 0 ? number_format((100 * (int) $summary->done_count) / (int) $summary->total, 1, ',', '.') : '0' }}%
-                    dari tiket masuk</small>
+                <small>{{
+                    (int) $summary->total > 0
+                        ? number_format((100 * (int) $summary->done_count) / (int) $summary->total, 1, ',', '.')
+                        : '0'
+                }}% dari tiket masuk</small>
             </div>
             <div class="report-metric">
                 <small>Perlu Pengajuan Ulang</small>
-                <strong>{{ number_format((int) $summary->returned_count, 0, ',', '.') }}</strong>
-                <small>{{ (int) $summary->total > 0 ? number_format((100 * (int) $summary->returned_count) / (int) $summary->total, 1, ',', '.') : '0' }}%
-                    dari tiket masuk</small>
+                <strong>{{
+                    number_format(
+                        (int) $summary->returned_count,
+                        0,
+                        ',',
+                        '.',
+                    )
+                }}</strong>
+                <small>{{
+                    (int) $summary->total > 0
+                        ? number_format((100 * (int) $summary->returned_count) / (int) $summary->total, 1, ',', '.')
+                        : '0'
+                }}% dari tiket masuk</small>
             </div>
             <div class="report-metric">
                 <small>Selesai Selama Periode</small>
                 <strong>
-                    {{ number_format($completedDuringPeriod, 0, ',', '.') }}
+                    {{
+                        number_format(
+                            $completedDuringPeriod,
+                            0,
+                            ',',
+                            '.',
+                        )
+                    }}
                 </strong>
                 <small>Menurut waktu penyelesaian</small>
             </div>
@@ -425,21 +508,27 @@
                     <h2>Aktivasi, WhatsApp, dan Sertifikat</h2>
                 </div>
             </div>
-            <p class="small muted">Jumlah tiket masuk pada periode laporan berdasarkan hasil AMS terakhir.
-                Indikator dapat saling beririsan dan tidak untuk dijumlahkan. Data lama yang belum diverifikasi ulang
-                tidak dianggap otomatis aktif.</p>
+            <p class="small muted">Jumlah tiket masuk pada periode laporan berdasarkan hasil AMS terakhir. Indikator dapat saling beririsan dan tidak untuk dijumlahkan. Data lama yang belum diverifikasi ulang tidak dianggap otomatis aktif.</p>
             <div class="report-metrics">
                 @foreach ([
-            'Akun Sudah Aktivasi' => $amsSummary->activated,
-            'Akun Belum Aktivasi' => $amsSummary->not_activated,
-            'WA Terverifikasi' => $amsSummary->wa_verified,
-            'WA Belum Terverifikasi' => $amsSummary->wa_unverified,
-            'SE Belum Terbit' => $amsSummary->not_issued,
-            'SE Aktif' => $amsSummary->cert_active,
-            'SE Kedaluwarsa' => $amsSummary->cert_expired,
-        ] as $label => $count)
+                        'Akun Sudah Aktivasi' => $amsSummary->activated,
+                        'Akun Belum Aktivasi' => $amsSummary->not_activated,
+                        'WA Terverifikasi' => $amsSummary->wa_verified,
+                        'WA Belum Terverifikasi' => $amsSummary->wa_unverified,
+                        'SE Belum Terbit' => $amsSummary->not_issued,
+                        'SE Aktif' => $amsSummary->cert_active,
+                        'SE Kedaluwarsa' => $amsSummary->cert_expired
+                    ]
+                    as $label => $count)
                     <div class="report-metric">
-                        <small>{{ $label }}</small><strong>{{ number_format((int) $count, 0, ',', '.') }}</strong>
+                        <small>{{ $label }}</small><strong>{{
+                            number_format(
+                                (int) $count,
+                                0,
+                                ',',
+                                '.',
+                            )
+                        }}</strong>
                         <small>Hasil pemeriksaan terakhir</small>
                     </div>
                 @endforeach
@@ -468,12 +557,15 @@
                     </thead>
                     <tbody>
                         @forelse ($byService as $service)
-                            @php($percent = (int) $summary->total > 0 ? (100 * (int) $service->total) / (int) $summary->total : 0)
+                            @php ($percent = (int) $summary->total > 0 ? (100 * (int) $service->total) / (int) $summary->total : 0)
                             <tr>
                                 <td><strong>{{ $service->layanan }}</strong></td>
                                 <td>
-                                    <div class="report-service-bar"><span style="width:{{ $percent }}%"></span></div>
-                                    <span class="small muted">{{ number_format($percent, 1, ',', '.') }}%</span>
+                                    <div class="report-service-bar">
+                                        <span style="width:{{ $percent }}%"></span>
+                                    </div>
+                                    <span
+                                        class="small muted">{{ number_format($percent, 1, ',', '.') }}%</span>
                                 </td>
                                 <td class="num">{{ $service->total }}</td>
                                 <td class="num">{{ $service->open_count }}</td>
@@ -508,8 +600,7 @@
                     <h2>Rekap Berdasarkan Verifikator</h2>
                 </div>
             </div>
-            <p class="small muted">Berdasarkan penanggung jawab saat ini untuk tiket yang masuk dalam periode; termasuk
-                verifikator yang akunnya pernah dinonaktifkan.</p>
+            <p class="small muted">Berdasarkan penanggung jawab saat ini untuk tiket yang masuk dalam periode; termasuk verifikator yang akunnya pernah dinonaktifkan.</p>
             <div class="table-scroll">
                 <table class="report-table">
                     <thead>
@@ -524,7 +615,12 @@
                     <tbody>
                         @forelse ($verifierStats as $stat)
                             <tr>
-                                <td>{{ $verifiers->get($stat->claimed_by)?->name ?? 'Akun tidak tersedia' }}</td>
+                                <td>
+                                    {{
+                                        $verifiers->get($stat->claimed_by)?->name ??
+                                            'Akun tidak tersedia'
+                                    }}
+                                </td>
                                 <td class="num">{{ $stat->total }}</td>
                                 <td class="num">{{ $stat->progress_count }}</td>
                                 <td class="num">{{ $stat->done_count }}</td>
@@ -532,7 +628,9 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5">Belum ada tiket dalam periode yang diambil verifikator.</td>
+                                <td colspan="5">
+                                    Belum ada tiket dalam periode yang diambil verifikator.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -556,7 +654,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($bySource as $source)
+                        @forelse ($bySource as $source)
                             <tr>
                                 <td>{{ ucfirst($source->source) }}</td>
                                 <td class="num">{{ $source->total }}</td>
@@ -569,8 +667,7 @@
                     </tbody>
                 </table>
             </div>
-            <p class="small muted">Tiket simulasi/dummy tetap diperhitungkan jika ada pada periode. Periksa sumber data
-                sebelum menggunakan hasil untuk laporan resmi.</p>
+            <p class="small muted">Tiket simulasi/dummy tetap diperhitungkan jika ada pada periode. Periksa sumber data sebelum menggunakan hasil untuk laporan resmi.</p>
         </section>
 
         <section class="card report-detail-card" id="tte-report-details">
@@ -579,14 +676,13 @@
                     <div class="eyebrow">DATA PENDUKUNG</div>
                     <h2>Rincian Tiket Masuk</h2>
                 </div>
-                <span class="pill pill-neutral">{{ number_format($tickets->total(), 0, ',', '.') }} tiket sesuai filter</span>
+                <span
+                    class="pill pill-neutral">{{ number_format($tickets->total(), 0, ',', '.') }} tiket sesuai filter</span>
             </div>
-            <p class="report-period-note">Status rincian:
-                <strong>{{ $statusLabels[$filters['status']] ?? 'Semua Status' }}</strong>.
-                Menampilkan 20 baris per halaman. <strong>Unduh CSV Lengkap</strong> memuat seluruh baris sesuai periode dan
-                status,
-                termasuk halaman berikutnya. NIK, email, dan nomor WA tidak dimasukkan dalam laporan.
-            </p>
+            <p class="report-period-note">Status rincian: <strong>{{
+                $statusLabels[$filters['status']] ??
+                    'Semua Status'
+            }}</strong>. Menampilkan 20 baris per halaman. <strong>Unduh CSV Lengkap</strong> memuat seluruh baris sesuai periode dan status, termasuk halaman berikutnya. NIK, email, dan nomor WA tidak dimasukkan dalam laporan.</p>
             <div class="table-scroll">
                 <table class="report-table">
                     <thead>
@@ -608,31 +704,58 @@
                     <tbody>
                         @forelse ($tickets as $ticket)
                             <tr>
-                                <td><strong>{{ $ticket->ticket_number ?? '#' . $ticket->id }}</strong></td>
-                                <td>{{ $ticket->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }}</td>
+                                <td>
+                                    <strong>{{
+                                        $ticket->ticket_number ??
+                                            '#' . $ticket->id
+                                    }}</strong>
+                                </td>
+                                <td>
+                                    {{
+                                        $ticket->created_at
+                                            ->timezone('Asia/Jakarta')
+                                            ->format('d/m/Y H:i')
+                                    }}
+                                </td>
                                 <td>{{ $ticket->nama_user }}</td>
                                 <td>{{ $ticket->opd ?: '-' }}</td>
-                                <td>{{ trim((string) $ticket->uptd) ?: '-' }}</td>
+                                <td>
+                                    {{
+                                        trim((string) $ticket->uptd) ?:
+                                            '-'
+                                    }}
+                                </td>
                                 <td>{{ $ticket->service_label }}</td>
                                 <td>{{ $ticket->activation_label }}</td>
                                 <td>{{ $ticket->wa_verification_label }}</td>
                                 <td>{{ $ticket->certificate_status_label }}</td>
                                 <td>{{ $ticket->status_label }}</td>
-                                <td>{{ $ticket->claimant?->name ?? 'Belum ditangani' }}</td>
-                                <td>{{ $ticket->status === 'Done' ? $ticket->completed_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') ?? '-' : '-' }}
+                                <td>
+                                    {{
+                                        $ticket->claimant?->name ??
+                                            'Belum ditangani'
+                                    }}
+                                </td>
+                                <td>
+                                    {{
+                                        $ticket->status === 'Done'
+                                            ? $ticket->completed_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') ?? '-'
+                                            : '-'
+                                    }}
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="12">Tidak ada tiket yang sesuai dengan periode dan status yang dipilih.</td>
+                                <td colspan="12">
+                                    Tidak ada tiket yang sesuai dengan periode dan status yang
+                                    dipilih.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-            <div class="pagination">
-                {{ $tickets->links() }}
-            </div>
+            <div class="pagination">{{ $tickets->links() }}</div>
         </section>
     </div>
     <script>

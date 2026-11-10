@@ -28,5 +28,5 @@ return [
     // Lokasi JSON service account sebaiknya berada di luar repository dan folder public/.
     'service_account_json' => env('TTE_GOOGLE_SERVICE_ACCOUNT_JSON'),
     'admin_contact_url' => $contactUrl,
-    'max_age_hours' => (int) env('TTE_EMAIL_DIRECTORY_MAX_AGE_HOURS', 168)
+    'max_age_hours' => (int) env('TTE_EMAIL_DIRECTORY_MAX_AGE_HOURS', 168),
 ];

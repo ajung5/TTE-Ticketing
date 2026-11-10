@@ -1,11 +1,40 @@
-.ams-conditional[hidden] { display: none !important; }
-.ams-conditional { min-width: 0; }
-#ams-verification-form select { min-height: 46px; }
-.ams-decision-preview { border: 1px solid #d6e3f5; background: #f5f9ff; color: #27528b; padding: 12px 14px; border-radius: 10px; line-height: 1.6; }
+.ams-conditional[hidden] {
+    display: none !important;
+}
+.ams-conditional {
+    min-width: 0;
+}
+#ams-verification-form select {
+    min-height: 46px;
+}
+.ams-decision-preview {
+    border: 1px solid #d6e3f5;
+    background: #f5f9ff;
+    color: #27528b;
+    padding: 12px 14px;
+    border-radius: 10px;
+    line-height: 1.6;
+}
 
 /* TTE v57: mobile native WhatsApp handoff after an authorized AJAX POST. */
-.tte-wa-native-panel { margin-top: 12px; display: grid; gap: 10px; min-width: 0; }
-.tte-wa-native-panel > strong { font-size: 14px; }
-.tte-wa-native-panel > p { margin: 0; line-height: 1.6; }
-.tte-wa-native-panel .btn { min-height: 44px; white-space: normal; text-align: center; }
-.tte-wa-native-panel a.btn { text-decoration: none; }
+.tte-wa-native-panel {
+    margin-top: 12px;
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+}
+.tte-wa-native-panel > strong {
+    font-size: 14px;
+}
+.tte-wa-native-panel > p {
+    margin: 0;
+    line-height: 1.6;
+}
+.tte-wa-native-panel .btn {
+    min-height: 44px;
+    white-space: normal;
+    text-align: center;
+}
+.tte-wa-native-panel a.btn {
+    text-decoration: none;
+}

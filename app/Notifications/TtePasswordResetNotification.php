@@ -19,19 +19,21 @@ class TtePasswordResetNotification extends Notification {
             'password.reset',
             [
                 'token' => $this->token,
-                'email' => $notifiable->getEmailForPasswordReset()
+                'email' => $notifiable->getEmailForPasswordReset(),
             ],
-            false
+            false,
         );
         $url = rtrim((string) config('app.url'), '/') . $path;
         $minutes = (int) config('auth.passwords.users.expire', 60);
 
-        return new MailMessage()
+        return (new MailMessage())
             ->subject('Atur Ulang Password - TTE Ticketing')
             ->greeting('Halo, ' . $notifiable->name)
             ->line('Kami menerima permintaan pengaturan ulang password akun TTE Ticketing Anda.')
             ->action('Atur Ulang Password', $url)
-            ->line('Tautan berlaku selama ' . $minutes . ' menit dan hanya dapat digunakan satu kali.')
+            ->line(
+                'Tautan berlaku selama ' . $minutes . ' menit dan hanya dapat digunakan satu kali.',
+            )
             ->line('Apabila Anda tidak meminta reset password, abaikan email ini.')
             ->line('Jangan bagikan tautan reset atau kode rahasia kepada siapa pun.');
     }

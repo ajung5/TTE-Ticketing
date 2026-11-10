@@ -44,7 +44,9 @@ class EmailDirectoryService {
         }
         $maxAge = max(1, (int) config('email_directory.max_age_hours', 168));
 
-        return \Illuminate\Support\Carbon::parse($lastSynced)->greaterThanOrEqualTo(now()->subHours($maxAge));
+        return \Illuminate\Support\Carbon::parse($lastSynced)->greaterThanOrEqualTo(
+            now()->subHours($maxAge),
+        );
     }
 
     public function normalizedEmail(?string $raw): ?string {

@@ -18,14 +18,14 @@ class EmailDirectory extends Model {
         'status_pengguna',
         'status_sertifikat',
         'sync_batch',
-        'synced_at'
+        'synced_at',
     ];
 
     protected function casts(): array {
         return [
             'nik' => 'encrypted',
             'email' => 'encrypted',
-            'synced_at' => 'datetime'
+            'synced_at' => 'datetime',
         ];
     }
 }

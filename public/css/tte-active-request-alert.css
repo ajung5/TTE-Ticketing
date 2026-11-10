@@ -1,7 +1,7 @@
 /* TTE v6.1 - hanya untuk alert permohonan aktif pada halaman publik. */
 .public-success.public-success--blocked {
     border: 1px solid #fecaca;
-    box-shadow: 0 12px 34px rgba(153, 27, 27, 0.10);
+    box-shadow: 0 12px 34px rgba(153, 27, 27, 0.1);
 }
 .public-success--blocked .tte-request-blocked--danger {
     display: flex;
@@ -28,11 +28,13 @@
     font-weight: 800;
     line-height: 1;
 }
-.public-success--blocked .tte-request-blocked__body { min-width: 0; }
+.public-success--blocked .tte-request-blocked__body {
+    min-width: 0;
+}
 .public-success--blocked .tte-request-blocked__eyebrow {
     color: #991b1b;
     font-weight: 850;
-    letter-spacing: .65px;
+    letter-spacing: 0.65px;
     font-size: 13px;
     margin: 0 0 10px;
 }
@@ -40,7 +42,7 @@
     font-size: clamp(20px, 3vw, 26px);
     line-height: 1.25;
     color: #7f1d1d;
-    letter-spacing: -.4px;
+    letter-spacing: -0.4px;
     margin: 0 0 12px;
 }
 .public-success--blocked .tte-request-blocked p {
@@ -70,5 +72,7 @@
         height: 38px;
         font-size: 24px;
     }
-    .public-success--blocked .tte-request-blocked__eyebrow { font-size: 11px; }
+    .public-success--blocked .tte-request-blocked__eyebrow {
+        font-size: 11px;
+    }
 }

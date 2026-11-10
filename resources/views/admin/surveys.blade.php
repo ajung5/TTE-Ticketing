@@ -1,22 +1,42 @@
-@extends('layouts.app')
-@section('title', 'Hasil Survei Kepuasan')
-@section('content')
-    <link rel="stylesheet" href="{{ asset('css/survey.css') }}?v=1">
+@extends ('layouts.app')
+@section ('title', 'Hasil Survei Kepuasan')
+@section ('content')
+    <link rel="stylesheet" href="{{ asset('css/survey.css') }}?v=1" />
     <div class="page-heading">
         <div>
             <div class="eyebrow">ADMIN / EVALUASI LAYANAN</div>
             <h1>Survei Kepuasan Layanan TTE</h1>
             <p class="muted">Ringkasan masukan pemohon yang mengisi survei setelah penanganan tiket.</p>
-        </div><a href="{{ route('admin.templates.index') }}" class="btn btn-outline">Preset WhatsApp</a>
+        </div>
+        <a href="{{ route('admin.templates.index') }}" class="btn btn-outline">Preset WhatsApp</a>
     </div>
     <div class="stat-grid survey-stat-grid">
-        @foreach (['total' => 'Jumlah Respons', 'overall' => 'Kepuasan Umum', 'staff' => 'Pelayanan Petugas', 'clarity' => 'Kejelasan Informasi', 'speed' => 'Kecepatan Penanganan'] as $key => $label)
+        @foreach ([
+                'total' => 'Jumlah Respons',
+                'overall' => 'Kepuasan Umum',
+                'staff' => 'Pelayanan Petugas',
+                'clarity' => 'Kejelasan Informasi',
+                'speed' => 'Kecepatan Penanganan'
+            ]
+            as $key => $label)
             <div class="stat-card">
                 <div class="stat-name">{{ $label }}</div>
                 <div class="stat-number">
-                    {{ $key === 'total' ? (int) $summary->total : ($summary->$key === null ? '-' : number_format((float) $summary->$key, 2, ',', '.')) }}
+                    {{
+                        $key === 'total'
+                            ? (int) $summary->total
+                            : ($summary->$key === null
+                                ? '-'
+                                : number_format((float) $summary->$key, 2, ',', '.'))
+                    }}
                 </div>
-                <div class="stat-foot">{{ $key === 'total' ? 'Survei terkumpul' : 'Skala 1–5' }}</div>
+                <div class="stat-foot">
+                    {{
+                        $key === 'total'
+                            ? 'Survei terkumpul'
+                            : 'Skala 1–5'
+                    }}
+                </div>
             </div>
         @endforeach
     </div>
@@ -36,7 +56,16 @@
                         <tr>
                             <td>{{ $service->layanan }}</td>
                             <td>{{ $service->total }}</td>
-                            <td>{{ number_format((float) $service->average, 2, ',', '.') }} / 5</td>
+                            <td>
+                                {{
+                                    number_format(
+                                        (float) $service->average,
+                                        2,
+                                        ',',
+                                        '.',
+                                    )
+                                }} / 5
+                            </td>
                         </tr>
                     @empty
                         <tr>
@@ -49,8 +78,7 @@
     </section>
     <section class="card mt">
         <h2>Masukan Pemohon</h2>
-        <p class="small muted">Nama pengisi survei dan tanggapannya hanya dapat dilihat oleh administrator. Respons lama
-            yang tidak mencatat nama ditampilkan sebagai "Belum dicatat".</p>
+        <p class="small muted">Nama pengisi survei dan tanggapannya hanya dapat dilihat oleh administrator. Respons lama yang tidak mencatat nama ditampilkan sebagai "Belum dicatat".</p>
         <div class="table-scroll tte-survey-scroll">
             <table class="tte-survey-response-table">
                 <thead>
@@ -66,11 +94,30 @@
                     @forelse ($responses as $response)
                         <tr>
                             <td data-label="Waktu">
-                                {{ $response->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</td>
-                            <td data-label="Nomor Tiket">{{ $response->ticket?->ticket_number ?? '-' }}</td>
-                            <td data-label="Nama Pengisi">{{ $response->respondent_name ?: 'Belum dicatat' }}</td>
-                            <td data-label="Nilai"><span class="tte-rating">{{ $response->overall_rating }}/5</span></td>
-                            <td data-label="Saran / Masukan" class="survey-comment">{{ $response->feedback ?: '-' }}</td>
+                                {{
+                                    $response->created_at
+                                        ->timezone('Asia/Jakarta')
+                                        ->format('d M Y H:i')
+                                }}
+                            </td>
+                            <td data-label="Nomor Tiket">
+                                {{
+                                    $response->ticket?->ticket_number ??
+                                        '-'
+                                }}
+                            </td>
+                            <td data-label="Nama Pengisi">
+                                {{
+                                    $response->respondent_name ?:
+                                        'Belum dicatat'
+                                }}
+                            </td>
+                            <td data-label="Nilai">
+                                <span class="tte-rating">{{ $response->overall_rating }}/5</span>
+                            </td>
+                            <td data-label="Saran / Masukan" class="survey-comment">
+                                {{ $response->feedback ?: '-' }}
+                            </td>
                         </tr>
                     @empty
                         <tr>
@@ -80,8 +127,6 @@
                 </tbody>
             </table>
         </div>
-        <div class="pagination">
-            {{ $responses->links() }}
-        </div>
+        <div class="pagination">{{ $responses->links() }}</div>
     </section>
 @endsection

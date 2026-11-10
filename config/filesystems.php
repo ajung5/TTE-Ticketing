@@ -33,7 +33,7 @@ return [
             'root' => storage_path('app/private'),
             'serve' => true,
             'throw' => false,
-            'report' => false
+            'report' => false,
         ],
         'public' => [
             'driver' => 'local',
@@ -41,7 +41,7 @@ return [
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/') . '/storage',
             'visibility' => 'public',
             'throw' => false,
-            'report' => false
+            'report' => false,
         ],
         's3' => [
             'driver' => 's3',
@@ -53,8 +53,8 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
-            'report' => false
-        ]
+            'report' => false,
+        ],
     ],
 
     /*
@@ -69,6 +69,6 @@ return [
     */
 
     'links' => [
-        public_path('storage') => storage_path('app/public')
-    ]
+        public_path('storage') => storage_path('app/public'),
+    ],
 ];

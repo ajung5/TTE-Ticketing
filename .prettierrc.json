@@ -1,0 +1,43 @@
+{
+    "$schema": "https://json.schemastore.org/prettierrc",
+    "printWidth": 100,
+    "tabWidth": 4,
+    "useTabs": false,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "endOfLine": "lf",
+    "plugins": [
+        "@prettier/plugin-php",
+        "prettier-plugin-blade"
+    ],
+    "phpVersion": "8.3",
+    "braceStyle": "1tbs",
+    "trailingCommaPHP": true,
+    "bladePhpFormatting": "safe",
+    "overrides": [
+        {
+            "files": [
+                "*.blade.php"
+            ],
+            "options": {
+                "parser": "blade",
+                "bracketSameLine": true,
+                "singleAttributePerLine": false,
+                "htmlWhitespaceSensitivity": "css",
+                "bladeInlineIntentElements": [
+                    "p",
+                    "svg",
+                    "svg:*",
+                    "strong",
+                    "em",
+                    "b",
+                    "i",
+                    "span",
+                    "small",
+                    "code",
+                    "mark"
+                ]
+            }
+        }
+    ]
+}

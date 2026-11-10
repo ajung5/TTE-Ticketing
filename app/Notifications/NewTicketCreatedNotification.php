@@ -19,7 +19,7 @@ class NewTicketCreatedNotification extends Notification implements ShouldQueue {
     public function __construct(
         public readonly string $ticketNumber,
         public readonly string $serviceLabel,
-        public readonly string $receivedAtWib
+        public readonly string $receivedAtWib,
     ) {
         $this->afterCommit();
     }
@@ -29,7 +29,7 @@ class NewTicketCreatedNotification extends Notification implements ShouldQueue {
     }
 
     public function toMail(object $notifiable): MailMessage {
-        return new MailMessage()
+        return (new MailMessage())
             ->subject('[Tiket baru]: ' . $this->ticketNumber)
             ->greeting('Ada permohonan layanan TTE baru')
             ->line('Nomor tiket: ' . $this->ticketNumber)
@@ -38,7 +38,7 @@ class NewTicketCreatedNotification extends Notification implements ShouldQueue {
             ->line('Status: Belum Diambil')
             ->action('Buka Aplikasi TTE', route('dashboard'))
             ->line(
-                'Silakan login untuk melihat informasi terbaru. Tiket diambil oleh verifikator melalui mekanisme self-claim.'
+                'Silakan login untuk melihat informasi terbaru. Tiket diambil oleh verifikator melalui mekanisme self-claim.',
             )
             ->line('Pesan ini bersifat pemberitahuan, bukan penugasan tiket.');
     }

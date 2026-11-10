@@ -10,7 +10,7 @@ class WaMessageTemplate extends Model {
     public const SERVICES = [
         'Reset Passphrase' => 'Reset Passphrase',
         'Pembaruan' => 'Pembaruan Sertifikat Elektronik',
-        'Pendaftaran' => 'Penerbitan Sertifikat Elektronik'
+        'Pendaftaran' => 'Penerbitan Sertifikat Elektronik',
     ];
 
     public const EVENTS = [
@@ -24,7 +24,7 @@ class WaMessageTemplate extends Model {
         'certificate_not_issued' => 'SE Belum Terbit',
         'certificate_revoked' => 'SE Revoke — Penerbitan Ulang',
         'service_mismatch' => 'Perbaikan Jenis Permohonan',
-        'issuance_required' => 'Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)'
+        'issuance_required' => 'Penyesuaian ke Penerbitan SE (Belum Pernah Terbit)',
     ];
 
     public const TEMPLATE_SERVICE_CODES = [
@@ -38,7 +38,7 @@ class WaMessageTemplate extends Model {
         'certificate_not_issued' => '*',
         'certificate_revoked' => '*',
         'service_mismatch' => '*',
-        'issuance_required' => '*'
+        'issuance_required' => '*',
     ];
 
     public const CORRECTION_EVENTS = ['service_mismatch', 'issuance_required'];
@@ -63,7 +63,7 @@ class WaMessageTemplate extends Model {
         '{nama_verifikator}' => 'Nama petugas',
         '{inisial_verifikator}' => 'Inisial petugas',
         '{nama_instansi}' => 'Nama instansi/layanan',
-        '{survey_url}' => 'Tautan survei internal (untuk pesan selesai)'
+        '{survey_url}' => 'Tautan survei internal (untuk pesan selesai)',
     ];
 
     public const PLACEHOLDERS = [
@@ -86,6 +86,6 @@ class WaMessageTemplate extends Model {
         '{nama_verifikator}',
         '{inisial_verifikator}',
         '{nama_instansi}',
-        '{survey_url}'
+        '{survey_url}',
     ];
 }

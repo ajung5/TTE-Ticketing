@@ -16,7 +16,11 @@ return new class extends Migration {
             $table->boolean('awaiting_applicant_action')->default(false);
             $table->text('directory_email')->nullable();
             $table->timestamp('email_corrected_at')->nullable();
-            $table->foreignId('email_corrected_by')->nullable()->constrained('users')->nullOnDelete();
+            $table
+                ->foreignId('email_corrected_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
         });
 
         Schema::create('blocked_ticket_attempts', function (Blueprint $table) {
@@ -42,19 +46,24 @@ return new class extends Migration {
         // Legacy backfill; never attempt an SQL comparison against encrypted NIK.
         // Preserve old direct-form email as the directory snapshot.
         $guard = app(\App\Services\ActiveTicketGuard::class);
-        Ticket::query()->where('source', '!=', 'simulated')->chunkById(200, function ($tickets) use ($guard) {
-            foreach ($tickets as $ticket) {
-                $f = $guard->fingerprints((string) ($ticket->nik ?? ''), (string) ($ticket->nip ?? ''));
-                $data = [
-                    'applicant_nik_hash' => $f['nik'],
-                    'applicant_nip_hash' => $f['nip']
-                ];
-                if ($ticket->source === 'direct' && $ticket->email) {
-                    $data['directory_email'] = $ticket->email;
+        Ticket::query()
+            ->where('source', '!=', 'simulated')
+            ->chunkById(200, function ($tickets) use ($guard) {
+                foreach ($tickets as $ticket) {
+                    $f = $guard->fingerprints(
+                        (string) ($ticket->nik ?? ''),
+                        (string) ($ticket->nip ?? ''),
+                    );
+                    $data = [
+                        'applicant_nik_hash' => $f['nik'],
+                        'applicant_nip_hash' => $f['nip'],
+                    ];
+                    if ($ticket->source === 'direct' && $ticket->email) {
+                        $data['directory_email'] = $ticket->email;
+                    }
+                    $ticket->forceFill($data)->saveQuietly();
                 }
-                $ticket->forceFill($data)->saveQuietly();
-            }
-        });
+            });
     }
 
     public function down(): void {
@@ -65,9 +74,14 @@ return new class extends Migration {
             $table->dropIndex(['applicant_nik_hash']);
             $table->dropIndex(['applicant_nip_hash']);
             $table->dropColumn([
-                'applicant_nik_hash', 'applicant_nip_hash', 'duplicate_attempts',
-                'last_duplicate_attempt_at', 'awaiting_applicant_action',
-                'directory_email', 'email_corrected_at', 'email_corrected_by'
+                'applicant_nik_hash',
+                'applicant_nip_hash',
+                'duplicate_attempts',
+                'last_duplicate_attempt_at',
+                'awaiting_applicant_action',
+                'directory_email',
+                'email_corrected_at',
+                'email_corrected_by',
             ]);
         });
     }

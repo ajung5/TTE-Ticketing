@@ -1,6 +1,6 @@
-@extends('layouts.app')
-@section('title', 'Manajemen Verifikator')
-@section('content')
+@extends ('layouts.app')
+@section ('title', 'Manajemen Verifikator')
+@section ('content')
     <style>
         .verifier-form-grid {
             display: grid;
@@ -61,7 +61,7 @@
         }
 
         .verifier-danger:disabled {
-            opacity: .45;
+            opacity: 0.45;
             cursor: not-allowed;
         }
 
@@ -79,7 +79,7 @@
             min-width: 175px;
         }
 
-        @media(max-width:760px) {
+        @media (max-width: 760px) {
             .verifier-form-grid {
                 grid-template-columns: 1fr;
             }
@@ -101,8 +101,7 @@
         <div>
             <div class="eyebrow">ADMIN / MANAJEMEN AKUN</div>
             <h1>Manajemen Verifikator</h1>
-            <p class="muted">Tambah, ubah profil dan password, serta hapus akun verifikator tanpa menghilangkan riwayat
-                penanganan tiket.</p>
+            <p class="muted">Tambah, ubah profil dan password, serta hapus akun verifikator tanpa menghilangkan riwayat penanganan tiket.</p>
         </div>
         <span class="pill pill-blue">{{ $verifiers->count() }} verifikator aktif</span>
     </div>
@@ -114,33 +113,69 @@
                 <h2>Tambah Verifikator</h2>
             </div>
         </summary>
-        <form method="post" action="{{ route('admin.verifiers.store') }}" class="stack" autocomplete="off">
+        <form
+            method="post"
+            action="{{ route('admin.verifiers.store') }}"
+            class="stack"
+            autocomplete="off">
             @csrf
             <div class="verifier-form-grid">
-                <label>Nama lengkap <span class="required-mark">*</span>
-                    <input name="name" type="text" value="{{ old('name') }}" minlength="3" maxlength="160" required
-                        autocomplete="off" placeholder="Nama petugas">
+                <label
+                    >Nama lengkap <span class="required-mark">*</span>
+                    <input
+                        name="name"
+                        type="text"
+                        value="{{ old('name') }}"
+                        minlength="3"
+                        maxlength="160"
+                        required
+                        autocomplete="off"
+                        placeholder="Nama petugas" />
                 </label>
-                <label>Email akun <span class="required-mark">*</span>
-                    <input name="email" type="email" value="{{ old('email') }}" maxlength="255" required
-                        autocomplete="off" placeholder="petugas@subang.go.id">
+                <label
+                    >Email akun <span class="required-mark">*</span>
+                    <input
+                        name="email"
+                        type="email"
+                        value="{{ old('email') }}"
+                        maxlength="255"
+                        required
+                        autocomplete="off"
+                        placeholder="petugas@subang.go.id" />
                 </label>
-                <label>Inisial (opsional)
-                    <input name="initials" type="text" value="{{ old('initials') }}" maxlength="12"
-                        pattern="[A-Za-z0-9]*" placeholder="Contoh: AWN">
+                <label
+                    >Inisial (opsional)
+                    <input
+                        name="initials"
+                        type="text"
+                        value="{{ old('initials') }}"
+                        maxlength="12"
+                        pattern="[A-Za-z0-9]*"
+                        placeholder="Contoh: AWN" />
                 </label>
                 <div></div>
-                <label>Password awal <span class="required-mark">*</span>
-                    <input name="password" type="password" minlength="12" required autocomplete="new-password"
-                        placeholder="Minimal 12 karakter">
+                <label
+                    >Password awal <span class="required-mark">*</span>
+                    <input
+                        name="password"
+                        type="password"
+                        minlength="12"
+                        required
+                        autocomplete="new-password"
+                        placeholder="Minimal 12 karakter" />
                 </label>
-                <label>Konfirmasi password <span class="required-mark">*</span>
-                    <input name="password_confirmation" type="password" minlength="12" required autocomplete="new-password"
-                        placeholder="Ulangi password">
+                <label
+                    >Konfirmasi password <span class="required-mark">*</span>
+                    <input
+                        name="password_confirmation"
+                        type="password"
+                        minlength="12"
+                        required
+                        autocomplete="new-password"
+                        placeholder="Ulangi password" />
                 </label>
             </div>
-            <p class="verifier-help">Password minimal 12 karakter dan mengandung huruf besar, huruf kecil, angka, serta
-                simbol. Akun baru otomatis berperan sebagai verifikator, bukan admin.</p>
+            <p class="verifier-help">Password minimal 12 karakter dan mengandung huruf besar, huruf kecil, angka, serta simbol. Akun baru otomatis berperan sebagai verifikator, bukan admin.</p>
             <button class="btn btn-primary" type="submit">Tambah Verifikator</button>
         </form>
     </details>
@@ -153,9 +188,7 @@
             </div>
             <span class="pill pill-neutral">{{ $verifiers->count() }} akun</span>
         </div>
-        <p class="small muted">Gunakan <strong>Edit Akun</strong> untuk memperbarui identitas, atau <strong>Kirim Reset
-                Email</strong> agar verifikator mengatur password sendiri. Password
-            lama tidak dapat ditampilkan.</p>
+        <p class="small muted">Gunakan <strong>Edit Akun</strong> untuk memperbarui identitas, atau <strong>Kirim Reset Email</strong> agar verifikator mengatur password sendiri. Password lama tidak dapat ditampilkan.</p>
         <div class="table-scroll">
             <table class="verifier-table">
                 <thead>
@@ -169,49 +202,74 @@
                 </thead>
                 <tbody>
                     @forelse ($verifiers as $verifier)
-                        @php($statistics = $counts->get($verifier->id))
-                        @php($activeCount = (int) ($statistics?->active_count ?? 0))
+                        @php ($statistics = $counts->get($verifier->id))
+                        @php ($activeCount = (int) ($statistics?->active_count ?? 0))
                         <tr>
                             <td>
                                 <div class="person-row">
-                                    <span
-                                        class="person-avatar">{{ strtoupper(substr($verifier->initials ?: $verifier->name, 0, 2)) }}</span>
-                                    <span><strong>{{ $verifier->name }}</strong><span class="small muted"
-                                            style="display:block">{{ $verifier->email }}</span></span>
+                                    <span class="person-avatar">{{
+                                        strtoupper(
+                                            substr($verifier->initials ?: $verifier->name, 0, 2),
+                                        )
+                                    }}</span>
+                                    <span><strong>{{ $verifier->name }}</strong><span class="small muted" style="display: block;">{{ $verifier->email }}</span></span>
                                 </div>
                             </td>
                             <td>{{ $verifier->initials ?: '-' }}</td>
                             <td>{{ (int) ($statistics?->total ?? 0) }}</td>
-                            <td><span class="pill {{ $activeCount ? 'pill-blue' : 'pill-neutral' }}">{{ $activeCount }}
-                                    aktif</span></td>
+                            <td>
+                                <span
+                                    class="pill {{ $activeCount ? 'pill-blue' : 'pill-neutral' }}">{{ $activeCount }} aktif</span>
+                            </td>
                             <td>
                                 <div class="verifier-actions">
-                                    <button type="button" class="btn btn-outline btn-small"
-                                        data-open-dialog="tte-edit-verifier-{{ $verifier->id }}">Edit Akun</button>
-                                    <form method="post" action="{{ route('admin.password-reset', $verifier) }}"
-                                        onsubmit="return confirm('Kirim tautan reset password ke email verifikator ini?')">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline btn-small"
+                                        data-open-dialog="tte-edit-verifier-{{ $verifier->id }}">
+                                        Edit Akun
+                                    </button>
+                                    <form
+                                        method="post"
+                                        action="{{ route('admin.password-reset', $verifier) }}"
+                                        onsubmit="
+                                            return confirm(
+                                                'Kirim tautan reset password ke email verifikator ini?',
+                                            );
+                                        ">
                                         @csrf
-                                        <button class="btn btn-outline btn-small" type="submit">Kirim Reset Email</button>
+                                        <button class="btn btn-outline btn-small" type="submit">
+                                            Kirim Reset Email
+                                        </button>
                                     </form>
-                                    <form method="post" action="{{ route('admin.verifiers.destroy', $verifier) }}"
-                                        onsubmit="return confirm('Nonaktifkan akun verifikator ini? Akun tidak dapat login lagi, tetapi histori tiket tetap tersimpan.')">
+                                    <form
+                                        method="post"
+                                        action="{{ route('admin.verifiers.destroy', $verifier) }}"
+                                        onsubmit="
+                                            return confirm(
+                                                'Nonaktifkan akun verifikator ini? Akun tidak dapat login lagi, tetapi histori tiket tetap tersimpan.',
+                                            );
+                                        ">
                                         @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-small verifier-danger"
-                                            @disabled($activeCount > 0)
-                                            title="{{ $activeCount ? 'Selesaikan tiket aktif terlebih dahulu.' : 'Nonaktifkan akun dan simpan historinya.' }}">Nonaktifkan</button>
+                                        @method ('DELETE')
+                                        <button
+                                            type="submit"
+                                            class="btn btn-small verifier-danger"
+                                            @disabled ($activeCount > 0)
+                                            title="{{ $activeCount ? 'Selesaikan tiket aktif terlebih dahulu.' : 'Nonaktifkan akun dan simpan historinya.' }}">
+                                            Nonaktifkan
+                                        </button>
                                     </form>
                                 </div>
                                 @if ($activeCount > 0)
-                                    <p class="verifier-help">Selesaikan {{ $activeCount }} tiket aktif sebelum
-                                        menonaktifkan
-                                        akun.</p>
+                                    <p class="verifier-help">Selesaikan {{ $activeCount }} tiket aktif sebelum menonaktifkan akun.</p>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="empty">Belum ada akun verifikator. Tambahkan melalui form di atas.
+                            <td colspan="5" class="empty">
+                                Belum ada akun verifikator. Tambahkan melalui form di atas.
                             </td>
                         </tr>
                     @endforelse
@@ -221,8 +279,11 @@
     </section>
     {{-- Editor ditempatkan di luar tabel agar tabel tidak melebar saat edit. --}}
     @foreach ($verifiers as $verifier)
-        <dialog class="tte-verifier-dialog" id="tte-edit-verifier-{{ $verifier->id }}"
-            aria-labelledby="tte-edit-title-{{ $verifier->id }}" @if ((string) old('_edit_id') === (string) $verifier->id) data-auto-open @endif>
+        <dialog
+            class="tte-verifier-dialog"
+            id="tte-edit-verifier-{{ $verifier->id }}"
+            aria-labelledby="tte-edit-title-{{ $verifier->id }}"
+            @if ((string) old('_edit_id') === (string) $verifier->id) data-auto-open @endif>
             <div class="tte-dialog-heading">
                 <div>
                     <h2 id="tte-edit-title-{{ $verifier->id }}">Edit Verifikator</h2>
@@ -232,34 +293,62 @@
                     Tutup
                 </button>
             </div>
-            <form method="post" action="{{ route('admin.verifiers.update', $verifier) }}" class="stack"
+            <form
+                method="post"
+                action="{{ route('admin.verifiers.update', $verifier) }}"
+                class="stack"
                 autocomplete="off">
                 @csrf
-                @method('PUT')
-                <input type="hidden" name="_edit_id" value="{{ $verifier->id }}">
+                @method ('PUT')
+                <input type="hidden" name="_edit_id" value="{{ $verifier->id }}" />
                 <div class="verifier-form-grid">
-                    <label>Nama lengkap
-                        <input type="text" name="name" minlength="3" maxlength="160" required
-                            value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('name', $verifier->name) : $verifier->name }}">
+                    <label
+                        >Nama lengkap
+                        <input
+                            type="text"
+                            name="name"
+                            minlength="3"
+                            maxlength="160"
+                            required
+                            value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('name', $verifier->name) : $verifier->name }}" />
                     </label>
-                    <label>Email akun
-                        <input type="email" name="email" maxlength="255" required
-                            value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('email', $verifier->email) : $verifier->email }}">
+                    <label
+                        >Email akun
+                        <input
+                            type="email"
+                            name="email"
+                            maxlength="255"
+                            required
+                            value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('email', $verifier->email) : $verifier->email }}" />
                     </label>
-                    <label>Inisial
-                        <input type="text" name="initials" maxlength="12" pattern="[A-Za-z0-9]*"
-                            value="{{ $verifier->initials }}">
+                    <label
+                        >Inisial
+                        <input
+                            type="text"
+                            name="initials"
+                            maxlength="12"
+                            pattern="[A-Za-z0-9]*"
+                            value="{{ $verifier->initials }}" />
                     </label>
                 </div>
-                <p class="small muted">Kosongkan kedua kolom password apabila hanya mengubah
-                    profil.</p>
+                <p class="small muted">Kosongkan kedua kolom password apabila hanya mengubah profil.</p>
                 <div class="verifier-form-grid">
-                    <label>Password baru (opsional)
-                        <input type="password" name="password" minlength="12" autocomplete="new-password"
-                            placeholder="Biarkan kosong jika tidak diganti">
+                    <label
+                        >Password baru (opsional)
+                        <input
+                            type="password"
+                            name="password"
+                            minlength="12"
+                            autocomplete="new-password"
+                            placeholder="Biarkan kosong jika tidak diganti" />
                     </label>
-                    <label>Konfirmasi password baru
-                        <input type="password" name="password_confirmation" minlength="12" autocomplete="new-password">
+                    <label
+                        >Konfirmasi password baru
+                        <input
+                            type="password"
+                            name="password_confirmation"
+                            minlength="12"
+                            autocomplete="new-password" />
                     </label>
                 </div>
                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>

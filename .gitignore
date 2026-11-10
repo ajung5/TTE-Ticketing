@@ -26,3 +26,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /config/google_credentials.json
+
+# Cadangan lokal formatter / installer (jangan di-commit)
+/.format-backups/
+/.tte-patch-backups/

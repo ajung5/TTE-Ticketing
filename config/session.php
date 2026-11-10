@@ -223,5 +223,5 @@ return [
     |
     */
 
-    'serialization' => 'json'
+    'serialization' => 'json',
 ];

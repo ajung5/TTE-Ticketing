@@ -20,12 +20,17 @@ class AppServiceProvider extends ServiceProvider {
         // Respons khusus survei tetap membawa status 429 dan header Retry-After.
         $surveyLimitResponse = function (Request $request, array $headers) {
             $retryAfter = max(1, (int) ($headers['Retry-After'] ?? 60));
-            $message = 'Batas akses survei tercapai. Silakan coba lagi setelah ' . $retryAfter . ' detik.';
+            $message =
+                'Batas akses survei tercapai. Silakan coba lagi setelah ' . $retryAfter . ' detik.';
             $headers['Cache-Control'] = 'no-store, private';
             $headers['X-Robots-Tag'] = 'noindex, nofollow';
 
             if ($request->expectsJson()) {
-                return response()->json(['message' => $message, 'retry_after' => $retryAfter], 429, $headers);
+                return response()->json(
+                    ['message' => $message, 'retry_after' => $retryAfter],
+                    429,
+                    $headers,
+                );
             }
 
             if ($request->hasSession()) {
@@ -37,10 +42,12 @@ class AppServiceProvider extends ServiceProvider {
                         'staff_rating',
                         'clarity_rating',
                         'speed_rating',
-                        'feedback'
+                        'feedback',
                     ]);
                 } else {
-                    $request->session()->flash('_old_input', $request->session()->get('_old_input', []));
+                    $request
+                        ->session()
+                        ->flash('_old_input', $request->session()->get('_old_input', []));
                 }
             }
 
@@ -49,10 +56,10 @@ class AppServiceProvider extends ServiceProvider {
                 [
                     'retryAfter' => $retryAfter,
                     'retryUrl' => $request->fullUrl(),
-                    'isSubmission' => $request->isMethod('post')
+                    'isSubmission' => $request->isMethod('post'),
                 ],
                 429,
-                $headers
+                $headers,
             );
         };
 
@@ -70,7 +77,9 @@ class AppServiceProvider extends ServiceProvider {
                 ->response($surveyLimitResponse);
         });
 
-        RateLimiter::for('tte-survey-submit', function (Request $request) use ($surveyLimitResponse) {
+        RateLimiter::for('tte-survey-submit', function (Request $request) use (
+            $surveyLimitResponse,
+        ) {
             if (!$request->hasValidSignature()) {
                 return Limit::perMinutes(10, 5)->by('invalid-ip:' . $request->ip());
             }
@@ -88,14 +97,14 @@ class AppServiceProvider extends ServiceProvider {
             $emailHash = hash('sha256', strtolower(trim((string) $request->input('email', ''))));
             return [
                 Limit::perMinutes(10, 12)->by('ip:' . $request->ip()),
-                Limit::perMinutes(10, 3)->by('email:' . $emailHash)
+                Limit::perMinutes(10, 3)->by('email:' . $emailHash),
             ];
         });
 
         RateLimiter::for('tte-nik-lookup', function (Request $request) {
             return [
                 Limit::perMinute(6)->by('minute:' . $request->ip()),
-                Limit::perDay(120)->by('day:' . $request->ip())
+                Limit::perDay(120)->by('day:' . $request->ip()),
             ];
         });
     }

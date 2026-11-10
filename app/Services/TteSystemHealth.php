@@ -13,7 +13,10 @@ class TteSystemHealth {
         $last = DB::table('email_directories')->max('synced_at');
         $limit = max(1, (int) config('email_directory.max_age_hours', 168));
         $age = $last ? Carbon::parse($last)->diffInHours(now()) : null;
-        $fresh = $count > 0 && $age !== null && Carbon::parse($last)->greaterThanOrEqualTo(now()->subHours($limit));
+        $fresh =
+            $count > 0 &&
+            $age !== null &&
+            Carbon::parse($last)->greaterThanOrEqualTo(now()->subHours($limit));
         $configuredSheet =
             filled(config('email_directory.spreadsheet_id')) &&
             is_readable((string) config('email_directory.service_account_json'));
@@ -27,7 +30,10 @@ class TteSystemHealth {
             filter_var((string) config('mail.from.address'), FILTER_VALIDATE_EMAIL) &&
             filter_var($inbox, FILTER_VALIDATE_EMAIL);
         $queueDriver = (string) config('queue.default', 'sync');
-        $pendingJobs = $queueDriver === 'database' && Schema::hasTable('jobs') ? DB::table('jobs')->count() : null;
+        $pendingJobs =
+            $queueDriver === 'database' && Schema::hasTable('jobs')
+                ? DB::table('jobs')->count()
+                : null;
         $failedJobs = Schema::hasTable('failed_jobs') ? DB::table('failed_jobs')->count() : null;
 
         return [
@@ -43,7 +49,7 @@ class TteSystemHealth {
             'smtp_ready' => (bool) $smtpReady,
             'queue_driver' => $queueDriver,
             'pending_jobs' => $pendingJobs,
-            'failed_jobs' => $failedJobs
+            'failed_jobs' => $failedJobs,
         ];
     }
 }

@@ -13,7 +13,7 @@ class ServiceSurveyResponse extends Model {
         'staff_rating',
         'clarity_rating',
         'speed_rating',
-        'feedback'
+        'feedback',
     ];
 
     public function ticket(): BelongsTo {

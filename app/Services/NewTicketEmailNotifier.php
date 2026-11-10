@@ -20,9 +20,12 @@ class NewTicketEmailNotifier {
 
         $inbox = trim((string) config('tte.new_ticket_inbox_email', ''));
         if (!filter_var($inbox, FILTER_VALIDATE_EMAIL)) {
-            Log::warning('Notifikasi tiket baru dilewati: alamat mailbox belum dikonfigurasi atau tidak valid.', [
-                'ticket_id' => $ticket->getKey()
-            ]);
+            Log::warning(
+                'Notifikasi tiket baru dilewati: alamat mailbox belum dikonfigurasi atau tidak valid.',
+                [
+                    'ticket_id' => $ticket->getKey(),
+                ],
+            );
             return;
         }
 
@@ -37,13 +40,13 @@ class NewTicketEmailNotifier {
                 new NewTicketCreatedNotification(
                     (string) ($ticket->ticket_number ?? '#' . $ticket->id),
                     (string) $ticket->service_label,
-                    $receivedAt
-                )
+                    $receivedAt,
+                ),
             );
         } catch (\Throwable $e) {
             Log::error('Gagal mengantrikan email ke mailbox tiket.', [
                 'ticket_id' => $ticket->getKey(),
-                'exception_class' => get_class($e)
+                'exception_class' => get_class($e),
             ]);
         }
     }

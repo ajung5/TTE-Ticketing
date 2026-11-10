@@ -19,7 +19,10 @@ class AuthController extends Controller {
     }
 
     public function login(Request $request) {
-        $credentials = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string']]);
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
         if (!Auth::attempt($credentials)) {
             return back()
                 ->withErrors(['email' => 'Email atau password tidak sesuai.'])
@@ -50,7 +53,7 @@ class AuthController extends Controller {
         $request->merge([
             'name' => trim((string) $request->input('name')),
             'email' => Str::lower(trim((string) $request->input('email'))),
-            'initials' => Str::upper(trim((string) $request->input('initials')))
+            'initials' => Str::upper(trim((string) $request->input('initials'))),
         ]);
 
         $emailChanged = $request->input('email') !== Str::lower($user->email);
@@ -58,9 +61,16 @@ class AuthController extends Controller {
         $data = $request->validate(
             [
                 'name' => ['required', 'string', 'min:3', 'max:255'],
-                'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+                'email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                    Rule::unique('users', 'email')->ignore($user->id),
+                ],
                 'initials' => ['nullable', 'alpha_num', 'max:12'],
-                'current_password' => $emailChanged ? ['required', 'current_password'] : ['nullable']
+                'current_password' => $emailChanged
+                    ? ['required', 'current_password']
+                    : ['nullable'],
             ],
             [
                 'name.required' => 'Nama lengkap wajib diisi.',
@@ -70,9 +80,10 @@ class AuthController extends Controller {
                 'email.unique' => 'Email sudah digunakan akun lain.',
                 'initials.alpha_num' => 'Inisial hanya boleh berisi huruf dan angka.',
                 'initials.max' => 'Inisial maksimal 12 karakter.',
-                'current_password.required' => 'Password saat ini wajib diisi untuk mengubah email.',
-                'current_password.current_password' => 'Password saat ini tidak sesuai.'
-            ]
+                'current_password.required' =>
+                    'Password saat ini wajib diisi untuk mengubah email.',
+                'current_password.current_password' => 'Password saat ini tidak sesuai.',
+            ],
         );
 
         DB::transaction(function () use ($user, $data, $emailChanged) {
@@ -81,7 +92,7 @@ class AuthController extends Controller {
             $user->fill([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'initials' => $data['initials'] ?: null
+                'initials' => $data['initials'] ?: null,
             ]);
 
             if ($emailChanged) {
@@ -101,25 +112,27 @@ class AuthController extends Controller {
                 'target_type' => 'user',
                 'target_id' => $user->id,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         });
 
         $request->session()->regenerate();
 
-        return redirect()->route('profile')->with('success', 'Profil administrator berhasil diperbarui.');
+        return redirect()
+            ->route('profile')
+            ->with('success', 'Profil administrator berhasil diperbarui.');
     }
 
     public function changePassword(Request $request) {
         $data = $request->validate([
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()]
+            'password' => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()],
         ]);
         $request
             ->user()
             ->forceFill([
                 'password' => Hash::make($data['password']),
-                'remember_token' => Str::random(60)
+                'remember_token' => Str::random(60),
             ])
             ->save();
         $request->session()->regenerate();
@@ -149,13 +162,16 @@ class AuthController extends Controller {
 
         return back()->with(
             'success',
-            'Jika email terdaftar dan aktif, tautan reset akan dikirim. Periksa Inbox atau Spam.'
+            'Jika email terdaftar dan aktif, tautan reset akan dikirim. Periksa Inbox atau Spam.',
         );
     }
 
     public function resetForm(Request $request, string $token) {
         return response()
-            ->view('auth.reset-password', ['token' => $token, 'email' => $request->query('email', '')])
+            ->view('auth.reset-password', [
+                'token' => $token,
+                'email' => $request->query('email', ''),
+            ])
             ->header('Cache-Control', 'no-store, private')
             ->header('Referrer-Policy', 'no-referrer')
             ->header('X-Robots-Tag', 'noindex, nofollow');
@@ -165,10 +181,15 @@ class AuthController extends Controller {
         $data = $request->validate([
             'token' => ['required', 'string'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()]
+            'password' => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()],
         ]);
         $status = Password::reset($data, function ($user, $password) {
-            $user->forceFill(['password' => Hash::make($password), 'remember_token' => Str::random(60)])->save();
+            $user
+                ->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])
+                ->save();
             // Revoke existing database sessions when the password is reset.
             if (config('session.driver') === 'database') {
                 DB::table('sessions')->where('user_id', $user->getKey())->delete();
@@ -177,7 +198,9 @@ class AuthController extends Controller {
         });
 
         return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('success', 'Password berhasil diperbarui. Silakan login.')
+            ? redirect()
+                ->route('login')
+                ->with('success', 'Password berhasil diperbarui. Silakan login.')
             : back()->withErrors(['email' => __($status)]);
     }
 }

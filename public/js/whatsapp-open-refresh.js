@@ -6,9 +6,12 @@
 (() => {
     'use strict';
 
-    const mobile = Boolean(navigator.userAgentData?.mobile)
-        || /Android|iPhone|iPad|iPod|IEMobile|Windows Phone|Opera Mini/i.test(navigator.userAgent || '')
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const mobile =
+        Boolean(navigator.userAgentData?.mobile) ||
+        /Android|iPhone|iPad|iPod|IEMobile|Windows Phone|Opera Mini/i.test(
+            navigator.userAgent || '',
+        ) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     let pendingMobileReturn = false;
     let mobileWentBackground = false;
 
@@ -19,7 +22,8 @@
         }
     };
     document.addEventListener('visibilitychange', () => {
-        if (pendingMobileReturn && document.visibilityState === 'hidden') mobileWentBackground = true;
+        if (pendingMobileReturn && document.visibilityState === 'hidden')
+            mobileWentBackground = true;
         refreshOnReturn();
     });
     window.addEventListener('pageshow', refreshOnReturn);
@@ -33,9 +37,9 @@
             body: data,
             credentials: 'same-origin',
             headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
         });
         if (!response.ok) throw new Error(`Permintaan gagal (${response.status}).`);
         const result = await response.json();
@@ -45,8 +49,14 @@
 
     const mobileLinks = (destination) => {
         // Never turn arbitrary server URLs into an application deep link.
-        if (destination.protocol !== 'https:' || destination.hostname !== 'wa.me'
-            || destination.username || destination.password || destination.port || destination.hash) {
+        if (
+            destination.protocol !== 'https:' ||
+            destination.hostname !== 'wa.me' ||
+            destination.username ||
+            destination.password ||
+            destination.port ||
+            destination.hash
+        ) {
             throw new Error('Tautan WhatsApp mobile dari server tidak valid.');
         }
         const phone = destination.pathname.replace(/^\//, '');
@@ -56,7 +66,7 @@
         }
         return {
             native: `whatsapp://send?phone=${phone}&text=${encodeURIComponent(message)}`,
-            web: destination.href
+            web: destination.href,
         };
     };
 
@@ -81,7 +91,8 @@
         const title = document.createElement('strong');
         title.textContent = 'Pesan siap dibuka di WhatsApp';
         const explanation = document.createElement('p');
-        explanation.textContent = 'Ketuk tombol berikut untuk membuka aplikasi WhatsApp di handphone. Pesan belum dianggap terkirim.';
+        explanation.textContent =
+            'Ketuk tombol berikut untuk membuka aplikasi WhatsApp di handphone. Pesan belum dianggap terkirim.';
         const native = makeLink('Buka Aplikasi WhatsApp', links.native, 'btn btn-wa full');
         native.setAttribute('data-wa-native-link', '1');
         native.addEventListener('click', () => {
@@ -98,7 +109,8 @@
         });
         const info = document.createElement('p');
         info.className = 'small muted';
-        info.textContent = 'Jika aplikasi tidak terbuka, gunakan opsi browser atau buka halaman ini di Safari/Chrome. Setelah mengirim pesan, kembali ke tiket dan konfirmasi secara manual.';
+        info.textContent =
+            'Jika aplikasi tidak terbuka, gunakan opsi browser atau buka halaman ini di Safari/Chrome. Setelah mengirim pesan, kembali ke tiket dan konfirmasi secara manual.';
         const reload = document.createElement('button');
         reload.type = 'button';
         reload.className = 'btn btn-ghost full';
@@ -122,7 +134,9 @@
             // Preserve user gesture for desktop popup blockers.
             waTab = window.open('about:blank', form.getAttribute('target') || '_blank');
             if (!waTab) {
-                window.alert('Tab WhatsApp diblokir browser. Izinkan pop-up untuk situs ini lalu coba kembali.');
+                window.alert(
+                    'Tab WhatsApp diblokir browser. Izinkan pop-up untuk situs ini lalu coba kembali.',
+                );
                 return;
             }
         }
@@ -136,8 +150,12 @@
                 // IMPORTANT: Do not auto-navigate to whatsapp:// after await.
                 // The explicit anchor tap is what allows the native app to open.
             } else {
-                if (destination.protocol !== 'https:' || destination.hostname !== 'web.whatsapp.com'
-                    || destination.username || destination.password) {
+                if (
+                    destination.protocol !== 'https:' ||
+                    destination.hostname !== 'web.whatsapp.com' ||
+                    destination.username ||
+                    destination.password
+                ) {
                     throw new Error('Tautan WhatsApp Web dari server tidak valid.');
                 }
                 waTab.opener = null;
@@ -147,7 +165,9 @@
             }
         } catch (error) {
             if (waTab) waTab.close();
-            window.alert(error instanceof Error ? error.message : 'Gagal membuka WhatsApp. Coba kembali.');
+            window.alert(
+                error instanceof Error ? error.message : 'Gagal membuka WhatsApp. Coba kembali.',
+            );
         } finally {
             form.dataset.submitting = '0';
             if (button) button.disabled = false;

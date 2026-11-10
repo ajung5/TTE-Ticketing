@@ -49,7 +49,7 @@ class Ticket extends Model {
         'last_duplicate_attempt_at',
         'awaiting_applicant_action',
         'email_corrected_at',
-        'email_corrected_by'
+        'email_corrected_by',
     ];
 
     protected function casts(): array {
@@ -63,7 +63,7 @@ class Ticket extends Model {
             'last_duplicate_attempt_at' => 'datetime',
             'awaiting_applicant_action' => 'boolean',
             'email_corrected_at' => 'datetime',
-            'consent_accepted_at' => 'datetime'
+            'consent_accepted_at' => 'datetime',
         ];
     }
 
@@ -88,7 +88,7 @@ class Ticket extends Model {
         return match ($this->wa_verification_status) {
             'verified' => 'Terverifikasi di AMS BSrE',
             'unverified' => 'Belum terverifikasi di AMS BSrE',
-            default => 'Belum diperiksa'
+            default => 'Belum diperiksa',
         };
     }
 
@@ -96,21 +96,24 @@ class Ticket extends Model {
         return match ($this->activation_status) {
             'activated' => 'Sudah aktivasi',
             'not_activated' => 'Belum aktivasi',
-            default => 'Belum diperiksa'
+            default => 'Belum diperiksa',
         };
     }
 
     public function getCertificateStatusLabelAttribute(): string {
         return match (true) {
             $this->certificate_issuance_status === 'not_issued' => 'SE belum pernah terbit',
-            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'active'
+            $this->certificate_issuance_status === 'issued' &&
+                $this->certificate_validity_status === 'active'
                 => 'SE aktif',
-            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'expired'
+            $this->certificate_issuance_status === 'issued' &&
+                $this->certificate_validity_status === 'expired'
                 => 'SE kedaluwarsa',
-            $this->certificate_issuance_status === 'issued' && $this->certificate_validity_status === 'revoked'
+            $this->certificate_issuance_status === 'issued' &&
+                $this->certificate_validity_status === 'revoked'
                 => 'SE dicabut (Revoke)',
             $this->certificate_issuance_status === 'issued' => 'Masa berlaku belum diperiksa',
-            default => 'Belum diperiksa'
+            default => 'Belum diperiksa',
         };
     }
 
@@ -134,7 +137,7 @@ class Ticket extends Model {
         return match ($this->layanan) {
             'Pembaruan' => 'Pembaruan Sertifikat Elektronik',
             'Pendaftaran' => 'Pendaftaran TTE Baru',
-            default => 'Reset Passphrase TTE'
+            default => 'Reset Passphrase TTE',
         };
     }
 
@@ -142,7 +145,7 @@ class Ticket extends Model {
         return match ($this->service_alignment_status) {
             'suitable' => 'Sesuai',
             'unsuitable' => 'Belum sesuai',
-            default => 'Belum dievaluasi'
+            default => 'Belum dievaluasi',
         };
     }
 
@@ -157,7 +160,7 @@ class Ticket extends Model {
             'registration_followup' => 'Tindak lanjut permohonan Penerbitan SE',
             'certificate_reissuance' => 'Penerbitan Ulang Sertifikat Elektronik',
             'service_correction' => 'Klarifikasi jenis layanan',
-            default => 'Belum ditetapkan'
+            default => 'Belum ditetapkan',
         };
     }
 
@@ -169,7 +172,7 @@ class Ticket extends Model {
                 => 'Permohonan Penerbitan SE telah diproses (bukan konfirmasi sertifikat telah terbit)',
             'certificate_renewed' => 'Sertifikat Elektronik berhasil diperbarui',
             'certificate_reissued' => 'Sertifikat Elektronik berhasil diterbitkan ulang',
-            default => 'Hasil belum ditetapkan'
+            default => 'Hasil belum ditetapkan',
         };
     }
 
@@ -178,7 +181,7 @@ class Ticket extends Model {
             'In Progress' => 'Diproses',
             'Done' => 'Selesai',
             'Returned' => 'Perlu Pengajuan Ulang',
-            default => 'Baru'
+            default => 'Baru',
         };
     }
 }

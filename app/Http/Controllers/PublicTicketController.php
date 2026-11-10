@@ -33,9 +33,10 @@ class PublicTicketController extends Controller {
                 ->json(
                     [
                         'status' => 'service_unavailable',
-                        'message' => 'Direktori email belum tersedia atau belum diperbarui. Silakan coba kembali nanti.'
+                        'message' =>
+                            'Direktori email belum tersedia atau belum diperbarui. Silakan coba kembali nanti.',
                     ],
-                    503
+                    503,
                 )
                 ->header('Cache-Control', 'private, no-store, max-age=0')
                 ->header('X-Robots-Tag', 'noindex, nofollow');
@@ -46,7 +47,7 @@ class PublicTicketController extends Controller {
                 ->json([
                     'status' => 'not_found',
                     'message' =>
-                        'NIK/NIP atau username email dinas belum tersedia. Coba NIP 18 digit atau hubungi Pengelola Email Dinas.'
+                        'NIK/NIP atau username email dinas belum tersedia. Coba NIP 18 digit atau hubungi Pengelola Email Dinas.',
                 ])
                 ->header('Cache-Control', 'private, no-store, max-age=0')
                 ->header('X-Robots-Tag', 'noindex, nofollow');
@@ -61,48 +62,64 @@ class PublicTicketController extends Controller {
                 'nip' => (string) ($record->nip ?? ''),
                 'jabatan' => (string) ($record->jabatan ?? ''),
                 'opd' => (string) ($record->unit_kerja ?: $record->nama_unor ?? ''),
-                'uptd' => trim((string) ($record->uptd ?? ''))
+                'uptd' => trim((string) ($record->uptd ?? '')),
             ])
             ->header('Cache-Control', 'private, no-store, max-age=0')
             ->header('X-Robots-Tag', 'noindex, nofollow');
     }
 
-    public function store(Request $request, EmailDirectoryService $directory, NewTicketEmailNotifier $notifier, ActiveTicketGuard $guard) {
+    public function store(
+        Request $request,
+        EmailDirectoryService $directory,
+        NewTicketEmailNotifier $notifier,
+        ActiveTicketGuard $guard,
+    ) {
         $data = $request->validate(
             [
-                'layanan' => ['required', Rule::in(['Reset Passphrase', 'Pembaruan', 'Pendaftaran'])],
+                'layanan' => [
+                    'required',
+                    Rule::in(['Reset Passphrase', 'Pembaruan', 'Pendaftaran']),
+                ],
                 'nama_user' => ['required', 'string', 'min:3', 'max:160'],
                 'nik' => ['required', 'regex:/\A(?:[0-9]{16}|[0-9]{18})\z/'],
                 'nip' => ['nullable', 'string', 'max:32'],
-                'no_wa' => ['required', 'string', 'regex:/\A(?:8[0-9]{8,12}|08[0-9]{8,12}|628[0-9]{8,12})\z/'],
+                'no_wa' => [
+                    'required',
+                    'string',
+                    'regex:/\A(?:8[0-9]{8,12}|08[0-9]{8,12}|628[0-9]{8,12})\z/',
+                ],
                 'opd' => ['required', 'string', 'max:180'],
                 'jabatan' => ['required', 'string', 'max:180'],
                 'keterangan' => ['nullable', 'string', 'max:2000'],
                 'persetujuan' => ['accepted'],
                 'signature_data' => ['required', 'string', 'max:240000'],
                 'submission_token' => ['required', 'uuid'],
-                'website' => ['prohibited']
+                'website' => ['prohibited'],
             ],
             [
                 'nik.regex' => 'Masukkan NIK 16 digit atau NIP 18 digit, hanya angka.',
-                'no_wa.regex' => 'Nomor WhatsApp harus angka saja, dimulai dengan 8 (9–13 digit) setelah kode +62.',
+                'no_wa.regex' =>
+                    'Nomor WhatsApp harus angka saja, dimulai dengan 8 (9–13 digit) setelah kode +62.',
                 'persetujuan.accepted' => 'Persetujuan pemrosesan data wajib dicentang.',
-                'signature_data.required' => 'Tanda tangan persetujuan wajib diisi.'
-            ]
+                'signature_data.required' => 'Tanda tangan persetujuan wajib diisi.',
+            ],
         );
         $externalId = 'direct-' . $data['submission_token'];
         if ($existing = Ticket::where('external_submission_id', $externalId)->first()) {
-            return redirect()->route('public.success')->with('submission_success_ticket', $existing->ticket_number);
+            return redirect()
+                ->route('public.success')
+                ->with('submission_success_ticket', $existing->ticket_number);
         }
         if (!$directory->available()) {
             throw ValidationException::withMessages([
-                'nik' => 'Direktori email belum siap. Silakan coba kembali nanti.'
+                'nik' => 'Direktori email belum siap. Silakan coba kembali nanti.',
             ]);
         }
         $person = $directory->findByIdentifier($data['nik']);
         if (!$person || !$person->email) {
             throw ValidationException::withMessages([
-                'nik' => 'NIK/NIP atau username email belum terdaftar. Hubungi Pengelola Email Dinas.'
+                'nik' =>
+                    'NIK/NIP atau username email belum terdaftar. Hubungi Pengelola Email Dinas.',
             ]);
         }
         // Never use email supplied by browser; the authoritative value comes from the directory.
@@ -115,14 +132,19 @@ class PublicTicketController extends Controller {
             $phone = '62' . $phone;
         }
         if (!preg_match('/\A628[0-9]{8,12}\z/', $phone)) {
-            throw ValidationException::withMessages(['no_wa' => 'Nomor WhatsApp Indonesia tidak valid.']);
+            throw ValidationException::withMessages([
+                'no_wa' => 'Nomor WhatsApp Indonesia tidak valid.',
+            ]);
         }
         if (!str_starts_with($data['signature_data'], 'data:image/png;base64,')) {
             throw ValidationException::withMessages([
-                'signature_data' => 'Tanda tangan harus berupa PNG dari kolom tanda tangan.'
+                'signature_data' => 'Tanda tangan harus berupa PNG dari kolom tanda tangan.',
             ]);
         }
-        $bytes = base64_decode(substr($data['signature_data'], strlen('data:image/png;base64,')), true);
+        $bytes = base64_decode(
+            substr($data['signature_data'], strlen('data:image/png;base64,')),
+            true,
+        );
         $image = is_string($bytes) ? @getimagesizefromstring($bytes) : false;
         if (
             !$image ||
@@ -134,18 +156,30 @@ class PublicTicketController extends Controller {
             $image[1] > 500
         ) {
             throw ValidationException::withMessages([
-                'signature_data' => 'Tanda tangan tidak valid. Silakan gambar ulang.'
+                'signature_data' => 'Tanda tangan tidak valid. Silakan gambar ulang.',
             ]);
         }
         // Only a directory-verified NIK/NIP is authoritative. The editable NIP
         // form value is NOT used as the identity of the applicant.
-        $fingerprints = $guard->fingerprints((string) ($person->nik ?? ''), (string) ($person->nip ?? ''));
+        $fingerprints = $guard->fingerprints(
+            (string) ($person->nik ?? ''),
+            (string) ($person->nip ?? ''),
+        );
         return $guard->synchronized($fingerprints, function () use (
-            $guard, $fingerprints, $externalId, $data, $person, $phone, $bytes, $notifier
+            $guard,
+            $fingerprints,
+            $externalId,
+            $data,
+            $person,
+            $phone,
+            $bytes,
+            $notifier,
         ) {
             // Recheck under the lock: two tabs or workers can submit simultaneously.
             if ($existing = Ticket::where('external_submission_id', $externalId)->first()) {
-                return redirect()->route('public.success')->with('submission_success_ticket', $existing->ticket_number);
+                return redirect()
+                    ->route('public.success')
+                    ->with('submission_success_ticket', $existing->ticket_number);
             }
             if ($active = $guard->active($fingerprints)) {
                 $guard->blocked($active, $externalId, 'direct', $data['layanan']);
@@ -156,7 +190,14 @@ class PublicTicketController extends Controller {
                 throw new \RuntimeException('Gagal menyimpan tanda tangan secara privat.');
             }
             try {
-                $ticket = DB::transaction(function () use ($data, $phone, $externalId, $person, $path, $fingerprints) {
+                $ticket = DB::transaction(function () use (
+                    $data,
+                    $phone,
+                    $externalId,
+                    $person,
+                    $path,
+                    $fingerprints,
+                ) {
                     $ticket = Ticket::create([
                         'external_submission_id' => $externalId,
                         'nama_user' => $data['nama_user'],
@@ -176,25 +217,33 @@ class PublicTicketController extends Controller {
                         'source' => 'direct',
                         'wa_verification_status' => 'unchecked',
                         'consent_accepted_at' => now(),
-                        'signature_path' => $path
+                        'signature_path' => $path,
                     ]);
                     $ticket->update([
-                        'ticket_number' => 'TTE-' . now('Asia/Jakarta')->format('Ymd') . '-' .
-                            str_pad((string) $ticket->id, 6, '0', STR_PAD_LEFT)
+                        'ticket_number' =>
+                            'TTE-' .
+                            now('Asia/Jakarta')->format('Ymd') .
+                            '-' .
+                            str_pad((string) $ticket->id, 6, '0', STR_PAD_LEFT),
                     ]);
                     return $ticket;
                 });
             } catch (\Throwable $e) {
                 Storage::disk('local')->delete($path);
-                if ($e instanceof QueryException &&
-                    ($existing = Ticket::where('external_submission_id', $externalId)->first())) {
-                    return redirect()->route('public.success')
+                if (
+                    $e instanceof QueryException &&
+                    ($existing = Ticket::where('external_submission_id', $externalId)->first())
+                ) {
+                    return redirect()
+                        ->route('public.success')
                         ->with('submission_success_ticket', $existing->ticket_number);
                 }
                 throw $e;
             }
             $notifier->notify($ticket);
-            return redirect()->route('public.success')->with('submission_success_ticket', $ticket->ticket_number);
+            return redirect()
+                ->route('public.success')
+                ->with('submission_success_ticket', $ticket->ticket_number);
         });
     }
 
@@ -206,6 +255,9 @@ class PublicTicketController extends Controller {
         }
         return response()
             ->view('public.success', compact('ticketNumber', 'activeRequestNotice'))
-            ->withHeaders(['Cache-Control' => 'no-store, private', 'X-Robots-Tag' => 'noindex, nofollow']);
+            ->withHeaders([
+                'Cache-Control' => 'no-store, private',
+                'X-Robots-Tag' => 'noindex, nofollow',
+            ]);
     }
 }

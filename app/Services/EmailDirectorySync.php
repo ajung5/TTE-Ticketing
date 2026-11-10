@@ -16,7 +16,7 @@ class EmailDirectorySync {
         }
         $header = array_map(
             fn($name) => mb_strtolower(trim(str_replace("\xEF\xBB\xBF", '', (string) $name))),
-            $rows[0]
+            $rows[0],
         );
         if (!in_array('email gov', $header, true)) {
             throw new \RuntimeException('Kolom wajib tidak ditemukan: email gov');
@@ -25,7 +25,9 @@ class EmailDirectorySync {
             throw new \RuntimeException('Spreadsheet harus memiliki kolom NIK atau NIP.');
         }
         $index = array_flip($header);
-        $get = static fn(array $row, string $key) => trim((string) ($row[$index[$key] ?? -1] ?? ''));
+        $get = static fn(array $row, string $key) => trim(
+            (string) ($row[$index[$key] ?? -1] ?? ''),
+        );
         $records = [];
         $seenNip = [];
 
@@ -38,11 +40,15 @@ class EmailDirectorySync {
             }
 
             if ($nik !== '' && !preg_match('/\A[0-9]{16}\z/', $nik)) {
-                throw new \RuntimeException('NIK pada baris ' . ($line + 2) . ' harus berupa teks 16 digit.');
+                throw new \RuntimeException(
+                    'NIK pada baris ' . ($line + 2) . ' harus berupa teks 16 digit.',
+                );
             }
             $nipValid = preg_match('/\A[0-9]{18}\z/', $nip) === 1;
             if ($nik === '' && !$nipValid) {
-                throw new \RuntimeException('Baris ' . ($line + 2) . ' harus memiliki NIK 16 digit atau NIP 18 digit.');
+                throw new \RuntimeException(
+                    'Baris ' . ($line + 2) . ' harus memiliki NIK 16 digit atau NIP 18 digit.',
+                );
             }
             if (strlen($nip) > 32) {
                 throw new \RuntimeException('NIP terlalu panjang pada baris ' . ($line + 2) . '.');
@@ -54,13 +60,16 @@ class EmailDirectorySync {
                 $seenNip[$nip] = true;
             }
 
-            $hash = $nik !== '' ? $this->directory->nikHash($nik) : $this->directory->nipOnlyHash($nip);
+            $hash =
+                $nik !== '' ? $this->directory->nikHash($nik) : $this->directory->nipOnlyHash($nip);
             if (isset($records[$hash])) {
                 throw new \RuntimeException('NIK/NIP duplikat pada baris ' . ($line + 2) . '.');
             }
             $email = $this->directory->normalizedEmail($emailRaw);
             if ($emailRaw !== '' && !$email) {
-                throw new \RuntimeException('Email Gov tidak valid pada baris ' . ($line + 2) . '.');
+                throw new \RuntimeException(
+                    'Email Gov tidak valid pada baris ' . ($line + 2) . '.',
+                );
             }
 
             $records[$hash] = [
@@ -74,7 +83,7 @@ class EmailDirectorySync {
                 'unit_kerja' => $get($row, 'unit kerja') ?: null,
                 'uptd' => in_array($get($row, 'uptd'), ['', '-'], true) ? null : $get($row, 'uptd'),
                 'status_pengguna' => $get($row, 'status pengguna') ?: null,
-                'status_sertifikat' => $get($row, 'status sertifikat') ?: null
+                'status_sertifikat' => $get($row, 'status sertifikat') ?: null,
             ];
         }
         if ($records === []) {
@@ -85,11 +94,11 @@ class EmailDirectorySync {
             foreach ($records as $record) {
                 EmailDirectory::updateOrCreate(
                     ['nik_hash' => $record['nik_hash']],
-                    $record + ['sync_batch' => $batch, 'synced_at' => now()]
+                    $record + ['sync_batch' => $batch, 'synced_at' => now()],
                 );
                 EmailDirectory::where('nik_hash', $record['nik_hash'])->update([
                     'sync_batch' => $batch,
-                    'synced_at' => now()
+                    'synced_at' => now(),
                 ]);
             }
             EmailDirectory::where('sync_batch', '!=', $batch)->delete();

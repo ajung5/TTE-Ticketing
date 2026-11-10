@@ -38,12 +38,14 @@ class TteBaselineSeeder extends Seeder {
             foreach ($pending as $account) {
                 if (User::query()->where('role', $account['role'])->exists()) {
                     throw new RuntimeException(
-                        'Role ' . $account['role'] . ' telah dibuat oleh proses lain. Ulangi seeder.'
+                        'Role ' .
+                            $account['role'] .
+                            ' telah dibuat oleh proses lain. Ulangi seeder.',
                     );
                 }
                 if (User::withTrashed()->where('email', $account['email'])->exists()) {
                     throw new RuntimeException(
-                        'Email sudah digunakan atau pernah dinonaktifkan. Tidak diaktifkan otomatis.'
+                        'Email sudah digunakan atau pernah dinonaktifkan. Tidak diaktifkan otomatis.',
                     );
                 }
                 User::create([
@@ -51,7 +53,7 @@ class TteBaselineSeeder extends Seeder {
                     'email' => $account['email'],
                     'role' => $account['role'],
                     'initials' => $account['initials'],
-                    'password' => Hash::make($account['password'])
+                    'password' => Hash::make($account['password']),
                 ]);
             }
 
@@ -59,7 +61,9 @@ class TteBaselineSeeder extends Seeder {
                 !User::query()->where('role', 'admin')->exists() ||
                 !User::query()->where('role', 'verifier')->exists()
             ) {
-                throw new RuntimeException('Baseline memerlukan satu admin dan satu verifikator aktif.');
+                throw new RuntimeException(
+                    'Baseline memerlukan satu admin dan satu verifikator aktif.',
+                );
             }
             $this->call(WaTemplatePresetsSeeder::class);
         });
@@ -71,38 +75,56 @@ class TteBaselineSeeder extends Seeder {
                 User::where('role', 'verifier')->count() .
                 ' verifikator, ' .
                 WaMessageTemplate::count() .
-                ' preset WA.'
+                ' preset WA.',
         );
-        $this->command?->info('Akun lama dan password tidak diubah. Tidak ada password di .env atau output terminal.');
+        $this->command?->info(
+            'Akun lama dan password tidak diubah. Tidak ada password di .env atau output terminal.',
+        );
         $this->command?->info('Tiket, survei, direktori, dan template WhatsApp kustom tetap utuh.');
     }
 
     /** @return array{role:string,name:string,email:string,initials:string,password:string} */
-    private function promptAccount(string $role, string $defaultName, string $defaultInitials): array {
+    private function promptAccount(
+        string $role,
+        string $defaultName,
+        string $defaultInitials,
+    ): array {
         if ($this->command === null) {
             throw new RuntimeException(
                 'Akun awal belum ada. Jalankan php artisan db:seed --class=DatabaseSeeder --force ' .
-                    'dari terminal interaktif; tidak menggunakan kredensial .env.'
+                    'dari terminal interaktif; tidak menggunakan kredensial .env.',
             );
         }
 
-        $this->command->line('Provisioning akun ' . ($role === 'admin' ? 'ADMIN' : 'VERIFIKATOR') . '.');
+        $this->command->line(
+            'Provisioning akun ' . ($role === 'admin' ? 'ADMIN' : 'VERIFIKATOR') . '.',
+        );
         $email = strtolower(trim((string) $this->command->ask('Email untuk ' . $role)));
         if (strlen($email) > 255 || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            throw new RuntimeException('Email tidak valid. Gunakan terminal interaktif (tanpa --no-interaction).');
+            throw new RuntimeException(
+                'Email tidak valid. Gunakan terminal interaktif (tanpa --no-interaction).',
+            );
         }
         if (User::withTrashed()->where('email', $email)->exists()) {
-            throw new RuntimeException('Email tersebut sudah ada, termasuk akun nonaktif. Tidak ditimpa.');
+            throw new RuntimeException(
+                'Email tersebut sudah ada, termasuk akun nonaktif. Tidak ditimpa.',
+            );
         }
 
         $name = trim((string) $this->command->ask('Nama akun ' . $role, $defaultName));
         $initials = trim((string) $this->command->ask('Inisial ' . $role, $defaultInitials));
-        if (mb_strlen($name) < 3 || mb_strlen($name) > 160 || !preg_match('/\A[a-zA-Z0-9]{1,12}\z/D', $initials)) {
-            throw new RuntimeException('Nama (3-160 karakter) atau inisial (1-12 alfanumerik) tidak valid.');
+        if (
+            mb_strlen($name) < 3 ||
+            mb_strlen($name) > 160 ||
+            !preg_match('/\A[a-zA-Z0-9]{1,12}\z/D', $initials)
+        ) {
+            throw new RuntimeException(
+                'Nama (3-160 karakter) atau inisial (1-12 alfanumerik) tidak valid.',
+            );
         }
 
         $password = (string) $this->command->secret(
-            'Password ' . $role . ' (minimal 12 karakter, campuran huruf/angka/simbol)'
+            'Password ' . $role . ' (minimal 12 karakter, campuran huruf/angka/simbol)',
         );
         $confirmation = (string) $this->command->secret('Ulangi password ' . $role);
         if (!hash_equals($password, $confirmation)) {
@@ -117,7 +139,7 @@ class TteBaselineSeeder extends Seeder {
             !preg_match('/[^a-zA-Z0-9]/', $password)
         ) {
             throw new RuntimeException(
-                'Password harus 12-72 byte dan memiliki huruf besar, huruf kecil, angka, serta simbol.'
+                'Password harus 12-72 byte dan memiliki huruf besar, huruf kecil, angka, serta simbol.',
             );
         }
 
@@ -126,7 +148,7 @@ class TteBaselineSeeder extends Seeder {
             'name' => $name,
             'email' => $email,
             'initials' => $initials,
-            'password' => $password
+            'password' => $password,
         ];
     }
 }

@@ -10,14 +10,23 @@ use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
-function v61Rows(): array {
+function v61Rows(): array
+{
     return [
         ['NIK', 'NIP', 'Email Gov', 'NAMA', 'JABATAN', 'UNIT KERJA'],
-        ['3273010101010001', '198901012020011001', 'lama@subang.go.id', 'Pegawai V61', 'Analis', 'Diskominfo']
+        [
+            '3273010101010001',
+            '198901012020011001',
+            'lama@subang.go.id',
+            'Pegawai V61',
+            'Analis',
+            'Diskominfo',
+        ],
     ];
 }
 
-function v61Payload(?string $token = null): array {
+function v61Payload(?string $token = null): array
+{
     return [
         'layanan' => 'Reset Passphrase',
         'nama_user' => 'Pegawai V61',
@@ -28,30 +37,36 @@ function v61Payload(?string $token = null): array {
         'jabatan' => 'Analis',
         'persetujuan' => '1',
         'submission_token' => $token ?? (string) Str::uuid(),
-        'signature_data' => 'data:image/png;base64,' .
-            base64_encode(file_get_contents(base_path('tests/Fixtures/signature-test.png')))
+        'signature_data' =>
+            'data:image/png;base64,' .
+            base64_encode(file_get_contents(base_path('tests/Fixtures/signature-test.png'))),
     ];
 }
 
-it('prevents a second active request, records only one repeat, and shows a generic notice', function () {
-    Storage::fake('local');
-    app(EmailDirectorySync::class)->import(v61Rows());
-    $this->post(route('public.submit'), v61Payload())->assertRedirect(route('public.success'));
-    $first = Ticket::firstOrFail();
-    $second = v61Payload();
-    $this->post(route('public.submit'), $second)->assertRedirect(route('public.success'));
-    $this->get(route('public.success'))
-        ->assertOk()
-        ->assertSee('PERMOHONAN SEBELUMNYA MASIH AKTIF')
-        ->assertDontSee($first->ticket_number);
-    expect(Ticket::count())->toBe(1);
-    expect($first->fresh()->duplicate_attempts)->toBe(1);
-    expect($first->fresh()->last_duplicate_attempt_at)->not->toBeNull();
-    expect($first->fresh()->activities()->where('action', 'duplicate_request_blocked')->count())->toBe(1);
-    $this->post(route('public.submit'), $second)->assertRedirect(route('public.success'));
-    expect($first->fresh()->duplicate_attempts)->toBe(1);
-    expect(Ticket::count())->toBe(1);
-});
+it(
+    'prevents a second active request, records only one repeat, and shows a generic notice',
+    function () {
+        Storage::fake('local');
+        app(EmailDirectorySync::class)->import(v61Rows());
+        $this->post(route('public.submit'), v61Payload())->assertRedirect(route('public.success'));
+        $first = Ticket::firstOrFail();
+        $second = v61Payload();
+        $this->post(route('public.submit'), $second)->assertRedirect(route('public.success'));
+        $this->get(route('public.success'))
+            ->assertOk()
+            ->assertSee('PERMOHONAN SEBELUMNYA MASIH AKTIF')
+            ->assertDontSee($first->ticket_number);
+        expect(Ticket::count())->toBe(1);
+        expect($first->fresh()->duplicate_attempts)->toBe(1);
+        expect($first->fresh()->last_duplicate_attempt_at)->not->toBeNull();
+        expect(
+            $first->fresh()->activities()->where('action', 'duplicate_request_blocked')->count(),
+        )->toBe(1);
+        $this->post(route('public.submit'), $second)->assertRedirect(route('public.success'));
+        expect($first->fresh()->duplicate_attempts)->toBe(1);
+        expect(Ticket::count())->toBe(1);
+    },
+);
 
 it('checks active identity by NIP from the directory, not a browser edited NIP field', function () {
     Storage::fake('local');
@@ -83,34 +98,51 @@ it('permits a new application after the prior ticket is Done or Returned', funct
     expect(Ticket::count())->toBe(3);
 });
 
-it('records an AMS email correction by the owning verifier, not by admin or other verifiers', function () {
-    Storage::fake('local');
-    app(EmailDirectorySync::class)->import(v61Rows());
-    $this->post(route('public.submit'), v61Payload())->assertRedirect();
-    $ticket = Ticket::firstOrFail();
-    $owner = User::factory()->create(['role' => 'verifier']);
-    $other = User::factory()->create(['role' => 'verifier']);
-    $admin = User::factory()->create(['role' => 'admin']);
-    $payload = [
-        'email' => 'baru@subang.go.id',
-        'reason' => 'Email hasil pemeriksaan AMS berbeda dari direktori.',
-        'ams_confirmed' => '1'
-    ];
-    $this->actingAs($admin)->patch(route('tickets.email.update', $ticket), $payload)->assertForbidden();
-    $this->actingAs($other)->patch(route('tickets.email.update', $ticket), $payload)->assertForbidden();
-    $this->actingAs($owner)->patch(route('tickets.email.update', $ticket), $payload)->assertForbidden();
-    $this->post(route('tickets.claim', $ticket))->assertRedirect();
-    $this->patch(route('tickets.email.update', $ticket), $payload)->assertRedirect();
-    $updated = $ticket->fresh();
-    expect($updated->email)->toBe('baru@subang.go.id')
-        ->and($updated->directory_email)->toBe('lama@subang.go.id')
-        ->and($updated->email_corrected_by)->toBe($owner->id);
-    $audit = TicketEmailChange::firstOrFail();
-    expect($audit->old_email)->toBe('lama@subang.go.id')
-        ->and($audit->new_email)->toBe('baru@subang.go.id')
-        ->and($audit->actor_id)->toBe($owner->id);
-    expect($updated->activities()->where('action', 'email_corrected_from_ams')->count())->toBe(1);
-});
+it(
+    'records an AMS email correction by the owning verifier, not by admin or other verifiers',
+    function () {
+        Storage::fake('local');
+        app(EmailDirectorySync::class)->import(v61Rows());
+        $this->post(route('public.submit'), v61Payload())->assertRedirect();
+        $ticket = Ticket::firstOrFail();
+        $owner = User::factory()->create(['role' => 'verifier']);
+        $other = User::factory()->create(['role' => 'verifier']);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $payload = [
+            'email' => 'baru@subang.go.id',
+            'reason' => 'Email hasil pemeriksaan AMS berbeda dari direktori.',
+            'ams_confirmed' => '1',
+        ];
+        $this->actingAs($admin)
+            ->patch(route('tickets.email.update', $ticket), $payload)
+            ->assertForbidden();
+        $this->actingAs($other)
+            ->patch(route('tickets.email.update', $ticket), $payload)
+            ->assertForbidden();
+        $this->actingAs($owner)
+            ->patch(route('tickets.email.update', $ticket), $payload)
+            ->assertForbidden();
+        $this->post(route('tickets.claim', $ticket))->assertRedirect();
+        $this->patch(route('tickets.email.update', $ticket), $payload)->assertRedirect();
+        $updated = $ticket->fresh();
+        expect($updated->email)
+            ->toBe('baru@subang.go.id')
+            ->and($updated->directory_email)
+            ->toBe('lama@subang.go.id')
+            ->and($updated->email_corrected_by)
+            ->toBe($owner->id);
+        $audit = TicketEmailChange::firstOrFail();
+        expect($audit->old_email)
+            ->toBe('lama@subang.go.id')
+            ->and($audit->new_email)
+            ->toBe('baru@subang.go.id')
+            ->and($audit->actor_id)
+            ->toBe($owner->id);
+        expect($updated->activities()->where('action', 'email_corrected_from_ams')->count())->toBe(
+            1,
+        );
+    },
+);
 
 it('rejects non-government emails, unconfirmed corrections, and completed tickets', function () {
     Storage::fake('local');
@@ -120,17 +152,19 @@ it('rejects non-government emails, unconfirmed corrections, and completed ticket
     $owner = User::factory()->create(['role' => 'verifier']);
     $this->actingAs($owner)->post(route('tickets.claim', $ticket))->assertRedirect();
     $this->patch(route('tickets.email.update', $ticket), [
-        'email' => 'gmail@example.com', 'reason' => 'Pemeriksaan AMS menunjukkan email berbeda.',
-        'ams_confirmed' => '1'
+        'email' => 'gmail@example.com',
+        'reason' => 'Pemeriksaan AMS menunjukkan email berbeda.',
+        'ams_confirmed' => '1',
     ])->assertSessionHasErrors('email');
     $this->patch(route('tickets.email.update', $ticket), [
-        'email' => 'baru@subang.go.id', 'reason' => 'Pemeriksaan AMS menunjukkan email berbeda.'
+        'email' => 'baru@subang.go.id',
+        'reason' => 'Pemeriksaan AMS menunjukkan email berbeda.',
     ])->assertSessionHasErrors('ams_confirmed');
     expect($ticket->fresh()->email)->toBe('lama@subang.go.id');
     $ticket->update(['status' => 'Done']);
     $this->patch(route('tickets.email.update', $ticket), [
-        'email' => 'baru@subang.go.id', 'reason' => 'Pemeriksaan AMS menunjukkan email berbeda.',
-        'ams_confirmed' => '1'
+        'email' => 'baru@subang.go.id',
+        'reason' => 'Pemeriksaan AMS menunjukkan email berbeda.',
+        'ams_confirmed' => '1',
     ])->assertStatus(409);
 });
-

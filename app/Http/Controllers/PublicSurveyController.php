@@ -27,7 +27,7 @@ class PublicSurveyController extends Controller {
             'clarity_rating' => ['required', 'integer', 'between:1,5'],
             'speed_rating' => ['required', 'integer', 'between:1,5'],
             'feedback' => ['nullable', 'string', 'max:1000'],
-            'website' => ['prohibited']
+            'website' => ['prohibited'],
         ]);
         if (ServiceSurveyResponse::where('ticket_id', $ticket->id)->exists()) {
             return redirect()->route('public.survey.thanks');
@@ -40,7 +40,7 @@ class PublicSurveyController extends Controller {
                 'staff_rating' => $data['staff_rating'],
                 'clarity_rating' => $data['clarity_rating'],
                 'speed_rating' => $data['speed_rating'],
-                'feedback' => trim((string) ($data['feedback'] ?? '')) ?: null
+                'feedback' => trim((string) ($data['feedback'] ?? '')) ?: null,
             ]);
         } catch (QueryException $e) {
             // Unique(ticket_id) menangani dua submit bersamaan. Error database lain tetap diteruskan.

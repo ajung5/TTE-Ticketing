@@ -45,7 +45,7 @@ Petugas: {nama_verifikator}
 
 Jangan membagikan passphrase, OTP, atau password.',
             'service_mismatch' =>
-                "Yth. Bapak/Ibu {nama_pemohon},\n\nJenis layanan {layanan_diajukan} belum sesuai dengan kondisi akun. Setelah klarifikasi, layanan yang disarankan: {layanan_disarankan}. Ajukan melalui {form_url}.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}"
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nJenis layanan {layanan_diajukan} belum sesuai dengan kondisi akun. Setelah klarifikasi, layanan yang disarankan: {layanan_disarankan}. Ajukan melalui {form_url}.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
         ];
 
         // Validasi seluruh preset SEBELUM ada perubahan database.
@@ -64,7 +64,7 @@ Jangan membagikan passphrase, OTP, atau password.',
                     'event_type' => $event,
                     'body' => $messages[$event],
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
         });

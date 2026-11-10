@@ -46,43 +46,43 @@ return [
             'timeout' => null,
             'local_domain' => env(
                 'MAIL_EHLO_DOMAIN',
-                parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)
-            )
+                parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST),
+            ),
         ],
         'ses' => [
-            'transport' => 'ses'
+            'transport' => 'ses',
         ],
         'postmark' => [
-            'transport' => 'postmark'
+            'transport' => 'postmark',
             // 'message_stream_id' => env('POSTMARK_MESSAGE_STREAM_ID'),
             // 'client' => [
             //     'timeout' => 5,
             // ],
         ],
         'resend' => [
-            'transport' => 'resend'
+            'transport' => 'resend',
         ],
         'sendmail' => [
             'transport' => 'sendmail',
-            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i')
+            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
         ],
         'log' => [
             'transport' => 'log',
-            'channel' => env('MAIL_LOG_CHANNEL')
+            'channel' => env('MAIL_LOG_CHANNEL'),
         ],
         'array' => [
-            'transport' => 'array'
+            'transport' => 'array',
         ],
         'failover' => [
             'transport' => 'failover',
             'mailers' => ['smtp', 'log'],
-            'retry_after' => 60
+            'retry_after' => 60,
         ],
         'roundrobin' => [
             'transport' => 'roundrobin',
             'mailers' => ['ses', 'postmark'],
-            'retry_after' => 60
-        ]
+            'retry_after' => 60,
+        ],
     ],
 
     /*
@@ -98,6 +98,6 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel'))
-    ]
+        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
+    ],
 ];

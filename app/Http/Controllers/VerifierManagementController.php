@@ -13,7 +13,11 @@ use Illuminate\Validation\ValidationException;
 
 class VerifierManagementController extends Controller {
     private function authorizeAdmin(Request $request): void {
-        abort_unless($request->user()?->isAdmin(), 403, 'Hanya admin yang dapat mengelola verifikator.');
+        abort_unless(
+            $request->user()?->isAdmin(),
+            403,
+            'Hanya admin yang dapat mengelola verifikator.',
+        );
     }
 
     private function authorizeVerifier(User $verifier): void {
@@ -31,13 +35,15 @@ class VerifierManagementController extends Controller {
             'target_type' => 'user',
             'target_id' => $verifier->id,
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
     }
 
     private function expireDatabaseSessions(User $verifier): void {
         if (config('session.driver') === 'database') {
-            DB::table(config('session.table', 'sessions'))->where('user_id', $verifier->id)->delete();
+            DB::table(config('session.table', 'sessions'))
+                ->where('user_id', $verifier->id)
+                ->delete();
         }
     }
 
@@ -49,7 +55,7 @@ class VerifierManagementController extends Controller {
         $counts = Ticket::query()
             ->select('claimed_by')
             ->selectRaw(
-                "COUNT(*) as total, SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as active_count, SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count"
+                "COUNT(*) as total, SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as active_count, SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count",
             )
             ->whereNotNull('claimed_by')
             ->groupBy('claimed_by')
@@ -67,9 +73,14 @@ class VerifierManagementController extends Controller {
 
         $data = $request->validate([
             'name' => ['required', 'string', 'min:3', 'max:160'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->whereNull('deleted_at')],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->whereNull('deleted_at'),
+            ],
             'initials' => ['nullable', 'alpha_num', 'max:12'],
-            'password' => ['required', 'confirmed', $this->passwordRule()]
+            'password' => ['required', 'confirmed', $this->passwordRule()],
         ]);
 
         $reactivated = false;
@@ -89,13 +100,17 @@ class VerifierManagementController extends Controller {
                 'email' => $data['email'],
                 'initials' => strtoupper((string) ($data['initials'] ?? '')) ?: null,
                 'role' => 'verifier',
-                'password' => $data['password'] // hashed oleh cast User
+                'password' => $data['password'], // hashed oleh cast User
             ]);
             // remember_token tidak ada di fillable, tetapkan secara eksplisit.
             $verifier->remember_token = Str::random(60);
             $verifier->save();
             $this->expireDatabaseSessions($verifier);
-            $this->audit($request, $verifier, $reactivated ? 'admin_reactivated_verifier' : 'admin_created_verifier');
+            $this->audit(
+                $request,
+                $verifier,
+                $reactivated ? 'admin_reactivated_verifier' : 'admin_created_verifier',
+            );
         });
 
         return redirect()
@@ -104,7 +119,7 @@ class VerifierManagementController extends Controller {
                 'success',
                 $reactivated
                     ? 'Akun verifikator lama telah diaktifkan kembali.'
-                    : 'Akun verifikator berhasil ditambahkan.'
+                    : 'Akun verifikator berhasil ditambahkan.',
             );
     }
 
@@ -115,9 +130,14 @@ class VerifierManagementController extends Controller {
 
         $data = $request->validate([
             'name' => ['required', 'string', 'min:3', 'max:160'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($verifier->id)],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($verifier->id),
+            ],
             'initials' => ['nullable', 'alpha_num', 'max:12'],
-            'password' => ['nullable', 'confirmed', $this->passwordRule()]
+            'password' => ['nullable', 'confirmed', $this->passwordRule()],
         ]);
 
         DB::transaction(function () use ($request, $verifier, $data) {
@@ -125,7 +145,7 @@ class VerifierManagementController extends Controller {
             $verifier->fill([
                 'name' => trim($data['name']),
                 'email' => $data['email'],
-                'initials' => strtoupper((string) ($data['initials'] ?? '')) ?: null
+                'initials' => strtoupper((string) ($data['initials'] ?? '')) ?: null,
             ]);
             if (!empty($data['password'])) {
                 $verifier->password = $data['password']; // hashed otomatis oleh model
@@ -138,7 +158,9 @@ class VerifierManagementController extends Controller {
             $this->audit(
                 $request,
                 $verifier,
-                empty($data['password']) ? 'admin_updated_verifier' : 'admin_changed_verifier_password'
+                empty($data['password'])
+                    ? 'admin_updated_verifier'
+                    : 'admin_changed_verifier_password',
             );
         });
 
@@ -146,7 +168,8 @@ class VerifierManagementController extends Controller {
             ->route('admin.verifiers.index')
             ->with(
                 'success',
-                'Profil verifikator berhasil diperbarui' . (empty($data['password']) ? '.' : ' dan password diganti.')
+                'Profil verifikator berhasil diperbarui' .
+                    (empty($data['password']) ? '.' : ' dan password diganti.'),
             );
     }
 
@@ -156,10 +179,12 @@ class VerifierManagementController extends Controller {
 
         DB::transaction(function () use ($request, $verifier) {
             $verifier = User::whereKey($verifier->id)->lockForUpdate()->firstOrFail();
-            if (Ticket::where('claimed_by', $verifier->id)->where('status', 'In Progress')->exists()) {
+            if (
+                Ticket::where('claimed_by', $verifier->id)->where('status', 'In Progress')->exists()
+            ) {
                 throw ValidationException::withMessages([
                     'verifier' =>
-                        'Verifikator masih menangani tiket aktif. Selesaikan atau alihkan tiket tersebut sebelum menghapus akun.'
+                        'Verifikator masih menangani tiket aktif. Selesaikan atau alihkan tiket tersebut sebelum menghapus akun.',
                 ]);
             }
 
@@ -171,6 +196,9 @@ class VerifierManagementController extends Controller {
 
         return redirect()
             ->route('admin.verifiers.index')
-            ->with('success', 'Akun verifikator dihapus dari daftar aktif; riwayat penanganan tetap tersimpan.');
+            ->with(
+                'success',
+                'Akun verifikator dihapus dari daftar aktif; riwayat penanganan tetap tersimpan.',
+            );
     }
 }

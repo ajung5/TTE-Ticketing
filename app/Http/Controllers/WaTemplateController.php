@@ -9,7 +9,11 @@ use Illuminate\Validation\ValidationException;
 
 class WaTemplateController extends Controller {
     private function check(Request $request): void {
-        abort_unless($request->user()?->isAdmin(), 403, 'Hanya admin yang dapat mengelola preset WhatsApp.');
+        abort_unless(
+            $request->user()?->isAdmin(),
+            403,
+            'Hanya admin yang dapat mengelola preset WhatsApp.',
+        );
     }
 
     public function index(Request $request) {
@@ -17,7 +21,8 @@ class WaTemplateController extends Controller {
         $templates = WaMessageTemplate::query()
             ->get()
             ->filter(function (WaMessageTemplate $template) {
-                return (WaMessageTemplate::TEMPLATE_SERVICE_CODES[$template->event_type] ?? null) ===
+                return (WaMessageTemplate::TEMPLATE_SERVICE_CODES[$template->event_type] ??
+                    null) ===
                     $template->service_code;
             })
             ->keyBy('event_type');
@@ -27,22 +32,25 @@ class WaTemplateController extends Controller {
     public function update(Request $request, WaMessageTemplate $template) {
         $this->check($request);
         abort_unless(
-            (WaMessageTemplate::TEMPLATE_SERVICE_CODES[$template->event_type] ?? null) === $template->service_code,
+            (WaMessageTemplate::TEMPLATE_SERVICE_CODES[$template->event_type] ?? null) ===
+                $template->service_code,
             404,
-            'Preset tidak aktif.'
+            'Preset tidak aktif.',
         );
         $data = $request->validate(['body' => ['required', 'string', 'min:40', 'max:3500']]);
         $body = trim($data['body']);
         foreach (['{nama_pemohon}', '{nomor_tiket}', '{nama_verifikator}'] as $required) {
             if (!str_contains($body, $required)) {
-                throw ValidationException::withMessages(['body' => "Preset harus menyertakan {$required}."]);
+                throw ValidationException::withMessages([
+                    'body' => "Preset harus menyertakan {$required}.",
+                ]);
             }
         }
         preg_match_all('/\{[^{}]+\}/u', $body, $matches);
         $unknown = array_diff($matches[0], WaMessageTemplate::PLACEHOLDERS);
         if ($unknown !== []) {
             throw ValidationException::withMessages([
-                'body' => 'Placeholder tidak dikenal: ' . implode(', ', array_unique($unknown))
+                'body' => 'Placeholder tidak dikenal: ' . implode(', ', array_unique($unknown)),
             ]);
         }
         DB::transaction(function () use ($template, $request, $body) {
@@ -53,9 +61,11 @@ class WaTemplateController extends Controller {
                 'target_type' => 'wa_message_template',
                 'target_id' => $template->id,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         });
-        return redirect()->route('admin.templates.index')->with('success', 'Preset WhatsApp berhasil disimpan.');
+        return redirect()
+            ->route('admin.templates.index')
+            ->with('success', 'Preset WhatsApp berhasil disimpan.');
     }
 }

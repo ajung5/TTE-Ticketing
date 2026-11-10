@@ -13,14 +13,20 @@ class TicketNextAction {
         bool $confirmed,
         bool $ready,
         ?WaNotification $serviceNotice,
-        ?WaNotification $finalNotice
+        ?WaNotification $finalNotice,
     ): array {
-        $action = static fn(string $title, string $description, ?string $target, string $button, int $step): array => [
+        $action = static fn(
+            string $title,
+            string $description,
+            ?string $target,
+            string $button,
+            int $step,
+        ): array => [
             'title' => $title,
             'description' => $description,
             'target' => $target,
             'button' => $button,
-            'step' => $step
+            'step' => $step,
         ];
 
         if ($ticket->status === 'Open') {
@@ -29,7 +35,7 @@ class TicketNextAction {
                 'Tiket belum memiliki penanggung jawab. Setelah diambil, lakukan pemeriksaan AMS.',
                 '#tte-ticket-workflow',
                 'Ambil tiket',
-                1
+                1,
             );
         }
         if ($ticket->status === 'Returned') {
@@ -38,7 +44,7 @@ class TicketNextAction {
                 'Permohonan lama sudah dikembalikan dan tidak dihitung sebagai layanan selesai.',
                 null,
                 '',
-                4
+                4,
             );
         }
         if ($ticket->status === 'Done') {
@@ -48,7 +54,7 @@ class TicketNextAction {
                     'Pesan akhir beserta tautan survei telah dikonfirmasi oleh petugas.',
                     '#tte-final-notification',
                     'Lihat notifikasi akhir',
-                    4
+                    4,
                 );
             }
             return $finalNotice?->opened_at
@@ -57,14 +63,14 @@ class TicketNextAction {
                     'Setelah benar-benar mengirim WhatsApp, lakukan konfirmasi manual.',
                     '#tte-final-notification',
                     'Konfirmasi pesan',
-                    4
+                    4,
                 )
                 : $action(
                     'Kirim notifikasi selesai dan survei',
                     'Tiket sudah selesai. Kirim pesan hasil layanan dan tautan survei ke pemohon.',
                     '#tte-final-notification',
                     'Buka notifikasi akhir',
-                    4
+                    4,
                 );
         }
         if ($event === null) {
@@ -73,7 +79,7 @@ class TicketNextAction {
                 'Mulai dari status aktivasi akun; tahapan berikutnya akan muncul sesuai hasil pemeriksaan.',
                 '#tte-ams-check',
                 'Mulai pemeriksaan',
-                1
+                1,
             );
         }
         if ($event === 'ready_for_completion' && $ready) {
@@ -82,7 +88,7 @@ class TicketNextAction {
                 'Hasil pemeriksaan ulang menunjukkan sertifikat aktif. Pastikan hasil aktual sebelum menutup tiket.',
                 '#tte-ticket-workflow',
                 'Lanjut ke penyelesaian',
-                3
+                3,
             );
         }
         if ($serviceNotice?->opened_at && !$confirmed) {
@@ -91,7 +97,7 @@ class TicketNextAction {
                 'Tautan sudah dibuka. Setelah pesan benar-benar dikirim, klik konfirmasi manual.',
                 '#tte-service-notification',
                 'Lihat konfirmasi pesan',
-                2
+                2,
             );
         }
         if (!$confirmed) {
@@ -100,7 +106,7 @@ class TicketNextAction {
                 'Pesan sudah disiapkan sesuai kondisi pemeriksaan terakhir. Periksa isi pesan sebelum membuka WhatsApp.',
                 '#tte-service-notification',
                 'Lihat pesan WhatsApp',
-                2
+                2,
             );
         }
         if ($ready && in_array($event, ['reset', 'renewal', 'registration'], true)) {
@@ -109,7 +115,7 @@ class TicketNextAction {
                 'Pastikan hasil pelayanan aktual benar sebelum menutup tiket.',
                 '#tte-ticket-workflow',
                 'Lanjut ke penyelesaian',
-                3
+                3,
             );
         }
         if ($event === 'registration' && $ticket->layanan === 'Pendaftaran') {
@@ -118,7 +124,7 @@ class TicketNextAction {
                 'Konfirmasi notifikasi Pendaftaran Diproses menutup tiket secara administratif, bukan bukti sertifikat terbit.',
                 '#tte-ticket-workflow',
                 'Lihat hasil',
-                3
+                3,
             );
         }
         if (in_array($event, ['service_mismatch', 'issuance_required'], true)) {
@@ -127,7 +133,7 @@ class TicketNextAction {
                 'Pesan koreksi sudah dikonfirmasi; pengembalian hanya dilakukan jika proses tidak dapat dilanjutkan pada tiket ini.',
                 '#tte-ticket-workflow',
                 'Lihat pengembalian',
-                3
+                3,
             );
         }
         return $action(
@@ -135,7 +141,7 @@ class TicketNextAction {
             'Notifikasi tindak lanjut sudah dikonfirmasi. Periksa perkembangan akun/sertifikat menggunakan tiket yang sama.',
             '#tte-ams-check',
             'Pemeriksaan ulang',
-            3
+            3,
         );
     }
 }

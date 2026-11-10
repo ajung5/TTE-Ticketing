@@ -9,7 +9,10 @@ use Illuminate\Support\Facades\URL;
 
 class WhatsAppMessage {
     public function forServiceTicket(Ticket $ticket, string $event): string {
-        if (!array_key_exists($event, WaMessageTemplate::TEMPLATE_SERVICE_CODES) || $event === 'completed') {
+        if (
+            !array_key_exists($event, WaMessageTemplate::TEMPLATE_SERVICE_CODES) ||
+            $event === 'completed'
+        ) {
             throw new \InvalidArgumentException('Jenis notifikasi tidak valid.');
         }
         return $this->render($ticket, $event);
@@ -28,7 +31,7 @@ class WhatsAppMessage {
         // The 30-day validity starts when the ticket is completed, not on each page view.
         $issuedAt = $ticket->completed_at ?? ($ticket->created_at ?? now());
         return URL::temporarySignedRoute('public.survey.show', $issuedAt->copy()->addDays(30), [
-            'ticket' => $ticket->getKey()
+            'ticket' => $ticket->getKey(),
         ]);
     }
 
@@ -61,7 +64,7 @@ class WhatsAppMessage {
             'service_mismatch' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nJenis layanan yang diajukan ({layanan_diajukan}) tidak sesuai dengan kondisi akun. Mohon mengajukan kembali dengan memilih {layanan_disarankan} melalui: {form_url}\n\nTiket sebelumnya ditutup secara administratif dan tidak dihitung sebagai layanan berhasil.\nNomor tiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'completed' =>
-                "Yth. Bapak/Ibu {nama_pemohon},\n\nPenanganan nomor tiket {nomor_tiket} telah selesai. Hasil pelayanan: {hasil_aktual}. Mohon mengisi survei kepuasan melalui {survey_url}.\nPetugas: {nama_verifikator}"
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nPenanganan nomor tiket {nomor_tiket} telah selesai. Hasil pelayanan: {hasil_aktual}. Mohon mengisi survei kepuasan melalui {survey_url}.\nPetugas: {nama_verifikator}",
         ];
         $templateBody = $template?->body ?? $fallback[$event];
         if ($event === 'registration' && $ticket->activation_status === 'not_activated') {
@@ -80,10 +83,13 @@ class WhatsAppMessage {
             $templateBody = str_replace(
                 'Penanganan permohonan {layanan} nomor tiket {nomor_tiket} telah selesai.',
                 'Hasil pelayanan tiket {nomor_tiket}: {hasil_aktual}.',
-                $templateBody
+                $templateBody,
             );
         }
-        if ($event === 'certificate_not_issued' && $ticket->wa_verification_status === 'unverified') {
+        if (
+            $event === 'certificate_not_issued' &&
+            $ticket->wa_verification_status === 'unverified'
+        ) {
             $templateBody .=
                 "\n\nNomor WhatsApp Anda juga belum terverifikasi pada AMS BSrE. Mohon tindak lanjuti verifikasi WhatsApp sebelum penutupan tiket, di samping proses set passphrase.";
         }
@@ -106,7 +112,9 @@ class WhatsAppMessage {
         $verifier = $ticket->claimant;
         // Jangan menyebut layanan awal sebagai hasil selesai. Pada tiket historis tanpa outcome,
         // pertahankan perilaku semula agar tidak mengarang hasil yang tidak pernah tercatat.
-        $completedLabel = $ticket->service_outcome ? $ticket->service_outcome_label : $ticket->service_label;
+        $completedLabel = $ticket->service_outcome
+            ? $ticket->service_outcome_label
+            : $ticket->service_label;
         return strtr($templateBody, [
             '{nama_pemohon}' => (string) $ticket->nama_user,
             '{nomor_tiket}' => (string) ($ticket->ticket_number ?? '#' . $ticket->id),
@@ -117,7 +125,7 @@ class WhatsAppMessage {
                 'Pembaruan' => 'Pembaruan Sertifikat Elektronik',
                 'Reset Passphrase' => 'Reset Passphrase',
                 'Penerbitan Ulang' => 'Penerbitan Ulang Sertifikat Elektronik',
-                default => 'Hubungi petugas'
+                default => 'Hubungi petugas',
             },
             '{proses_aktual}' => $ticket->actual_process_label,
             '{hasil_aktual}' => $ticket->service_outcome
@@ -135,13 +143,16 @@ class WhatsAppMessage {
             '{jabatan}' => (string) ($ticket->jabatan ?: '-'),
             '{keterangan}' => (string) ($ticket->keterangan ?: '-'),
             '{status_verifikasi_wa}' => $ticket->wa_verification_label,
-            '{survey_url}' => $event === 'completed' ? $this->surveyUrl($ticket) : '-'
+            '{survey_url}' => $event === 'completed' ? $this->surveyUrl($ticket) : '-',
         ]);
     }
 
     /** Desktop stays in WhatsApp Web. */
     public function url(Ticket $ticket, string $message): string {
-        return 'https://web.whatsapp.com/send?phone=' . $ticket->no_wa . '&text=' . rawurlencode($message);
+        return 'https://web.whatsapp.com/send?phone=' .
+            $ticket->no_wa .
+            '&text=' .
+            rawurlencode($message);
     }
 
     /** Official universal link: native WhatsApp when installed on iOS/Android. */
@@ -155,8 +166,10 @@ class WhatsAppMessage {
         $mobileUserAgent =
             preg_match(
                 '/Android|iPhone|iPad|iPod|IEMobile|Windows Phone|Opera Mini/i',
-                (string) $request->userAgent()
+                (string) $request->userAgent(),
             ) === 1;
-        return $mobileHint || $mobileUserAgent ? $this->mobileUrl($ticket, $message) : $this->url($ticket, $message);
+        return $mobileHint || $mobileUserAgent
+            ? $this->mobileUrl($ticket, $message)
+            : $this->url($ticket, $message);
     }
 }

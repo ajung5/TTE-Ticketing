@@ -1,0 +1,20 @@
+# Dependencies and generated artifacts
+node_modules/
+vendor/
+storage/
+bootstrap/cache/
+public/build/
+public/storage/
+coverage/
+dist/
+
+# Private data / backups
+.env
+.env.*
+.ams-v16-backup/
+.tte-patch-backups/
+.format-backups/
+
+# Runtime/lockfiles (formatting only source)
+package-lock.json
+composer.lock

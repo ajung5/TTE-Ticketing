@@ -21,13 +21,15 @@ class ActiveTicketGuard {
         $nip = trim((string) $nip);
         return [
             'nik' => preg_match('/\A[0-9]{16}\z/', $nik) ? $this->directory->nikHash($nik) : null,
-            'nip' => preg_match('/\A[0-9]{18}\z/', $nip) ? $this->directory->nipOnlyHash($nip) : null
+            'nip' => preg_match('/\A[0-9]{18}\z/', $nip)
+                ? $this->directory->nipOnlyHash($nip)
+                : null,
         ];
     }
 
     public function synchronized(array $fingerprints, callable $callback): mixed {
         // Prefer NIP as the stable lock identifier for submissions by NIK or NIP.
-        $identifier = $fingerprints['nip'] ?? $fingerprints['nik'] ?? null;
+        $identifier = $fingerprints['nip'] ?? ($fingerprints['nik'] ?? null);
         if (!$identifier) {
             return $callback();
         }
@@ -48,8 +50,9 @@ class ActiveTicketGuard {
                     $query->where('applicant_nik_hash', $nik);
                 }
                 if ($nip) {
-                    $nik ? $query->orWhere('applicant_nip_hash', $nip)
-                         : $query->where('applicant_nip_hash', $nip);
+                    $nik
+                        ? $query->orWhere('applicant_nip_hash', $nip)
+                        : $query->where('applicant_nip_hash', $nip);
                 }
             })
             ->orderBy('id')
@@ -57,7 +60,12 @@ class ActiveTicketGuard {
     }
 
     /** Idempotent per submission ID, and never extends the work-idle clock. */
-    public function blocked(Ticket $ticket, string $externalId, string $source, string $service): void {
+    public function blocked(
+        Ticket $ticket,
+        string $externalId,
+        string $source,
+        string $service,
+    ): void {
         DB::transaction(function () use ($ticket, $externalId, $source, $service) {
             $created = DB::table('blocked_ticket_attempts')->insertOrIgnore([
                 'ticket_id' => $ticket->id,
@@ -65,22 +73,27 @@ class ActiveTicketGuard {
                 'source' => $source,
                 'requested_service' => $service,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
             if ($created !== 1) {
                 return;
             }
-            DB::table('tickets')->where('id', $ticket->id)->update([
-                'duplicate_attempts' => DB::raw('duplicate_attempts + 1'),
-                'last_duplicate_attempt_at' => now()
-            ]);
+            DB::table('tickets')
+                ->where('id', $ticket->id)
+                ->update([
+                    'duplicate_attempts' => DB::raw('duplicate_attempts + 1'),
+                    'last_duplicate_attempt_at' => now(),
+                ]);
             TicketActivity::create([
                 'ticket_id' => $ticket->id,
                 'actor_id' => null,
                 'action' => 'duplicate_request_blocked',
-                'note' => 'Sistem menahan permohonan baru dari ' . $source .
-                    '; layanan diminta: ' . $service .
-                    '. Pemohon diarahkan menindaklanjuti tiket aktif.'
+                'note' =>
+                    'Sistem menahan permohonan baru dari ' .
+                    $source .
+                    '; layanan diminta: ' .
+                    $service .
+                    '. Pemohon diarahkan menindaklanjuti tiket aktif.',
             ]);
         });
     }

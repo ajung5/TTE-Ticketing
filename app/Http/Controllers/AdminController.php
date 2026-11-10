@@ -21,7 +21,7 @@ class AdminController extends Controller {
             'new' => Ticket::where('status', 'Open')->count(),
             'active' => Ticket::where('status', 'In Progress')->count(),
             'done' => Ticket::where('status', 'Done')->count(),
-            'returned' => Ticket::where('status', 'Returned')->count()
+            'returned' => Ticket::where('status', 'Returned')->count(),
         ];
         $ams = Ticket::query()
             ->selectRaw(
@@ -33,7 +33,7 @@ class AdminController extends Controller {
             SUM(CASE WHEN certificate_issuance_status = 'not_issued' THEN 1 ELSE 0 END) as not_issued,
             SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'active' THEN 1 ELSE 0 END) as cert_active,
             SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'expired' THEN 1 ELSE 0 END) as cert_expired,
-            SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'revoked' THEN 1 ELSE 0 END) as cert_revoked"
+            SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'revoked' THEN 1 ELSE 0 END) as cert_revoked",
             )
             ->first();
         $services = Ticket::select('layanan')
@@ -44,7 +44,7 @@ class AdminController extends Controller {
             ->selectRaw(
                 "COUNT(*) as total, SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as done_count,
             SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as active_count,
-            SUM(CASE WHEN status = 'Returned' THEN 1 ELSE 0 END) as returned_count"
+            SUM(CASE WHEN status = 'Returned' THEN 1 ELSE 0 END) as returned_count",
             )
             ->whereNotNull('claimed_by')
             ->groupBy('claimed_by')
@@ -62,7 +62,9 @@ class AdminController extends Controller {
                 ->where('updated_at', '<', now()->subHours($attentionHours))
                 ->count(),
             'weekly_in' => Ticket::where('created_at', '>=', now()->subDays(7))->count(),
-            'weekly_done' => Ticket::where('status', 'Done')->where('completed_at', '>=', now()->subDays(7))->count()
+            'weekly_done' => Ticket::where('status', 'Done')
+                ->where('completed_at', '>=', now()->subDays(7))
+                ->count(),
         ];
         // Distribusi hasil aktual, berbeda dengan distribusi layanan yang diminta pemohon.
         $outcomes = Ticket::query()
@@ -74,7 +76,16 @@ class AdminController extends Controller {
             ->pluck('total', 'service_outcome');
         return view(
             'admin.dashboard',
-            compact('stats', 'services', 'counts', 'verifiers', 'ams', 'outcomes', 'health', 'attention')
+            compact(
+                'stats',
+                'services',
+                'counts',
+                'verifiers',
+                'ams',
+                'outcomes',
+                'health',
+                'attention',
+            ),
         );
     }
 
@@ -91,13 +102,13 @@ class AdminController extends Controller {
             'target_type' => 'user',
             'target_id' => $user->id,
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
         return back()->with(
             'success',
             'Tautan reset password dibuat untuk ' .
                 $user->name .
-                '. Periksa inbox email akun tersebut. Pengiriman memerlukan SMTP aktif.'
+                '. Periksa inbox email akun tersebut. Pengiriman memerlukan SMTP aktif.',
         );
     }
 }

@@ -1,26 +1,28 @@
 <!doctype html>
 <html lang="id">
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#14243b">
-    <title>@yield('title', 'Layanan TTE') · TTE Ticketing</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}?v=53" sizes="any">
-    <link rel="icon" href="{{ asset('favicon.svg') }}?v=53" type="image/svg+xml">
-    <link rel="icon" href="{{ asset('favicon-32x32.png') }}?v=53" type="image/png" sizes="32x32">
-    <link rel="icon" href="{{ asset('favicon-16x16.png') }}?v=53" type="image/png" sizes="16x16">
-    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=53" sizes="180x180">
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=53">
-    <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3">
-    <link rel="stylesheet" href="{{ asset('css/tte-ui-fixes.css') }}?v=1">
-    <link rel="stylesheet" href="{{ asset('css/tte-footer.css') }}?v=60.1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="theme-color" content="#14243b" />
+    <title>
+        @yield ('title', 'Layanan TTE')
+        · TTE Ticketing
+    </title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=53" sizes="any" />
+    <link rel="icon" href="{{ asset('favicon.svg') }}?v=53" type="image/svg+xml" />
+    <link rel="icon" href="{{ asset('favicon-32x32.png') }}?v=53" type="image/png" sizes="32x32" />
+    <link rel="icon" href="{{ asset('favicon-16x16.png') }}?v=53" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=53" sizes="180x180" />
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=53" />
+    <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3" />
+    <link rel="stylesheet" href="{{ asset('css/tte-ui-fixes.css') }}?v=1" />
+    <link rel="stylesheet" href="{{ asset('css/tte-footer.css') }}?v=60.1" />
     @if (request()->routeIs('public.success'))
-        <link rel="stylesheet" href="{{ asset('css/tte-active-request-alert.css') }}?v=61.2">
+        <link rel="stylesheet" href="{{ asset('css/tte-active-request-alert.css') }}?v=61.2" />
     @endif
     @auth
-        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=59">
+        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=59" />
         <script src="{{ asset('js/tte-internal-refresh.js') }}?v=51" defer></script>
         <script src="{{ asset('js/tte-back-to-top.js') }}?v=59" defer></script>
     @endauth
@@ -69,14 +71,23 @@
         <div class="shell tte-internal">
             <aside class="sidebar">
                 <div class="tte-sidebar-head">
-                    <a href="{{ route('dashboard') }}" class="brand" aria-label="Dashboard TTE Ticketing">
-                        <span class="brand-icon" aria-hidden="true"><img src="{{ asset('favicon.svg') }}?v=53"
-                                alt="" width="42" height="42"></span>
+                    <a
+                        href="{{ route('dashboard') }}"
+                        class="brand"
+                        aria-label="Dashboard TTE Ticketing">
+                        <span
+                            class="brand-icon"
+                            aria-hidden="true"><img src="{{ asset('favicon.svg') }}?v=53" alt="" width="42" height="42" /></span>
                         <span>TTE Ticketing<small>Layanan Sertifikat Elektronik</small></span>
                     </a>
                 </div>
-                <button type="button" class="tte-sidebar-toggle tte-sidebar-edge-toggle" data-sidebar-toggle
-                    aria-controls="tte-sidebar-menu" aria-pressed="false" aria-label="Perkecil menu samping"
+                <button
+                    type="button"
+                    class="tte-sidebar-toggle tte-sidebar-edge-toggle"
+                    data-sidebar-toggle
+                    aria-controls="tte-sidebar-menu"
+                    aria-pressed="false"
+                    aria-label="Perkecil menu samping"
                     title="Perkecil menu samping">
                     <svg class="tte-sidebar-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <rect x="3.5" y="4" width="17" height="16" rx="2" />
@@ -84,76 +95,126 @@
                         <path class="tte-toggle-chevron" d="m15 9-3 3 3 3" />
                     </svg>
                 </button>
-                <button type="button" class="tte-mobile-menu-toggle" data-menu-toggle aria-controls="tte-sidebar-menu"
+                <button
+                    type="button"
+                    class="tte-mobile-menu-toggle"
+                    data-menu-toggle
+                    aria-controls="tte-sidebar-menu"
                     aria-expanded="false">
-                    <span>Menu Navigasi</span><span aria-hidden="true" class="tte-menu-chevron">▾</span>
+                    <span>Menu Navigasi</span
+                    ><span aria-hidden="true" class="tte-menu-chevron">▾</span>
                 </button>
                 <div class="sidebar-group" id="tte-sidebar-menu">
                     <div class="nav-caption">MENU UTAMA</div>
                     @if (auth()->user()->isAdmin())
-                        <a class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
-                            href="{{ route('admin.dashboard') }}"><svg class="nav-symbol" aria-hidden="true"
-                                focusable="false">
+                        <a
+                            class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                            href="{{ route('admin.dashboard') }}"
+                            ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-stats" />
-                            </svg> Statistik Layanan</a>
-                        <a class="nav-item {{ request()->routeIs('admin.verifiers.*') ? 'active' : '' }}"
-                            href="{{ route('admin.verifiers.index') }}"><svg class="nav-symbol" aria-hidden="true"
-                                focusable="false">
+                            </svg>
+                            Statistik Layanan</a
+                        >
+                        <a
+                            class="nav-item {{ request()->routeIs('admin.verifiers.*') ? 'active' : '' }}"
+                            href="{{ route('admin.verifiers.index') }}"
+                            ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-users" />
-                            </svg> Manajemen Verifikator</a>
-                        <a class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
-                            href="{{ route('admin.reports.tickets.index') }}"><svg class="nav-symbol" aria-hidden="true"
-                                focusable="false">
+                            </svg>
+                            Manajemen Verifikator</a
+                        >
+                        <a
+                            class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
+                            href="{{ route('admin.reports.tickets.index') }}"
+                            ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-report" />
-                            </svg> Laporan Tiket</a>
-                        <a class="nav-item {{ request()->routeIs('admin.surveys.*') ? 'active' : '' }}"
-                            href="{{ route('admin.surveys.index') }}"><svg class="nav-symbol" aria-hidden="true"
-                                focusable="false">
+                            </svg>
+                            Laporan Tiket</a
+                        >
+                        <a
+                            class="nav-item {{ request()->routeIs('admin.surveys.*') ? 'active' : '' }}"
+                            href="{{ route('admin.surveys.index') }}"
+                            ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-survey" />
-                            </svg> Hasil Survei</a>
-                        <a class="nav-item {{ request()->routeIs('admin.templates.*') ? 'active' : '' }}"
-                            href="{{ route('admin.templates.index') }}"><svg class="nav-symbol" aria-hidden="true"
-                                focusable="false">
+                            </svg>
+                            Hasil Survei</a
+                        >
+                        <a
+                            class="nav-item {{ request()->routeIs('admin.templates.*') ? 'active' : '' }}"
+                            href="{{ route('admin.templates.index') }}"
+                            ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-message" />
-                            </svg> Preset
-                            WhatsApp</a>
+                            </svg>
+                            Preset WhatsApp</a
+                        >
                     @else
-                        <a class="nav-item {{ request()->routeIs('tickets.*') ? 'active' : '' }}"
-                            href="{{ route('tickets.index') }}"><svg class="nav-symbol" aria-hidden="true"
-                                focusable="false">
+                        <a
+                            class="nav-item {{ request()->routeIs('tickets.*') ? 'active' : '' }}"
+                            href="{{ route('tickets.index') }}"
+                            ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-ticket" />
-                            </svg> Antrean Tiket</a>
+                            </svg>
+                            Antrean Tiket</a
+                        >
                     @endif
-                    <a class="nav-item" href="{{ route('public.form') }}" target="_blank" rel="noopener"><svg
-                            class="nav-symbol" aria-hidden="true" focusable="false">
+                    <a
+                        class="nav-item"
+                        href="{{ route('public.form') }}"
+                        target="_blank"
+                        rel="noopener"
+                        ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                             <use href="#tte-ico-external" />
-                        </svg> Formulir Publik</a>
+                        </svg>
+                        Formulir Publik</a
+                    >
                 </div>
-                <div class="sidebar-help"><span class="mini-dot"></span><strong>Self-Claim Ticketing</strong>
+                <div class="sidebar-help">
+                    <span class="mini-dot"></span><strong>Self-Claim Ticketing</strong>
                     <p>Permohonan dicatat secara transparan. Setiap tiket memiliki penanggung jawab.</p>
                 </div>
                 <div class="sidebar-bottom">
-                    <div class="profile-chip"><span
-                            class="avatar">{{ strtoupper(substr(auth()->user()->initials ?: auth()->user()->name, 0, 2)) }}</span><span><strong
-                                class="user-name">{{ auth()->user()->name }}</strong><small>{{ auth()->user()->isAdmin() ? 'Administrator' : 'Verifikator' }}</small></span>
+                    <div class="profile-chip">
+                        <span class="avatar">{{
+                            strtoupper(
+                                substr(auth()->user()->initials ?: auth()->user()->name, 0, 2),
+                            )
+                        }}</span
+                        ><span><strong class="user-name">{{ auth()->user()->name }}</strong><small>{{
+                            auth()->user()->isAdmin()
+                                ? 'Administrator'
+                                : 'Verifikator'
+                        }}</small></span>
                     </div>
-                    <a href="{{ route('profile') }}" class="nav-item sidebar-secondary"><svg class="nav-symbol"
-                            aria-hidden="true" focusable="false">
+                    <a href="{{ route('profile') }}" class="nav-item sidebar-secondary"
+                        ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                             <use href="#tte-ico-profile" />
-                        </svg> Pengaturan Profil</a>
-                    <form method="post" action="{{ route('logout') }}">@csrf<button
-                            class="btn btn-ghost full sidebar-logout" type="submit">Keluar Sistem</button></form>
+                        </svg>
+                        Pengaturan Profil</a
+                    >
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="btn btn-ghost full sidebar-logout" type="submit">
+                            Keluar Sistem
+                        </button>
+                    </form>
                 </div>
             </aside>
             <main class="main">
-                <header class="topbar"><span><span class="topbar-circle"></span> Sistem Manajemen Layanan TTE</span><span
-                        class="topbar-date">{{ now('Asia/Jakarta')->translatedFormat('l, d F Y') }}</span></header>
+                <header class="topbar">
+                    <span><span class="topbar-circle"></span> Sistem Manajemen Layanan TTE</span
+                    ><span class="topbar-date">{{
+                        now('Asia/Jakarta')->translatedFormat(
+                            'l, d F Y',
+                        )
+                    }}</span>
+                </header>
                 <div class="content">
                     @if (session('success'))
                         <div class="alert success" role="status">{{ session('success') }}</div>
                     @endif
                     @if ($errors->any())
-                        <div class="alert error" role="alert"><strong>Mohon periksa kembali:</strong>
+                        <div class="alert error" role="alert">
+                            <strong>Mohon periksa kembali:</strong>
                             <ul>
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -161,11 +222,16 @@
                             </ul>
                         </div>
                     @endif
-                    @yield('content')
-                    @include('layouts.footer')
+                    @yield ('content')
+                    @include ('layouts.footer')
                 </div>
-                <button type="button" class="tte-back-to-top" data-tte-back-top aria-label="Kembali ke atas"
-                    title="Kembali ke atas" hidden>
+                <button
+                    type="button"
+                    class="tte-back-to-top"
+                    data-tte-back-top
+                    aria-label="Kembali ke atas"
+                    title="Kembali ke atas"
+                    hidden>
                     <span aria-hidden="true">↑</span> Ke Atas
                 </button>
             </main>
@@ -184,11 +250,10 @@
                     </ul>
                 </div>
             @endif
-            @yield('content')
-            @include('layouts.footer')
+            @yield ('content')
+            @include ('layouts.footer')
         </main>
     @endauth
     <div id="clipboard-status" class="clipboard-status" role="status" aria-live="polite"></div>
 </body>
-
 </html>
