@@ -48,12 +48,16 @@ class AuthController extends Controller {
     public function updateProfile(Request $request) {
         $user = $request->user();
 
-        abort_unless($user?->isAdmin(), 403, 'Hanya administrator yang dapat mengubah profil ini.');
+        abort_unless(
+            $user?->isAdmin() || $user?->isVerifier(),
+            403,
+            'Akses profil tidak diizinkan.',
+        );
 
         $request->merge([
             'name' => trim((string) $request->input('name')),
             'email' => Str::lower(trim((string) $request->input('email'))),
-            'initials' => Str::upper(trim((string) $request->input('initials'))),
+            'initials' => trim((string) $request->input('initials')),
         ]);
 
         $emailChanged = $request->input('email') !== Str::lower($user->email);
@@ -67,7 +71,12 @@ class AuthController extends Controller {
                     'max:255',
                     Rule::unique('users', 'email')->ignore($user->id),
                 ],
-                'initials' => ['nullable', 'alpha_num', 'max:12'],
+                'initials' => [
+                    'nullable',
+                    'string',
+                    'max:12',
+                    'regex:/\A[^\p{C}\p{Zl}\p{Zp}]+\z/u',
+                ],
                 'current_password' => $emailChanged
                     ? ['required', 'current_password']
                     : ['nullable'],
@@ -78,7 +87,8 @@ class AuthController extends Controller {
                 'email.required' => 'Alamat email wajib diisi.',
                 'email.email' => 'Format email tidak valid.',
                 'email.unique' => 'Email sudah digunakan akun lain.',
-                'initials.alpha_num' => 'Inisial hanya boleh berisi huruf dan angka.',
+                'initials.regex' =>
+                    'Inisial tidak boleh mengandung karakter kontrol atau baris baru.',
                 'initials.max' => 'Inisial maksimal 12 karakter.',
                 'current_password.required' =>
                     'Password saat ini wajib diisi untuk mengubah email.',
@@ -108,7 +118,9 @@ class AuthController extends Controller {
 
             DB::table('audit_logs')->insert([
                 'actor_id' => $user->id,
-                'action' => 'admin_updated_own_profile',
+                'action' => $user->isAdmin()
+                    ? 'admin_updated_own_profile'
+                    : 'verifier_updated_own_profile',
                 'target_type' => 'user',
                 'target_id' => $user->id,
                 'created_at' => now(),
@@ -120,7 +132,12 @@ class AuthController extends Controller {
 
         return redirect()
             ->route('profile')
-            ->with('success', 'Profil administrator berhasil diperbarui.');
+            ->with(
+                'success',
+                'Profil ' .
+                    ($user->isAdmin() ? 'administrator' : 'verifikator') .
+                    ' berhasil diperbarui.',
+            );
     }
 
     public function changePassword(Request $request) {

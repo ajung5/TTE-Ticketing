@@ -16,95 +16,71 @@
         <section class="card">
             <h2>Informasi Profil</h2>
 
-            @if ($user->isAdmin())
-                <form method="POST" action="{{ route('profile.update') }}" class="stack">
-                    @csrf
-                    @method ('PATCH')
+            <form method="POST" action="{{ route('profile.update') }}" class="stack">
+                @csrf
+                @method ('PATCH')
 
-                    <div class="form-field">
-                        <label for="profile-name">Nama Lengkap</label>
-                        <input
-                            id="profile-name"
-                            type="text"
-                            name="name"
-                            value="{{ old('name', $user->name) }}"
-                            minlength="3"
-                            maxlength="255"
-                            autocomplete="name"
-                            required />
-                    </div>
-
-                    <div class="form-field">
-                        <label for="profile-email">Email</label>
-                        <input
-                            id="profile-email"
-                            type="email"
-                            name="email"
-                            value="{{ old('email', $user->email) }}"
-                            maxlength="255"
-                            autocomplete="email"
-                            required />
-                    </div>
-
-                    <div class="form-field">
-                        <label for="profile-initials">Inisial</label>
-                        <input
-                            id="profile-initials"
-                            type="text"
-                            name="initials"
-                            value="{{ old('initials', $user->initials) }}"
-                            maxlength="12"
-                            placeholder="Contoh: ADM"
-                            autocomplete="off" />
-                    </div>
-
-                    <div class="form-field">
-                        <label for="profile-role">Peran</label>
-                        <input
-                            id="profile-role"
-                            type="text"
-                            value="Administrator"
-                            readonly
-                            aria-readonly="true" />
-                    </div>
-
-                    <div class="form-field">
-                        <label for="profile-current-password">Password Saat Ini</label>
-                        <input
-                            id="profile-current-password"
-                            type="password"
-                            name="current_password"
-                            autocomplete="current-password"
-                            placeholder="Wajib jika mengubah email" />
-                    </div>
-
-                    <p class="small muted">Nama lengkap dan inisial dapat diubah langsung. Jika mengubah alamat email, masukkan password saat ini sebagai konfirmasi keamanan. Gunakan email baru saat login berikutnya.</p>
-
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan Profil</button>
-                </form>
-            @else
-                <div class="detail-grid">
-                    <div>
-                        <div class="field-name">Nama</div>
-                        <div class="field-value">{{ $user->name }}</div>
-                    </div>
-
-                    <div>
-                        <div class="field-name">Email</div>
-                        <div class="field-value">{{ $user->email }}</div>
-                    </div>
-
-                    <div>
-                        <div class="field-name">Inisial</div>
-                        <div class="field-value">{{ $user->initials ?: '-' }}</div>
-                    </div>
-
-                    <div>
-                        <div class="field-name">Peran</div>
-                        <div class="field-value">Verifikator</div>
-                    </div>
+                <div class="form-field">
+                    <label for="profile-name">Nama Lengkap</label>
+                    <input
+                        id="profile-name"
+                        type="text"
+                        name="name"
+                        value="{{ old('name', $user->name) }}"
+                        minlength="3"
+                        maxlength="255"
+                        autocomplete="name"
+                        required />
                 </div>
-            @endif
+
+                <div class="form-field">
+                    <label for="profile-email">Email</label>
+                    <input
+                        id="profile-email"
+                        type="email"
+                        name="email"
+                        value="{{ old('email', $user->email) }}"
+                        maxlength="255"
+                        autocomplete="email"
+                        required />
+                </div>
+
+                <div class="form-field">
+                    <label for="profile-initials">Inisial</label>
+                    <input
+                        id="profile-initials"
+                        type="text"
+                        name="initials"
+                        value="{{ old('initials', $user->initials) }}"
+                        maxlength="12"
+                        placeholder="Contoh: Aj. 01 / TTE"
+                        autocomplete="off" />
+                </div>
+
+                <div class="form-field">
+                    <label for="profile-role">Peran</label>
+                    <input
+                        id="profile-role"
+                        type="text"
+                        value="{{ $user->isAdmin() ? 'Administrator' : 'Verifikator' }}"
+                        readonly
+                        aria-readonly="true" />
+                </div>
+
+                <div class="form-field">
+                    <label for="profile-current-password">Password Saat Ini</label>
+                    <input
+                        id="profile-current-password"
+                        type="password"
+                        name="current_password"
+                        autocomplete="current-password"
+                        placeholder="Wajib jika mengubah email" />
+                </div>
+
+                <p class="small muted">Nama lengkap dan inisial dapat diubah langsung. Inisial bebas maksimal 12 karakter (tanpa baris baru) dan dapat digunakan pada tanda tangan preset WhatsApp. Untuk mengubah email login, masukkan password saat ini. Gunakan email baru saat login berikutnya.</p>
+
+                <button type="submit" class="btn btn-primary">Simpan Perubahan Profil</button>
+            </form>
         </section>
 
         {{-- GANTI PASSWORD --}}
