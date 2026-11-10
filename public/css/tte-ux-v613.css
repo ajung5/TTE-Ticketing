@@ -212,3 +212,48 @@
         transition: none;
     }
 }
+
+/* UX-V614 custom period controls */
+.tte-ux-period-custom-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 8px;
+}
+.tte-ux-period-custom-fields[hidden] {
+    display: none !important;
+}
+.tte-ux-period-custom-fields label {
+    display: grid;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 650;
+    color: #50647d;
+}
+.tte-ux-period-custom-fields input[type='date'] {
+    width: 100%;
+    min-height: 39px;
+    padding: 7px 11px;
+    border: 1px solid #d3deed;
+    border-radius: 8px;
+    background: #fff;
+    color: #223e63;
+}
+.tte-ux-period-custom-fields input[type='date']:focus-visible {
+    outline: 2px solid #477fb9;
+    outline-offset: 2px;
+}
+.tte-ux-date-error {
+    font-size: 11px;
+    color: #a32936;
+    max-width: 230px;
+}
+@media (max-width: 520px) {
+    .tte-ux-period-custom-fields {
+        width: 100%;
+    }
+    .tte-ux-period-custom-fields label {
+        flex: 1 1 145px;
+        min-width: 0;
+    }
+}

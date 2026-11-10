@@ -74,25 +74,67 @@ class AdminController extends Controller {
             ->selectRaw('COUNT(*) as total')
             ->groupBy('service_outcome')
             ->pluck('total', 'service_outcome');
-        // UX-V613: period metrics are distinct from all-time KPI and current backlog snapshots.
-        $period = in_array($request->query('period'), ['week', 'month', 'all'], true)
+        // UX-V614: WIB calendar bounds; custom range is inclusive to the final date.
+        // Count incoming by created_at and completed by completed_at (not by original service).
+        $period = in_array($request->query('period'), ['week', 'month', 'all', 'custom'], true)
             ? $request->query('period')
             : 'month';
-        $periodStart = match ($period) {
-            'week' => now()->subDays(6)->startOfDay(),
-            'month' => now()->startOfMonth(),
-            default => null,
-        };
-        $periodLabel = match ($period) {
-            'week' => '7 hari kalender terakhir',
-            'month' => 'Bulan berjalan',
-            default => 'Seluruh periode',
-        };
+        $todayWib = \Carbon\CarbonImmutable::now('Asia/Jakarta');
+        $dateFrom = $todayWib->startOfMonth()->format('Y-m-d');
+        $dateTo = $todayWib->format('Y-m-d');
+        $periodStart = null;
+        $periodEndExclusive = null;
+        if ($period === 'custom') {
+            $dates = $request->validate(
+                [
+                    'from' => ['required', 'date_format:Y-m-d'],
+                    'to' => ['required', 'date_format:Y-m-d', 'after_or_equal:from'],
+                ],
+                [
+                    'from.required' => 'Tanggal mulai harus diisi.',
+                    'from.date_format' => 'Tanggal mulai harus menggunakan format YYYY-MM-DD.',
+                    'to.required' => 'Tanggal akhir harus diisi.',
+                    'to.date_format' => 'Tanggal akhir harus menggunakan format YYYY-MM-DD.',
+                    'to.after_or_equal' => 'Tanggal akhir tidak boleh sebelum tanggal mulai.',
+                ],
+            );
+            $dateFrom = $dates['from'];
+            $dateTo = $dates['to'];
+            $startWib = \Carbon\CarbonImmutable::createFromFormat(
+                '!Y-m-d',
+                $dateFrom,
+                'Asia/Jakarta',
+            );
+            $endWib = \Carbon\CarbonImmutable::createFromFormat('!Y-m-d', $dateTo, 'Asia/Jakarta');
+            $periodStart = $startWib->utc();
+            $periodEndExclusive = $endWib->addDay()->utc();
+            $periodLabel =
+                $startWib->locale('id')->translatedFormat('d F Y') .
+                ' – ' .
+                $endWib->locale('id')->translatedFormat('d F Y');
+        } else {
+            $periodStart = match ($period) {
+                'week' => $todayWib->startOfDay()->subDays(6)->utc(),
+                'month' => $todayWib->startOfMonth()->utc(),
+                default => null,
+            };
+            $periodEndExclusive =
+                $periodStart === null ? null : $todayWib->addDay()->startOfDay()->utc();
+            $periodLabel = match ($period) {
+                'week' => '7 hari kalender terakhir',
+                'month' => 'Bulan berjalan',
+                default => 'Seluruh periode',
+            };
+        }
         $incoming = Ticket::query();
         $completedInPeriod = Ticket::query()->where('status', 'Done')->whereNotNull('completed_at');
         if ($periodStart !== null) {
             $incoming->where('created_at', '>=', $periodStart);
             $completedInPeriod->where('completed_at', '>=', $periodStart);
+        }
+        if ($periodEndExclusive !== null) {
+            $incoming->where('created_at', '<', $periodEndExclusive);
+            $completedInPeriod->where('completed_at', '<', $periodEndExclusive);
         }
         $periodStats = [
             'incoming' => $incoming->count(),
@@ -115,6 +157,8 @@ class AdminController extends Controller {
                 'attention',
                 'period',
                 'periodLabel',
+                'dateFrom',
+                'dateTo',
                 'periodStats',
             ),
         );

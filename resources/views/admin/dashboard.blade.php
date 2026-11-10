@@ -25,13 +25,51 @@
                 <label for="tte-ux-period"
                     >Pilih periode
                     <select id="tte-ux-period" name="period">
-                        <option value="month" @selected ($period === 'month')>
+                        <option value="month" @selected (old('period', $period) === 'month')>
                             Bulan Berjalan
                         </option>
-                        <option value="week" @selected ($period === 'week')>7 Hari Terakhir</option>
-                        <option value="all" @selected ($period === 'all')>Semua Waktu</option>
+                        <option value="week" @selected (old('period', $period) === 'week')>
+                            7 Hari Terakhir
+                        </option>
+                        <option value="all" @selected (old('period', $period) === 'all')>
+                            Semua Waktu
+                        </option>
+                        <option value="custom" @selected (old('period', $period) === 'custom')>
+                            Tanggal Kustom
+                        </option>
                     </select>
                 </label>
+                <div
+                    class="tte-ux-period-custom-fields"
+                    id="tte-ux-period-custom-fields"
+                    @if (old('period', $period) !== 'custom') hidden @endif>
+                    <label for="tte-ux-date-from">
+                        Dari tanggal
+                        <input
+                            id="tte-ux-date-from"
+                            type="date"
+                            name="from"
+                            value="{{ old('from', $dateFrom) }}"
+                            @required (old('period', $period) === 'custom')
+                            @disabled (old('period', $period) !== 'custom') />
+                        @error ('from')
+                            <span class="tte-ux-date-error" role="alert">{{ $message }}</span>
+                        @enderror
+                    </label>
+                    <label for="tte-ux-date-to">
+                        Sampai tanggal
+                        <input
+                            id="tte-ux-date-to"
+                            type="date"
+                            name="to"
+                            value="{{ old('to', $dateTo) }}"
+                            @required (old('period', $period) === 'custom')
+                            @disabled (old('period', $period) !== 'custom') />
+                        @error ('to')
+                            <span class="tte-ux-date-error" role="alert">{{ $message }}</span>
+                        @enderror
+                    </label>
+                </div>
                 <button class="btn btn-primary" type="submit">Tampilkan</button>
             </form>
         </div>
@@ -408,4 +446,5 @@
             </table>
         </div>
     </section>
+    <script src="{{ asset('js/tte-admin-period-v614.js') }}?v=614" defer></script>
 @endsection
