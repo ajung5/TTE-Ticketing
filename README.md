@@ -4,9 +4,22 @@
 
 Aplikasi **Laravel 13** ini menyediakan formulir permohonan tanpa login, direktori email dinas dari Google Sheets, antrean **self-claim**, pemeriksaan manual AMS BSrE, komunikasi WhatsApp Web (desktop) / aplikasi WhatsApp native (mobile), email pemberitahuan tiket baru ke satu inbox operasional, laporan, dan survei kepuasan layanan. Tampilan admin/verifikator menggunakan panel **Tindakan Berikutnya**, dashboard kesehatan sistem *read-only*, serta footer copyright dan versi aplikasi yang konsisten.
 
-> **Status dokumentasi:** diverifikasi terhadap kode branch `main` per **5 November 2026**, baseline [`26504c2`](https://github.com/ajung5/TTE-Ticketing/commit/26504c27176a53f3f26f00eece0f62f4ae7a26d8) (fitur hingga pembaruan footer v60.1 dan email tiket). Pembaruan dokumentasi **tidak membuktikan** kesiapan konfigurasi server, SMTP, sinkronisasi direktori, keamanan, atau keberhasilan seluruh test pada deployment tertentu.
+> **Status dokumentasi:** panduan dasar diverifikasi terhadap kode branch `main` per **5 November 2026**, baseline [`26504c2`](https://github.com/ajung5/TTE-Ticketing/commit/26504c27176a53f3f26f00eece0f62f4ae7a26d8). Ringkasan perubahan di bawah diverifikasi terhadap source sampai commit [`1e842a5`](https://github.com/ajung5/TTE-Ticketing/commit/1e842a57234032c04125dda4aac387e44d42b5c2) (**10 November 2026**). Pembaruan dokumentasi **tidak membuktikan** kesiapan konfigurasi server, SMTP, sinkronisasi direktori, keamanan, atau keberhasilan seluruh test pada deployment tertentu.
 >
 > **Perhatian production:** pencarian NIK/NIP pada versi ini **tidak menggunakan OTP/verifikasi email** dan masih dapat menampilkan profil pegawai berdasarkan NIK/NIP yang cocok. Rate limit telah tersedia, tetapi **bukan pembuktian kepemilikan identitas**. Sebelum akses dibuka luas, pastikan pengelola layanan menerima risikonya dan menerapkan pembatasan jaringan/WAF/anti-enumerasi yang memadai.
+
+## Pembaruan implementasi — 10 November 2026
+
+Bagian ini hanya mencatat perubahan sejak baseline dokumentasi 5 November; bagian panduan lain tetap dipertahankan.
+
+- **v6.13 — UX layanan:** filter antrean verifikator **Perlu Tindakan** dan **Menunggu Pemohon** (tetap menghormati kepemilikan tiket), ringkasan hasil AMS tersimpan pada detail tiket, bantuan jika NIK/NIP tidak ditemukan pada formulir publik, dan tombol salin nomor tiket setelah pengajuan berhasil.
+- **v6.13–v6.14 — Dashboard admin:** ringkasan **Bulan Berjalan**, **7 Hari Terakhir**, **Semua Waktu**, dan **Tanggal Kustom** dengan tanggal awal/akhir inklusif menurut WIB. *Tiket Masuk* berdasarkan `created_at`, *Selesai dalam Periode* berdasarkan `completed_at`; indikator antrean saat ini dan statistik akumulasi tetap tidak dipengaruhi filter periode.
+- **v6.15 — Preset WhatsApp:** tanda tangan pesan dapat memakai **`{nama_verifikator}` atau `{inisial_verifikator}`**. Inisial akun dapat ditulis bebas (maksimum 12 karakter, tanpa karakter kontrol/baris baru), tidak dipaksa huruf kapital, dan kembali ke nama lengkap jika inisial kosong. Preset yang telah disimpan tidak ditimpa.
+- **v6.16 — Profil akun:** administrator dan verifikator dapat memperbarui **nama, email login, dan inisial sendiri** melalui `/profile`. Perubahan email mensyaratkan **password saat ini**; perubahan password tetap di form terpisah. Field **Peran** bersifat `readonly` dan telah diberi tampilan read-only seperti field email pada formulir permohonan. Peran dan hak akses tetap ditentukan di backend, bukan oleh input profil.
+
+Perubahan profil dan inisial **tidak memerlukan migrasi database**. Uji pada lingkungan development/staging dengan `php artisan test`, termasuk `tests/Feature/VerifierSelfProfileV616Test.php`, `tests/Feature/WaVerifierInitialsV615Test.php`, dan `tests/Feature/AdminCustomPeriodV614Test.php`.
+
+---
 
 ## Daftar isi
 
@@ -50,6 +63,7 @@ Aplikasi **Laravel 13** ini menyediakan formulir permohonan tanpa login, direkto
 | Melihat laporan tiket dan mengunduh CSV | — | — | Ya |
 | Mengisi survei melalui signed URL | Ya | — | — |
 | Melihat hasil survei | — | — | Ya |
+| Memperbarui profil sendiri (nama, email, inisial) | — | Ya | Ya |
 | Mengubah password sendiri | — | Ya | Ya |
 | Mengirim tautan reset password verifikator | — | — | Ya |
 
@@ -771,4 +785,4 @@ Panduan patch yang dihapus tetap tersedia dalam riwayat Git. Pembersihan integra
 
 ## Catatan terakhir
 
-README ini merepresentasikan source yang diperiksa pada **5 November 2026** (baseline kode `26504c2`). Pembaruan dokumentasi **tidak menjalankan** migration, test suite, deployment, ataupun pemeriksaan production. Uji perubahan proses bisnis dan keamanan secara terpisah sebelum rilis.
+Panduan dasar README ini berasal dari pemeriksaan **5 November 2026** (baseline `26504c2`), sedangkan bagian **Pembaruan implementasi** mencatat perubahan sampai **10 November 2026** (commit `1e842a5`). Pembaruan dokumentasi **tidak menjalankan** migration, test suite, deployment, ataupun pemeriksaan production. Uji perubahan proses bisnis dan keamanan secara terpisah sebelum rilis.
