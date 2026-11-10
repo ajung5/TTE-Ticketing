@@ -1,7 +1,7 @@
 @extends ('layouts.app')
 @section ('title', 'Survei Kepuasan Layanan TTE')
 @section ('content')
-    <link rel="stylesheet" href="{{ asset('css/tte-survey.css') }}?v=617" />
+    <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-survey.css') }}" />
     <div class="survey-wrap">
         <header class="survey-header">
             <span class="survey-mark" aria-hidden="true">T</span>

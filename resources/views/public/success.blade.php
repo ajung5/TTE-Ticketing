@@ -45,6 +45,6 @@
         @endif
     </div>
     @if (!$activeRequestNotice)
-        <script src="{{ asset('js/tte-request.js') }}?v=617" defer></script>
+        <script src="{{ \App\Support\VersionedAsset::url('js/tte-request.js') }}" defer></script>
     @endif
 @endsection

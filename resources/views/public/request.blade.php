@@ -309,6 +309,6 @@
             </div>
         </div>
     </div>
-    <link rel="stylesheet" href="{{ asset('css/tte-request.css') }}?v=617" />
-    <script src="{{ asset('js/tte-request.js') }}?v=617" defer></script>
+    <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-request.css') }}" />
+    <script src="{{ \App\Support\VersionedAsset::url('js/tte-request.js') }}" defer></script>
 @endsection

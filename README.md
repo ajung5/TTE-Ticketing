@@ -18,7 +18,8 @@ Bagian ini hanya mencatat perubahan sejak baseline dokumentasi 5 November; bagia
 - **v6.16 — Profil akun:** administrator dan verifikator dapat memperbarui **nama, email login, dan inisial sendiri** melalui `/profile`. Perubahan email mensyaratkan **password saat ini**; perubahan password tetap di form terpisah. Field **Peran** bersifat `readonly` dan telah diberi tampilan read-only seperti field email pada formulir permohonan. Peran dan hak akses tetap ditentukan di backend, bukan oleh input profil.
 
 - **v6.17 — Konsolidasi aset frontend:** 11 CSS dan 10 JS di `public/` menjadi **4 CSS dan 3 JS** (`tte-app`, `tte-request`, `tte-ticket`, `tte-survey`); loader Blade serta regression test diadaptasi. Urutan deklarasi CSS dan logika JS dipertahankan, tanpa perubahan alur bisnis, otorisasi, atau skema database.
-Perubahan profil dan inisial **tidak memerlukan migrasi database**. Uji pada lingkungan development/staging dengan `php artisan test`, termasuk `tests/Feature/VerifierSelfProfileV616Test.php`, `tests/Feature/WaVerifierInitialsV615Test.php`, dan `tests/Feature/AdminCustomPeriodV614Test.php`.
+- **v6.18.1 — Cache aset otomatis dan penataan test:** URL CSS/JS/icon memakai hash SHA-256 isi file melalui `App\Support\VersionedAsset`; tidak ada nomor `?v=` manual pada Blade. Test Pest dikelompokkan menurut fungsi di `tests/Feature/{Accounts,Public,Tickets,Notifications,Reporting,Surveys,Infrastructure,Presentation}` dan seluruh test dari `tests/Feature/Current` dipindahkan; test tanpa `RefreshDatabase` tetap berdiri sendiri demi menjaga lifecycle. Tidak ada migrasi database atau perubahan alur layanan.
+Perubahan profil dan inisial **tidak memerlukan migrasi database**. Uji pada lingkungan development/staging dengan `php artisan test`, termasuk `tests/Feature/Accounts/AccountManagementTest.php`, `tests/Feature/Notifications/WhatsAppTemplatesTest.php`, dan `tests/Feature/Reporting/DashboardAndTicketReportsTest.php`.
 
 ---
 
@@ -608,15 +609,13 @@ php artisan test --compact
 Test yang relevan untuk verifikasi perubahan penting:
 
 ```bash
-php artisan test tests/Feature/Current/InstallSchemaAndSeedTest.php --compact
-php artisan test tests/Feature/TteBaselineSeederTest.php --compact
-php artisan test tests/Feature/Current/AmsBusinessRulesTest.php --compact
-php artisan test tests/Feature/Current/WhatsAppWorkflowTest.php --compact
-php artisan test tests/Feature/ReturnedTicketStatisticsTest.php --compact
-php artisan test tests/Feature/TteActivationFooterV60Test.php --compact
-php artisan test tests/Feature/TteFourUxImprovementsV59Test.php --compact
-php artisan test tests/Feature/NewTicketEmailNotificationTest.php --compact
-php artisan test tests/Feature/PublicSurveyTest.php --compact
+php artisan test tests/Feature/Infrastructure/DatabaseAndSeedersTest.php --compact
+php artisan test tests/Feature/Tickets/AmsDecisionsTest.php --compact
+php artisan test tests/Feature/Notifications/WhatsAppDeliveryTest.php --compact
+php artisan test tests/Feature/Reporting/DashboardAndTicketReportsTest.php --compact
+php artisan test tests/Feature/Presentation/InternalInterfaceTest.php --compact
+php artisan test tests/Feature/Notifications/EmailNotificationsTest.php --compact
+php artisan test tests/Feature/Surveys/SurveyWorkflowsTest.php --compact
 ```
 
 Lakukan juga pemeriksaan dependency dan lingkungan:

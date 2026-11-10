@@ -9,14 +9,14 @@
         @yield ('title', 'Layanan TTE')
         · TTE Ticketing
     </title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}?v=53" sizes="any" />
-    <link rel="icon" href="{{ asset('favicon.svg') }}?v=53" type="image/svg+xml" />
-    <link rel="icon" href="{{ asset('favicon-32x32.png') }}?v=53" type="image/png" sizes="32x32" />
-    <link rel="icon" href="{{ asset('favicon-16x16.png') }}?v=53" type="image/png" sizes="16x16" />
-    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=53" sizes="180x180" />
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=53" />
-    <link rel="stylesheet" href="{{ asset('css/tte-app.css') }}?v=617" />
-    <script src="{{ asset('js/tte-app.js') }}?v=617" defer></script>
+    <link rel="icon" href="{{ \App\Support\VersionedAsset::url('favicon.ico') }}" sizes="any" />
+    <link rel="icon" href="{{ \App\Support\VersionedAsset::url('favicon.svg') }}" type="image/svg+xml" />
+    <link rel="icon" href="{{ \App\Support\VersionedAsset::url('favicon-32x32.png') }}" type="image/png" sizes="32x32" />
+    <link rel="icon" href="{{ \App\Support\VersionedAsset::url('favicon-16x16.png') }}" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="{{ \App\Support\VersionedAsset::url('apple-touch-icon.png') }}" sizes="180x180" />
+    <link rel="manifest" href="{{ \App\Support\VersionedAsset::url('site.webmanifest') }}" />
+    <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-app.css') }}" />
+    <script src="{{ \App\Support\VersionedAsset::url('js/tte-app.js') }}" defer></script>
 </head>
 
 <body>
@@ -67,7 +67,7 @@
                         aria-label="Dashboard TTE Ticketing">
                         <span
                             class="brand-icon"
-                            aria-hidden="true"><img src="{{ asset('favicon.svg') }}?v=53" alt="" width="42" height="42" /></span>
+                            aria-hidden="true"><img src="{{ \App\Support\VersionedAsset::url('favicon.svg') }}" alt="" width="42" height="42" /></span>
                         <span>TTE Ticketing<small>Layanan Sertifikat Elektronik</small></span>
                     </a>
                 </div>
