@@ -101,8 +101,7 @@
                     data-menu-toggle
                     aria-controls="tte-sidebar-menu"
                     aria-expanded="false">
-                    <span>Menu Navigasi</span
-                    ><span aria-hidden="true" class="tte-menu-chevron">▾</span>
+                    <span>Menu Navigasi</span><span aria-hidden="true" class="tte-menu-chevron">▾</span>
                 </button>
                 <div class="sidebar-group" id="tte-sidebar-menu">
                     <div class="nav-caption">MENU UTAMA</div>
@@ -113,40 +112,35 @@
                             ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-stats" />
                             </svg>
-                            Statistik Layanan</a
-                        >
+                            Statistik Layanan</a>
                         <a
                             class="nav-item {{ request()->routeIs('admin.verifiers.*') ? 'active' : '' }}"
                             href="{{ route('admin.verifiers.index') }}"
                             ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-users" />
                             </svg>
-                            Manajemen Verifikator</a
-                        >
+                            Manajemen Verifikator</a>
                         <a
                             class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
                             href="{{ route('admin.reports.tickets.index') }}"
                             ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-report" />
                             </svg>
-                            Laporan Tiket</a
-                        >
+                            Laporan Tiket</a>
                         <a
                             class="nav-item {{ request()->routeIs('admin.surveys.*') ? 'active' : '' }}"
                             href="{{ route('admin.surveys.index') }}"
                             ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-survey" />
                             </svg>
-                            Hasil Survei</a
-                        >
+                            Hasil Survei</a>
                         <a
                             class="nav-item {{ request()->routeIs('admin.templates.*') ? 'active' : '' }}"
                             href="{{ route('admin.templates.index') }}"
                             ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-message" />
                             </svg>
-                            Preset WhatsApp</a
-                        >
+                            Preset WhatsApp</a>
                     @else
                         <a
                             class="nav-item {{ request()->routeIs('tickets.*') ? 'active' : '' }}"
@@ -154,8 +148,7 @@
                             ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                                 <use href="#tte-ico-ticket" />
                             </svg>
-                            Antrean Tiket</a
-                        >
+                            Antrean Tiket</a>
                     @endif
                     <a
                         class="nav-item"
@@ -165,8 +158,7 @@
                         ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                             <use href="#tte-ico-external" />
                         </svg>
-                        Formulir Publik</a
-                    >
+                        Formulir Publik</a>
                 </div>
                 <div class="sidebar-help">
                     <span class="mini-dot"></span><strong>Self-Claim Ticketing</strong>
@@ -178,8 +170,7 @@
                             strtoupper(
                                 substr(auth()->user()->initials ?: auth()->user()->name, 0, 2),
                             )
-                        }}</span
-                        ><span><strong class="user-name">{{ auth()->user()->name }}</strong><small>{{
+                        }}</span><span><strong class="user-name">{{ auth()->user()->name }}</strong><small>{{
                             auth()->user()->isAdmin()
                                 ? 'Administrator'
                                 : 'Verifikator'
@@ -189,8 +180,7 @@
                         ><svg class="nav-symbol" aria-hidden="true" focusable="false">
                             <use href="#tte-ico-profile" />
                         </svg>
-                        Pengaturan Profil</a
-                    >
+                        Pengaturan Profil</a>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button class="btn btn-ghost full sidebar-logout" type="submit">
@@ -201,8 +191,7 @@
             </aside>
             <main class="main">
                 <header class="topbar">
-                    <span><span class="topbar-circle"></span> Sistem Manajemen Layanan TTE</span
-                    ><span class="topbar-date">{{
+                    <span><span class="topbar-circle"></span> Sistem Manajemen Layanan TTE</span><span class="topbar-date">{{
                         now('Asia/Jakarta')->translatedFormat(
                             'l, d F Y',
                         )

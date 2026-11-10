@@ -18,8 +18,7 @@
     <div class="stat-grid">
         <div class="stat-card">
             <div class="stat-top">
-                <span class="stat-icon stat-amber">◷</span
-                ><span class="stat-micro">ANTREAN BERSAMA</span>
+                <span class="stat-icon stat-amber">◷</span><span class="stat-micro">ANTREAN BERSAMA</span>
             </div>
             <div class="stat-name">Belum Diambil</div>
             <div class="stat-number">
@@ -36,8 +35,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-top">
-                <span class="stat-icon stat-sky">↻</span
-                ><span class="stat-micro">PEKERJAAN SAYA</span>
+                <span class="stat-icon stat-sky">↻</span><span class="stat-micro">PEKERJAAN SAYA</span>
             </div>
             <div class="stat-name">Sedang Dikerjakan</div>
             <div class="stat-number">
@@ -54,8 +52,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-top">
-                <span class="stat-icon stat-emerald">✓</span
-                ><span class="stat-micro">HASIL SAYA</span>
+                <span class="stat-icon stat-emerald">✓</span><span class="stat-micro">HASIL SAYA</span>
             </div>
             <div class="stat-name">Selesai</div>
             <div class="stat-number">
@@ -72,8 +69,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-top">
-                <span class="stat-icon stat-amber">↩</span
-                ><span class="stat-micro">TIKET SAYA</span>
+                <span class="stat-icon stat-amber">↩</span><span class="stat-micro">TIKET SAYA</span>
             </div>
             <div class="stat-name">Perlu Pengajuan Ulang</div>
             <div class="stat-number">
@@ -88,8 +84,7 @@
             </div>
             <div class="stat-foot">
                 <a href="{{ route('tickets.index', ['status' => 'Returned']) }}"
-                    >Lihat tiket yang Anda kembalikan →</a
-                >
+                    >Lihat tiket yang Anda kembalikan →</a>
             </div>
         </div>
     </div>
@@ -98,34 +93,29 @@
             href="{{ route('tickets.index', ['status' => 'all']) }}"
             @class (['is-active' => request('status') === 'all'])
             @if (request('status') === 'all') aria-current="page" @endif
-            >Semua Tiket</a
-        >
+            >Semua Tiket</a>
         <a
             href="{{ route('tickets.index', ['status' => 'Open']) }}"
             @class (['is-active' => request('status') === 'Open'])
             @if (request('status') === 'Open') aria-current="page" @endif
-            >Baru <strong>{{ $stats['new'] }}</strong></a
-        >
+            >Baru <strong>{{ $stats['new'] }}</strong></a>
         <a
             href="{{ route('tickets.index', ['status' => 'In Progress']) }}"
             @class ([
                 'is-active' => in_array(request('status'), [null, 'In Progress'], true)
             ])
             @if (in_array(request('status'), [null, 'In Progress'], true)) aria-current="page" @endif
-            >Milik Saya <strong>{{ $stats['mine'] }}</strong></a
-        >
+            >Milik Saya <strong>{{ $stats['mine'] }}</strong></a>
         <a
             href="{{ route('tickets.index', ['status' => 'Done']) }}"
             @class (['is-active' => request('status') === 'Done'])
             @if (request('status') === 'Done') aria-current="page" @endif
-            >Selesai <strong>{{ $stats['completed'] }}</strong></a
-        >
+            >Selesai <strong>{{ $stats['completed'] }}</strong></a>
         <a
             href="{{ route('tickets.index', ['status' => 'Returned']) }}"
             @class (['is-active' => request('status') === 'Returned'])
             @if (request('status') === 'Returned') aria-current="page" @endif
-            >Pengajuan Ulang <strong>{{ $stats['returned'] }}</strong></a
-        >
+            >Pengajuan Ulang <strong>{{ $stats['returned'] }}</strong></a>
     </nav>
     <section class="card">
         <div class="section-heading">
@@ -170,8 +160,7 @@
                     </option>
                 @endforeach
             </select>
-            <button class="btn btn-primary" type="submit">Terapkan Filter</button
-            ><a href="{{ route('tickets.index') }}" class="btn btn-ghost">Reset</a>
+            <button class="btn btn-primary" type="submit">Terapkan Filter</button><a href="{{ route('tickets.index') }}" class="btn btn-ghost">Reset</a>
         </form>
         <div class="table-scroll">
             <table class="ticket-table">
@@ -254,8 +243,7 @@
                                     <a
                                         class="btn btn-outline btn-small"
                                         href="{{ route('tickets.show', $ticket) }}"
-                                        >Lihat Detail →</a
-                                    >
+                                        >Lihat Detail →</a>
                                 @else
                                     <span class="small muted">Petugas lain</span>
                                 @endif

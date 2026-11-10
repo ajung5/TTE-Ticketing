@@ -13,8 +13,7 @@
         </header>
         <section class="card survey-card">
             <div class="survey-ticket">
-                <span>Layanan: <strong>{{ $ticket->service_label }}</strong></span
-                ><span>No. tiket: <strong>{{
+                <span>Layanan: <strong>{{ $ticket->service_label }}</strong></span><span>No. tiket: <strong>{{
                     $ticket->ticket_number ??
                         '#' . $ticket->id
                 }}</strong></span>
@@ -71,8 +70,7 @@
                                             name="{{ $field }}"
                                             value="{{ $n }}"
                                             required
-                                            @checked ((string) old($field) === (string) $n) /><span>{{ $n }}</span></label
-                                    >
+                                            @checked ((string) old($field) === (string) $n) /><span>{{ $n }}</span></label>
                                 @endfor
                             </div>
                             <div class="survey-scale-caption">

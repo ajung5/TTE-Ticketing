@@ -76,8 +76,7 @@
         <p>{{ $nextAction['description'] }}</p>
         @if ($nextAction['target'])
             <a class="btn btn-primary" href="{{ $nextAction['target'] }}"
-                >{{ $nextAction['button'] }} →</a
-            >
+                >{{ $nextAction['button'] }} →</a>
         @endif
     </section>
     <div class="columns detail-columns">
@@ -211,8 +210,7 @@
                             @enderror
                             <label
                                 ><input type="checkbox" name="ams_confirmed" value="1" required />
-                                Saya telah memeriksa alamat email ini langsung di AMS BSrE.</label
-                            >
+                                Saya telah memeriksa alamat email ini langsung di AMS BSrE.</label>
                             @error ('ams_confirmed')
                                 <p class="small" role="alert">{{ $message }}</p>
                             @enderror
@@ -865,8 +863,7 @@
                             class="btn btn-outline"
                             target="_blank"
                             rel="noopener"
-                            >Lihat Formulir Pengajuan Baru</a
-                        >
+                            >Lihat Formulir Pengajuan Baru</a>
                     </div>
                 @else
                     <div class="alert success">

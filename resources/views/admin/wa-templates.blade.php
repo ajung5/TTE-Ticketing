@@ -119,8 +119,7 @@
                     @else
                         <div class="alert error">
                             Preset belum tersedia. Jalankan
-                            <code>php artisan db:seed --class=WaTemplatePresetsSeeder --force</code
-                            >.
+                            <code>php artisan db:seed --class=WaTemplatePresetsSeeder --force</code>.
                         </div>
                     @endif
                 </details>

@@ -9,6 +9,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as prettier from 'prettier';
+import { compactBladeInlineOpeningTags } from './format-blade-inline-tags.mjs';
 
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const excludedDirectories = new Set([
@@ -92,20 +93,7 @@ async function visit(dir = project) {
     }
 }
 
-// Keep no-attribute inline HTML opening tags on one line.
-// Prettier Blade can emit `<strong\n  >` for a tag containing dynamic Blade text.
-// Limit normalization to opening tags with ZERO attributes, and leave literal
-// JS/CSS, HTML comments, and Blade comments untouched.
-const inlineOpeningTag = /<(strong|em|b|i|span|small|code|mark)[ \t]*\r?\n[ \t]*>/gi;
-const bladeProtectedBlock =
-    /(<script\b[^>]*>[\s\S]*?<\/script\s*>|<style\b[^>]*>[\s\S]*?<\/style\s*>|<textarea\b[^>]*>[\s\S]*?<\/textarea\s*>|\{\{--[\s\S]*?--\}\}|<!--[\s\S]*?-->)/gi;
-function compactBladeInlineOpeningTags(source) {
-    return source
-        .split(bladeProtectedBlock)
-        .map((part, index) => (index % 2 === 1 ? part : part.replace(inlineOpeningTag, '<$1>')))
-        .join('');
-}
-
+// TTE v6.10: Blade opening and closing tag normalization. Implementasi dan regression test ada pada modul terpisah.
 let sqlFormatter;
 async function formatFile(file, original) {
     if (file.language === 'sql') {

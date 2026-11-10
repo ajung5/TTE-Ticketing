@@ -48,8 +48,7 @@
                         value="{{ (string) \Illuminate\Support\Str::uuid() }}" />
                     <input type="hidden" name="signature_data" id="signature_data" value="" />
                     <div class="honeypot" aria-hidden="true">
-                        <label for="website">Biarkan kosong</label
-                        ><input id="website" name="website" tabindex="-1" autocomplete="off" />
+                        <label for="website">Biarkan kosong</label><input id="website" name="website" tabindex="-1" autocomplete="off" />
                     </div>
 
                     <section class="request-step request-entry">
@@ -192,8 +191,7 @@
                             <div class="field-group wa-phone-field">
                                 <label for="no_wa"
                                     >Nomor WhatsApp aktif
-                                    <span class="required-mark">*</span></label
-                                >
+                                    <span class="required-mark">*</span></label>
                                 <div class="wa-phone-input">
                                     <span class="wa-phone-prefix" aria-hidden="true">
                                         <span class="wa-flag-id"></span>
@@ -293,8 +291,7 @@
                         target="_blank"
                         rel="noopener noreferrer"
                         data-email-admin-wa="1"
-                        >Hubungi Pengelola via WhatsApp</a
-                    >
+                        >Hubungi Pengelola via WhatsApp</a>
                 @else
                     <span
                         class="small muted">Nomor WhatsApp pengelola email belum dikonfigurasi. Silakan hubungi helpdesk internal.</span>

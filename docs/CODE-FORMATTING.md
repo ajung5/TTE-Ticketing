@@ -77,3 +77,24 @@ npm run build
 karena formatter proyek mempunyai tahap normalisasi inline-tag setelah Prettier.
 Jangan menjalankan `npm run format` di server production. Periksa `git diff`
 setelah format massal; hanya commit source yang sudah diuji.
+
+## TTE v6.10 — Penutupan tag HTML Blade
+
+Formatter proyek sekarang menormalisasi pemisahan `>` pada **tag penutup HTML**,
+misalnya `</span\n >` menjadi `</span>`. Tag pembuka sederhana (`<strong\n >`)
+tetap dipadatkan seperti sebelumnya. Normalisasi tidak menambah whitespace di
+antara tag inline yang berdampingan; konten `<script>`, `<style>`, `<textarea>`,
+komentar, dan ekspresi Blade dikecualikan.
+
+Jalankan setelah pemasangan:
+
+```bash
+node --test tests/FormatterBladeInlineTags.test.mjs
+npm run format:blade
+npm run format:check
+php artisan test
+```
+
+Format on Save yang menggunakan `scripts/format-source.mjs --write --file` akan
+memakai normalisasi yang sama. `npm run build` tetap hanya membangun aset, bukan
+memformat source.

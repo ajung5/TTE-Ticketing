@@ -49,8 +49,7 @@
                                 class="tte-page-item"
                                 href="{{ $url }}"
                                 aria-label="Buka halaman {{ $page }}"
-                                >{{ $page }}</a
-                            >
+                                >{{ $page }}</a>
                         @endif
                     @endforeach
                 @endif

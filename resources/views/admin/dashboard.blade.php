@@ -17,8 +17,7 @@
     <div class="stat-grid admin-statistics">
         <div class="stat-card">
             <div class="stat-top">
-                <span class="stat-icon stat-indigo">▤</span
-                ><span class="stat-micro">KESELURUHAN</span>
+                <span class="stat-icon stat-indigo">▤</span><span class="stat-micro">KESELURUHAN</span>
             </div>
             <div class="stat-name">Total Permohonan</div>
             <div class="stat-number">
@@ -92,8 +91,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-top">
-                <span class="stat-icon stat-amber">↩</span
-                ><span class="stat-micro">DIKEMBALIKAN</span>
+                <span class="stat-icon stat-amber">↩</span><span class="stat-micro">DIKEMBALIKAN</span>
             </div>
             <div class="stat-name">Perlu Pengajuan Ulang</div>
             <div class="stat-number">
@@ -229,8 +227,7 @@
                     @php ($percent = $stats['total'] > 0 ? round(($count / $stats['total']) * 100, 1) : 0)
                     <div class="bar-item">
                         <div class="bar-label">
-                            <span>{{ $label }}</span
-                            ><span><strong>{{ $count }}</strong> <small class="muted">({{ $percent }}%)</small></span>
+                            <span>{{ $label }}</span><span><strong>{{ $count }}</strong> <small class="muted">({{ $percent }}%)</small></span>
                         </div>
                         <div class="bar-track">
                             <div class="bar-value" style="width:{{ $percent }}%"></div>
@@ -253,8 +250,7 @@
                 <p class="small muted">Notifikasi mengikuti kondisi AMS, termasuk Revoke dan hasil aktual pelayanan.</p>
             </div>
             <a class="btn btn-primary full mt" href="{{ route('admin.templates.index') }}"
-                >Kelola Preset WhatsApp <span aria-hidden="true">→</span></a
-            >
+                >Kelola Preset WhatsApp <span aria-hidden="true">→</span></a>
             <p class="small muted mt">Admin tidak dapat mengambil atau memproses tiket.</p>
         </section>
     </div>

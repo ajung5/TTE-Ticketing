@@ -23,8 +23,7 @@
                 <p class="small">Jika petugas telah meminta aktivasi akun, verifikasi WhatsApp, set passphrase, atau tindakan lainnya, lanjutkan pada tiket yang sama. Jangan memberikan OTP, password, atau passphrase kepada siapa pun.</p>
             </div>
             <a href="{{ route('public.form') }}" class="btn btn-outline full"
-                >Kembali ke Formulir</a
-            >
+                >Kembali ke Formulir</a>
         @else
             <div class="public-success-icon">✓</div>
             <div class="eyebrow">PERMOHONAN BERHASIL DIKIRIM</div>
@@ -36,8 +35,7 @@
                 <p class="small muted">Permohonan akan ditangani oleh verifikator. Pastikan nomor WhatsApp aktif dan telah terverifikasi di AMS BSrE. Petugas tidak pernah meminta OTP, password, atau passphrase.</p>
             </div>
             <a href="{{ route('public.form') }}" class="btn btn-primary full"
-                >Kembali ke Formulir</a
-            >
+                >Kembali ke Formulir</a>
         @endif
     </div>
 @endsection

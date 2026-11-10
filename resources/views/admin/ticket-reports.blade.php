@@ -314,8 +314,7 @@
             </div>
             <div class="report-actions">
                 <a class="btn btn-outline" href="{{ route('admin.reports.tickets.csv', $filters) }}"
-                    >Unduh CSV Lengkap</a
-                >
+                    >Unduh CSV Lengkap</a>
                 <button type="button" class="btn btn-primary" onclick="window.print()">
                     Cetak Ringkasan / Simpan PDF
                 </button>
@@ -324,8 +323,7 @@
 
         <nav class="tte-report-jumps report-no-print" aria-label="Navigasi bagian laporan">
             <a href="#tte-report-filters">Periode</a><a href="#tte-report-summary">Ringkasan</a>
-            <a href="#tte-report-ams">Pemeriksaan AMS</a
-            ><a href="#tte-report-services">Jenis Layanan</a>
+            <a href="#tte-report-ams">Pemeriksaan AMS</a><a href="#tte-report-services">Jenis Layanan</a>
             <a href="#tte-report-details">Rincian Tiket</a>
         </nav>
         <section class="card report-filter-card" id="tte-report-filters">
