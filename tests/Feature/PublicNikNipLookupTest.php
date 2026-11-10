@@ -27,8 +27,7 @@ function nipDirectoryRows(
     ];
 }
 
-function nipPublicForm(string $identifier): array
-{
+function nipPublicForm(string $identifier): array {
     return [
         'layanan' => 'Pendaftaran',
         'nama_user' => 'Pemohon Contoh',

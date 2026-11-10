@@ -7,8 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function rbTransitionTicket(User $owner, string $service = 'Reset Passphrase'): Ticket
-{
+function rbTransitionTicket(User $owner, string $service = 'Reset Passphrase'): Ticket {
     return Ticket::create([
         'nama_user' => 'Pemohon Transisi',
         'no_wa' => '6281212345678',
@@ -21,8 +20,7 @@ function rbTransitionTicket(User $owner, string $service = 'Reset Passphrase'): 
     ]);
 }
 
-function rbAmsInput(string $validity, string $wa = 'verified'): array
-{
+function rbAmsInput(string $validity, string $wa = 'verified'): array {
     return [
         'activation_status' => 'activated',
         'wa_verification_status' => $wa,

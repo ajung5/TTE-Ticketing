@@ -9,8 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function amsV35Ticket(User $owner, string $service = 'Reset Passphrase'): Ticket
-{
+function amsV35Ticket(User $owner, string $service = 'Reset Passphrase'): Ticket {
     return Ticket::create([
         'nama_user' => 'Pemohon AMS Aktual',
         'no_wa' => '6281212345678',

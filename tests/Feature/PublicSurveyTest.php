@@ -9,8 +9,7 @@ use Illuminate\Support\Facades\URL;
 
 uses(RefreshDatabase::class);
 
-function surveyTestTicket(array $attrs = []): Ticket
-{
+function surveyTestTicket(array $attrs = []): Ticket {
     return Ticket::create(
         array_merge(
             [
@@ -26,8 +25,7 @@ function surveyTestTicket(array $attrs = []): Ticket
     );
 }
 
-function surveyTestUrl(Ticket $ticket): string
-{
+function surveyTestUrl(Ticket $ticket): string {
     return URL::temporarySignedRoute('public.survey.show', now()->addDays(30), [
         'ticket' => $ticket->id,
     ]);

@@ -7,7 +7,7 @@ uses(RefreshDatabase::class);
 it(
     'menampilkan kop resmi Kabupaten Subang dan form progresif tanpa mengubah syarat persetujuan',
     function () {
-        $this->get(route('public.form'))
+        $response = $this->get(route('public.form'))
             ->assertOk()
             ->assertSee('PEMERINTAH DAERAH KABUPATEN SUBANG')
             ->assertSee('DINAS KOMUNIKASI DAN INFORMATIKA')
@@ -16,9 +16,6 @@ it(
             ->assertSee('Lambang Kabupaten Subang')
             ->assertSee('public-request-official.css')
             ->assertSee('Data belum sesuai? Anda bisa memperbaikinya.')
-            ->assertSee('id="request-details" hidden', false)
-            ->assertSee('id="email_display" type="email"', false)
-            ->assertSee('readonly', false)
             ->assertSee('id="signature-pad"', false)
             ->assertSee('Syarat dan Ketentuan')
             ->assertSee('Kami menghargai privasi Anda')
@@ -28,5 +25,16 @@ it(
             ->assertSee('Saya setuju dengan Syarat dan Ketentuan yang berlaku.');
 
         expect(is_file(public_path('images/lambang-kabupaten-subang.png')))->toBeTrue();
+
+        // TTE v69: format-independent semantic HTML assertions (attribute order/newlines do not matter).
+        $html = $response->getContent();
+        $this->assertMatchesRegularExpression(
+            '~<section\b(?=[^>]*\sid="request-details")(?=[^>]*\shidden(?:\s|=|>))[^>]*>~is',
+            $html,
+        );
+        $this->assertMatchesRegularExpression(
+            '~<input\b(?=[^>]*\sid="email_display")(?=[^>]*\stype="email")(?=[^>]*\sreadonly(?:\s|=|>))[^>]*>~is',
+            $html,
+        );
     },
 );

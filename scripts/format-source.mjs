@@ -34,6 +34,13 @@ const write = args.includes('--write');
 const check = args.includes('--check') || !write;
 const selectedIndex = args.indexOf('--only');
 const selected = selectedIndex >= 0 ? args[selectedIndex + 1] : null;
+// TTE v69 single-file mode: same Prettier + Blade post-processing as mass format.
+const targetIndex = args.indexOf('--file');
+const targetArgument = targetIndex >= 0 ? args[targetIndex + 1] : null;
+const targetFile =
+    targetArgument && !targetArgument.startsWith('--')
+        ? path.resolve(project, targetArgument)
+        : null;
 const sqlArg = args.find((arg) => arg.startsWith('--sql-dialect='));
 const sqlDialect = sqlArg ? sqlArg.split('=')[1] : 'sqlite';
 const supportedDialects = new Set(['sqlite', 'mysql', 'mariadb', 'postgresql', 'sql']);
@@ -42,16 +49,18 @@ if (
     (write && args.includes('--check')) ||
     (selected && !selectors.has(selected)) ||
     (selectedIndex >= 0 && !selected) ||
+    (targetIndex >= 0 && !targetFile) ||
     !supportedDialects.has(sqlDialect) ||
     args.some(
         (arg, i) =>
-            !['--write', '--check', '--only'].includes(arg) &&
+            !['--write', '--check', '--only', '--file'].includes(arg) &&
             !arg.startsWith('--sql-dialect=') &&
-            !(i === selectedIndex + 1),
+            !(i === selectedIndex + 1) &&
+            !(i === targetIndex + 1),
     )
 ) {
     console.error(
-        'Penggunaan: node scripts/format-source.mjs [--check | --write] [--only php|blade|js|css|sql] [--sql-dialect=sqlite|mysql|mariadb|postgresql|sql]',
+        'Penggunaan: node scripts/format-source.mjs [--check | --write] [--only php|blade|js|css|sql] [--file path] [--sql-dialect=sqlite|mysql|mariadb|postgresql|sql]',
     );
     process.exit(2);
 }
@@ -77,6 +86,7 @@ async function visit(dir = project) {
         } else if (entry.isFile() && category(entry.name)) {
             if (/\.min\.(?:js|css)$/u.test(entry.name)) continue;
             if (selected && selected !== category(entry.name)) continue;
+            if (targetFile && path.resolve(full) !== targetFile) continue;
             files.push({ full, relative, language: category(entry.name) });
         }
     }
@@ -87,11 +97,13 @@ async function visit(dir = project) {
 // Limit normalization to opening tags with ZERO attributes, and leave literal
 // JS/CSS, HTML comments, and Blade comments untouched.
 const inlineOpeningTag = /<(strong|em|b|i|span|small|code|mark)[ \t]*\r?\n[ \t]*>/gi;
-const bladeProtectedBlock = /(<script\b[^>]*>[\s\S]*?<\/script\s*>|<style\b[^>]*>[\s\S]*?<\/style\s*>|<textarea\b[^>]*>[\s\S]*?<\/textarea\s*>|\{\{--[\s\S]*?--\}\}|<!--[\s\S]*?-->)/gi;
+const bladeProtectedBlock =
+    /(<script\b[^>]*>[\s\S]*?<\/script\s*>|<style\b[^>]*>[\s\S]*?<\/style\s*>|<textarea\b[^>]*>[\s\S]*?<\/textarea\s*>|\{\{--[\s\S]*?--\}\}|<!--[\s\S]*?-->)/gi;
 function compactBladeInlineOpeningTags(source) {
-    return source.split(bladeProtectedBlock).map((part, index) =>
-        index % 2 === 1 ? part : part.replace(inlineOpeningTag, '<$1>')
-    ).join('');
+    return source
+        .split(bladeProtectedBlock)
+        .map((part, index) => (index % 2 === 1 ? part : part.replace(inlineOpeningTag, '<$1>')))
+        .join('');
 }
 
 let sqlFormatter;
@@ -121,6 +133,13 @@ async function formatFile(file, original) {
 
 async function main() {
     await visit();
+    if (targetFile && files.length !== 1) {
+        console.error(
+            'ERROR: --file harus menunjuk satu file source yang didukung di dalam repository; bukan symlink, file .min, backup, atau file di folder yang dikecualikan.',
+        );
+        process.exitCode = 2;
+        return;
+    }
     files.sort((a, b) => a.relative.localeCompare(b.relative));
     const changes = [];
     const errors = [];
@@ -150,6 +169,10 @@ async function main() {
             );
             process.exitCode = 1;
         }
+        return;
+    }
+    if (!changes.length) {
+        console.log('Semua file sudah sesuai format.');
         return;
     }
     // Keep a recoverable source copy of every changed file before a mass write.

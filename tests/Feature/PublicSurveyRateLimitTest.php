@@ -16,8 +16,7 @@ beforeEach(function () {
     Cache::store('array')->flush();
 });
 
-function surveyRateTicket(): Ticket
-{
+function surveyRateTicket(): Ticket {
     return Ticket::create([
         'ticket_number' => 'TTE-RATE-' . Str::random(16),
         'nama_user' => 'Pemohon Survei Uji',
@@ -28,15 +27,13 @@ function surveyRateTicket(): Ticket
     ]);
 }
 
-function surveyRateUrl(Ticket $ticket): string
-{
+function surveyRateUrl(Ticket $ticket): string {
     return URL::temporarySignedRoute('public.survey.show', now()->addDays(30), [
         'ticket' => $ticket->id,
     ]);
 }
 
-function surveyRatePayload(): array
-{
+function surveyRatePayload(): array {
     return [
         'respondent_name' => 'Responden Survei Uji',
         'overall_rating' => 5,

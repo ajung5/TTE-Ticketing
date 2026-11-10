@@ -9,8 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function v60Ticket(User $verifier, string $service): Ticket
-{
+function v60Ticket(User $verifier, string $service): Ticket {
     return Ticket::create([
         'nama_user' => 'Pemohon Pengujian V60',
         'no_wa' => '6281212345678',

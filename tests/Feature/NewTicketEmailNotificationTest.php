@@ -13,8 +13,7 @@ use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
-function singleInboxRows(): array
-{
+function singleInboxRows(): array {
     return [
         ['NIK', 'NIP', 'Email Gov', 'NAMA', 'JABATAN', 'UNIT KERJA'],
         [
@@ -28,8 +27,7 @@ function singleInboxRows(): array
     ];
 }
 
-function singleInboxForm(?string $token = null): array
-{
+function singleInboxForm(?string $token = null): array {
     return [
         'layanan' => 'Pendaftaran',
         'nama_user' => 'Pemohon Contoh',

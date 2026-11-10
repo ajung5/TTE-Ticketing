@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
-function verifierAccountData(array $overrides = []): array
-{
+function verifierAccountData(array $overrides = []): array {
     return array_merge(
         [
             'name' => 'Petugas Verifikasi Contoh',

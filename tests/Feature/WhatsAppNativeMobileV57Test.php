@@ -8,8 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function nativeV57Ticket(User $owner, string $status = 'In Progress'): Ticket
-{
+function nativeV57Ticket(User $owner, string $status = 'In Progress'): Ticket {
     return Ticket::create([
         'nama_user' => 'Pengujian Native WhatsApp',
         'no_wa' => '6281212345678',

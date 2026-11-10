@@ -18,9 +18,12 @@ it('keeps a local placeholder guide available at the last WhatsApp preset editor
         ->toContain('data-insert-token="{nama_pemohon}"')
         ->toContain('data-insert-token="{nomor_tiket}"');
     $js = file_get_contents(public_path('js/tte.js'));
-    expect($js)
-        ->toContain("button.closest('.tte-preset-detail')")
-        ->toContain('localEditor || activeEditor');
+    // TTE v69: format-independent JS assertions (quote style and whitespace may vary).
+    $this->assertMatchesRegularExpression(
+        '~\bbutton\s*\.\s*closest\s*\(\s*[\x27\x22]\.tte-preset-detail[\x27\x22]\s*\)~',
+        $js,
+    );
+    $this->assertMatchesRegularExpression('~\blocalEditor\s*\|\|\s*activeEditor\b~', $js);
 });
 
 it(

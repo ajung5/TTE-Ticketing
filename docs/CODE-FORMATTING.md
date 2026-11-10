@@ -47,3 +47,33 @@ Jika `npm run format:check` mengembalikan kode 1, artinya masih ada file yang bu
 - `bracketSameLine: true` diterapkan **hanya pada parser Blade**, bukan pada PHP/JS/CSS. Atribut panjang tetap boleh dipecah ke beberapa baris.
 - Formatter juga merapikan kasus `<strong` + newline + `>` **tanpa atribut**, setelah parsing Prettier. Komentar, konten `<script>`, `<style>`, dan `<textarea>` dilewati.
 - Jalankan `npm run format:blade` lalu `npm run format:check` dan `php artisan test`. Periksa `git diff` sebelum commit.
+
+## Perbaikan v6.9: konsistensi editor vs CLI
+
+- **`npm run build` menjalankan Vite bundling, BUKAN formatting.** Perintah sumber
+  formatting ialah `npm run format`, sedangkan `npm run format:check` hanya memeriksa.
+- `tests/.prettierrc.json` yang sebelumnya menduplikasi konfigurasi dihapus agar
+  pengaturan file test mengikuti `.prettierrc.json` root.
+- VS Code: pasang ekstensi **Run on Save** (`emeraldwalk.runonsave`) dari Marketplace,
+  aktifkan ekstensi pada workspace yang Anda percayai. Pengaturan bersama tersedia
+  di `.vscode/settings.json`. `editor.formatOnSave` dinonaktifkan untuk PHP, Blade,
+  JavaScript, CSS, dan SQL agar tidak ada dua formatter yang saling menimpa.
+- Ekstensi akan menjalankan **formatter proyek yang sama** dengan CLI, dengan
+  `--file` untuk hanya file yang disimpan; termasuk normalisasi opening tag Blade
+  seperti `<strong>` dari v6.8.
+- Setelah memasang ekstensi, restart/reload jendela VS Code. File baru yang baru
+  pertama kali dibuat mungkin memerlukan Save kedua agar Run on Save terpanggil.
+- CLI satu file (gunakan path relatif, dari root repo):
+
+```sh
+node scripts/format-source.mjs --check --file resources/views/tickets/index.blade.php
+node scripts/format-source.mjs --write --file resources/views/tickets/index.blade.php
+npm run format:check
+php artisan test
+npm run build
+```
+
+**Jangan memakai `prettier --write` langsung pada Blade** bila ingin hasil identik
+karena formatter proyek mempunyai tahap normalisasi inline-tag setelah Prettier.
+Jangan menjalankan `npm run format` di server production. Periksa `git diff`
+setelah format massal; hanya commit source yang sudah diuji.

@@ -1,0 +1,32 @@
+{
+    "[php]": {
+        "editor.formatOnSave": false
+    },
+    "[blade]": {
+        "editor.formatOnSave": false
+    },
+    "[javascript]": {
+        "editor.formatOnSave": false
+    },
+    "[javascriptreact]": {
+        "editor.formatOnSave": false
+    },
+    "[css]": {
+        "editor.formatOnSave": false
+    },
+    "[sql]": {
+        "editor.formatOnSave": false
+    },
+    "emeraldwalk.runonsave": {
+        "ignoreUnchangedFiles": true,
+        "commands": [
+            {
+                "match": "\\.(?:blade\\.php|php|js|mjs|cjs|css|sql)$",
+                "notMatch": "[/\\\\](?:vendor|node_modules|storage|\\.format-backups|\\.tte-patch-backups|public[/\\\\]build)[/\\\\]|\\.min\\.(?:js|css)$",
+                "cmd": "node \"${workspaceFolder}/scripts/format-source.mjs\" --write --file \"${file}\"",
+                "isAsync": false,
+                "autoShowOutputPanel": "error"
+            }
+        ]
+    }
+}

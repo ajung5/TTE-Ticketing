@@ -6,8 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function reportTicket(array $attributes = []): Ticket
-{
+function reportTicket(array $attributes = []): Ticket {
     return Ticket::create(
         array_merge(
             [

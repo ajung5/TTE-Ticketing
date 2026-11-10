@@ -8,8 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function adaptiveWaTicket(User $owner, string $status = 'In Progress'): Ticket
-{
+function adaptiveWaTicket(User $owner, string $status = 'In Progress'): Ticket {
     return Ticket::create([
         'nama_user' => 'Pemohon Pengujian WhatsApp',
         'no_wa' => '6281212345678',

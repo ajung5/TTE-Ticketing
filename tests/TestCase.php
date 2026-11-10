@@ -4,8 +4,7 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
-abstract class TestCase extends BaseTestCase
-{
+abstract class TestCase extends BaseTestCase {
     /**
      * TTE v30: CSRF middleware dilewati hanya di HTTP Feature Test.
      * Middleware autentikasi, otorisasi, signed URL, session, dan rate-limit tetap aktif.
@@ -18,8 +17,7 @@ abstract class TestCase extends BaseTestCase
      * settings AFTER that call is too late. Instead, set up a dedicated
      * in-memory test connection in createApplication() before traits execute.
      */
-    public function createApplication()
-    {
+    public function createApplication() {
         // Never bootstrap cached production configuration in a test process.
         if (is_file(dirname(__DIR__) . '/bootstrap/cache/config.php')) {
             throw new \RuntimeException(
@@ -78,8 +76,7 @@ abstract class TestCase extends BaseTestCase
         return $application;
     }
 
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         parent::setUp();
 
         // Migration baru hanya membuat skema. Test memakai preset asli dari seeder

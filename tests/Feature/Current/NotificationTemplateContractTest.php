@@ -8,8 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function rbTemplateTicket(User $verifier): Ticket
-{
+function rbTemplateTicket(User $verifier): Ticket {
     return Ticket::create([
         'nama_user' => 'Pemohon Template',
         'no_wa' => '6281212345678',

@@ -9,8 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
-function directoryRows(string $email = 'pemohon@subang.go.id'): array
-{
+function directoryRows(string $email = 'pemohon@subang.go.id'): array {
     return [
         [
             'No',
@@ -55,8 +54,7 @@ function directoryRows(string $email = 'pemohon@subang.go.id'): array
     ];
 }
 
-function directFormWithSignature(): array
-{
+function directFormWithSignature(): array {
     return [
         'layanan' => 'Reset Passphrase',
         'nama_user' => 'Pemohon Contoh',
@@ -201,12 +199,18 @@ it(
 );
 
 it('shows immutable email and only NIK and service before successful lookup', function () {
-    $this->get(route('public.form'))
-        ->assertOk()
-        ->assertSee('id="request-details" hidden', false)
-        ->assertSee('id="email_display" type="email"', false)
-        ->assertSee('readonly', false)
-        ->assertSee('public-request-v5.css');
+    $response = $this->get(route('public.form'))->assertOk()->assertSee('public-request-v5.css');
+
+    // TTE v69: format-independent semantic HTML assertions (attribute order/newlines do not matter).
+    $html = $response->getContent();
+    $this->assertMatchesRegularExpression(
+        '~<section\b(?=[^>]*\sid="request-details")(?=[^>]*\shidden(?:\s|=|>))[^>]*>~is',
+        $html,
+    );
+    $this->assertMatchesRegularExpression(
+        '~<input\b(?=[^>]*\sid="email_display")(?=[^>]*\stype="email")(?=[^>]*\sreadonly(?:\s|=|>))[^>]*>~is',
+        $html,
+    );
 });
 
 it('limits active WhatsApp phone input to Indonesian numeric mobile formats', function () {

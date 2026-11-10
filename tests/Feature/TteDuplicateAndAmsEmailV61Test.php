@@ -10,8 +10,7 @@ use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
-function v61Rows(): array
-{
+function v61Rows(): array {
     return [
         ['NIK', 'NIP', 'Email Gov', 'NAMA', 'JABATAN', 'UNIT KERJA'],
         [
@@ -25,8 +24,7 @@ function v61Rows(): array
     ];
 }
 
-function v61Payload(?string $token = null): array
-{
+function v61Payload(?string $token = null): array {
     return [
         'layanan' => 'Reset Passphrase',
         'nama_user' => 'Pegawai V61',

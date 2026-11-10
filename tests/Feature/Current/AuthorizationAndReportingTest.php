@@ -6,8 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function rbReportingTicket(string $status = 'Open', array $extra = []): Ticket
-{
+function rbReportingTicket(string $status = 'Open', array $extra = []): Ticket {
     return Ticket::create(
         array_merge(
             [

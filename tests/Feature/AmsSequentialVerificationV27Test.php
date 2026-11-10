@@ -25,8 +25,7 @@ beforeEach(function (): void {
     $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class);
 });
 
-function amsV27Ticket(User $owner, string $service = 'Pembaruan'): Ticket
-{
+function amsV27Ticket(User $owner, string $service = 'Pembaruan'): Ticket {
     return Ticket::create([
         'nama_user' => 'Pemohon AMS V27',
         'no_wa' => '6281212345678',
