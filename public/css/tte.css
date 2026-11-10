@@ -270,7 +270,10 @@ label {
     display: block;
 }
 label input,
-label textarea {
+label textarea,
+.form-field > input,
+.form-field > select,
+.form-field > textarea {
     display: block;
     margin-top: 7px;
 }

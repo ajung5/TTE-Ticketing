@@ -120,8 +120,11 @@
             autocomplete="off">
             @csrf
             <div class="verifier-form-grid">
-                <label>Nama lengkap <span class="required-mark">*</span>
+                <div class="form-field">
+                    <label for="create-verifier-name"
+                        >Nama lengkap <span class="required-mark">*</span></label>
                     <input
+                        id="create-verifier-name"
                         name="name"
                         type="text"
                         value="{{ old('name') }}"
@@ -130,9 +133,12 @@
                         required
                         autocomplete="off"
                         placeholder="Nama petugas" />
-                </label>
-                <label>Email akun <span class="required-mark">*</span>
+                </div>
+                <div class="form-field">
+                    <label for="create-verifier-email"
+                        >Email akun <span class="required-mark">*</span></label>
                     <input
+                        id="create-verifier-email"
                         name="email"
                         type="email"
                         value="{{ old('email') }}"
@@ -140,35 +146,43 @@
                         required
                         autocomplete="off"
                         placeholder="petugas@subang.go.id" />
-                </label>
-                <label>Inisial (opsional)
+                </div>
+                <div class="form-field">
+                    <label for="create-verifier-initials">Inisial (opsional)</label>
                     <input
+                        id="create-verifier-initials"
                         name="initials"
                         type="text"
                         value="{{ old('initials') }}"
                         maxlength="12"
                         pattern="[A-Za-z0-9]*"
                         placeholder="Contoh: AWN" />
-                </label>
+                </div>
                 <div></div>
-                <label>Password awal <span class="required-mark">*</span>
+                <div class="form-field">
+                    <label for="create-verifier-password"
+                        >Password awal <span class="required-mark">*</span></label>
                     <input
+                        id="create-verifier-password"
                         name="password"
                         type="password"
                         minlength="12"
                         required
                         autocomplete="new-password"
                         placeholder="Minimal 12 karakter" />
-                </label>
-                <label>Konfirmasi password <span class="required-mark">*</span>
+                </div>
+                <div class="form-field">
+                    <label for="create-verifier-password-confirmation"
+                        >Konfirmasi password <span class="required-mark">*</span></label>
                     <input
+                        id="create-verifier-password-confirmation"
                         name="password_confirmation"
                         type="password"
                         minlength="12"
                         required
                         autocomplete="new-password"
                         placeholder="Ulangi password" />
-                </label>
+                </div>
             </div>
             <p class="verifier-help">Password minimal 12 karakter dan mengandung huruf besar, huruf kecil, angka, serta simbol. Akun baru otomatis berperan sebagai verifikator, bukan admin.</p>
             <button class="btn btn-primary" type="submit">Tambah Verifikator</button>
@@ -297,49 +311,61 @@
                 @method ('PUT')
                 <input type="hidden" name="_edit_id" value="{{ $verifier->id }}" />
                 <div class="verifier-form-grid">
-                    <label>Nama lengkap
+                    <div class="form-field">
+                        <label for="edit-verifier-name-{{ $verifier->id }}">Nama lengkap</label>
                         <input
+                            id="edit-verifier-name-{{ $verifier->id }}"
                             type="text"
                             name="name"
                             minlength="3"
                             maxlength="160"
                             required
                             value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('name', $verifier->name) : $verifier->name }}" />
-                    </label>
-                    <label>Email akun
+                    </div>
+                    <div class="form-field">
+                        <label for="edit-verifier-email-{{ $verifier->id }}">Email akun</label>
                         <input
+                            id="edit-verifier-email-{{ $verifier->id }}"
                             type="email"
                             name="email"
                             maxlength="255"
                             required
                             value="{{ (string) old('_edit_id') === (string) $verifier->id ? old('email', $verifier->email) : $verifier->email }}" />
-                    </label>
-                    <label>Inisial
+                    </div>
+                    <div class="form-field">
+                        <label for="edit-verifier-initials-{{ $verifier->id }}">Inisial</label>
                         <input
+                            id="edit-verifier-initials-{{ $verifier->id }}"
                             type="text"
                             name="initials"
                             maxlength="12"
                             pattern="[A-Za-z0-9]*"
                             value="{{ $verifier->initials }}" />
-                    </label>
+                    </div>
                 </div>
                 <p class="small muted">Kosongkan kedua kolom password apabila hanya mengubah profil.</p>
                 <div class="verifier-form-grid">
-                    <label>Password baru (opsional)
+                    <div class="form-field">
+                        <label for="edit-verifier-password-{{ $verifier->id }}"
+                            >Password baru (opsional)</label>
                         <input
+                            id="edit-verifier-password-{{ $verifier->id }}"
                             type="password"
                             name="password"
                             minlength="12"
                             autocomplete="new-password"
                             placeholder="Biarkan kosong jika tidak diganti" />
-                    </label>
-                    <label>Konfirmasi password baru
+                    </div>
+                    <div class="form-field">
+                        <label for="edit-verifier-password-confirmation-{{ $verifier->id }}"
+                            >Konfirmasi password baru</label>
                         <input
+                            id="edit-verifier-password-confirmation-{{ $verifier->id }}"
                             type="password"
                             name="password_confirmation"
                             minlength="12"
                             autocomplete="new-password" />
-                    </label>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
             </form>

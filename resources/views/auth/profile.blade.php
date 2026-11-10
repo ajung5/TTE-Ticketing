@@ -21,8 +21,8 @@
                     @csrf
                     @method ('PATCH')
 
-                    <label for="profile-name">
-                        Nama Lengkap
+                    <div class="form-field">
+                        <label for="profile-name">Nama Lengkap</label>
                         <input
                             id="profile-name"
                             type="text"
@@ -32,10 +32,10 @@
                             maxlength="255"
                             autocomplete="name"
                             required />
-                    </label>
+                    </div>
 
-                    <label for="profile-email">
-                        Email
+                    <div class="form-field">
+                        <label for="profile-email">Email</label>
                         <input
                             id="profile-email"
                             type="email"
@@ -44,10 +44,10 @@
                             maxlength="255"
                             autocomplete="email"
                             required />
-                    </label>
+                    </div>
 
-                    <label for="profile-initials">
-                        Inisial
+                    <div class="form-field">
+                        <label for="profile-initials">Inisial</label>
                         <input
                             id="profile-initials"
                             type="text"
@@ -56,27 +56,27 @@
                             maxlength="12"
                             placeholder="Contoh: ADM"
                             autocomplete="off" />
-                    </label>
+                    </div>
 
-                    <label for="profile-role">
-                        Peran
+                    <div class="form-field">
+                        <label for="profile-role">Peran</label>
                         <input
                             id="profile-role"
                             type="text"
                             value="Administrator"
                             readonly
                             aria-readonly="true" />
-                    </label>
+                    </div>
 
-                    <label for="profile-current-password">
-                        Password Saat Ini
+                    <div class="form-field">
+                        <label for="profile-current-password">Password Saat Ini</label>
                         <input
                             id="profile-current-password"
                             type="password"
                             name="current_password"
                             autocomplete="current-password"
                             placeholder="Wajib jika mengubah email" />
-                    </label>
+                    </div>
 
                     <p class="small muted">Nama lengkap dan inisial dapat diubah langsung. Jika mengubah alamat email, masukkan password saat ini sebagai konfirmasi keamanan. Gunakan email baru saat login berikutnya.</p>
 
@@ -114,18 +114,18 @@
             <form method="POST" class="stack" action="{{ route('profile.password') }}">
                 @csrf
 
-                <label for="current_password">
-                    Password Saat Ini
+                <div class="form-field">
+                    <label for="current_password">Password Saat Ini</label>
                     <input
                         id="current_password"
                         type="password"
                         name="current_password"
                         autocomplete="current-password"
                         required />
-                </label>
+                </div>
 
-                <label for="new_password">
-                    Password Baru
+                <div class="form-field">
+                    <label for="new_password">Password Baru</label>
                     <input
                         id="new_password"
                         type="password"
@@ -133,10 +133,10 @@
                         minlength="12"
                         autocomplete="new-password"
                         required />
-                </label>
+                </div>
 
-                <label for="password_confirmation">
-                    Konfirmasi Password Baru
+                <div class="form-field">
+                    <label for="password_confirmation">Konfirmasi Password Baru</label>
                     <input
                         id="password_confirmation"
                         type="password"
@@ -144,7 +144,7 @@
                         minlength="12"
                         autocomplete="new-password"
                         required />
-                </label>
+                </div>
 
                 <p class="small muted">Minimal 12 karakter, menggunakan huruf besar, huruf kecil, dan angka.</p>
 

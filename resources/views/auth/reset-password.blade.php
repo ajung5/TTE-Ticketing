@@ -8,20 +8,33 @@
         <form method="post" action="{{ route('password.update') }}" class="stack mt-lg">
             @csrf
             <input type="hidden" name="token" value="{{ $token }}" />
-            <label>Email<input type="email" name="email" value="{{ old('email', $email) }}" required
-            /></label>
-            <label>Password baru<input
+            <div class="form-field">
+                <label for="reset-password-email">Email</label>
+                <input
+                    id="reset-password-email"
+                    type="email"
+                    name="email"
+                    value="{{ old('email', $email) }}"
+                    required />
+            </div>
+            <div class="form-field">
+                <label for="reset-password-password">Password baru</label>
+                <input
+                    id="reset-password-password"
                     type="password"
                     name="password"
                     autocomplete="new-password"
-                    required
-            /></label>
-            <label>Konfirmasi password<input
+                    required />
+            </div>
+            <div class="form-field">
+                <label for="reset-password-password-confirmation">Konfirmasi password</label>
+                <input
+                    id="reset-password-password-confirmation"
                     type="password"
                     name="password_confirmation"
                     autocomplete="new-password"
-                    required
-            /></label>
+                    required />
+            </div>
             <button class="btn btn-primary full" type="submit">Simpan Password Baru</button>
         </form>
         <div class="center mt"><a href="{{ route('login') }}">Kembali ke Login</a></div>

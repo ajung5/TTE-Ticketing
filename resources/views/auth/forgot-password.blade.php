@@ -7,8 +7,8 @@
         <p class="muted">Masukkan email akun admin atau verifikator. Jika terdaftar, tautan reset password akan dikirim ke alamat tersebut.</p>
         <form method="post" action="{{ route('password.email') }}" class="stack mt-lg">
             @csrf
-            <label for="reset-email"
-                >Email akun
+            <div class="form-field">
+                <label for="reset-email">Email akun</label>
                 <input
                     id="reset-email"
                     name="email"
@@ -19,7 +19,7 @@
                     required
                     autofocus
                     placeholder="nama@subang.go.id" />
-            </label>
+            </div>
             <button class="btn btn-primary full" type="submit">Kirim Tautan Reset Password</button>
         </form>
         <p class="small muted center mt">Periksa Inbox dan folder Spam. Tautan hanya berlaku selama 60 menit.</p>

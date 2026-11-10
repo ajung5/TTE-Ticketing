@@ -120,3 +120,32 @@ php artisan test
 Format on Save harus menjalankan `scripts/format-source.mjs` dari root proyek
 (ekstensi Run On Save), bukan format native Prettier yang melewati normalizer.
 `npm run build` adalah build Vite dan **tidak** melakukan formatting.
+
+
+## Standar form HTML/Blade (v6.12)
+
+- Gunakan pasangan label eksplisit (`for`) dan kontrol (`id`) yang sama.
+- Label ditempatkan sebagai sibling input di dalam `<div class="form-field">`,
+  bukan membungkus `<input>` secara inline dalam form akun/admin.
+- Contoh:
+
+  ```blade
+  <div class="form-field">
+      <label for="login-password">Password</label>
+      <input
+          id="login-password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+      />
+  </div>
+  ```
+
+- Pertahankan `name`, `value`, `required`, CSRF, validasi, dan hak akses saat
+  melakukan refactoring markup.
+- Kode di bawah `resources/views/public/` yang memiliki form bertahap dan
+  CSS khusus tidak diubah otomatis oleh patch ini. Audit secara terpisah.
+- Jalankan formatter proyek dengan `npm run format:blade` dan tinjau `git diff`.
+- `<input>` adalah elemen void HTML5: `/>` bukan tag penutup. Bentuk output
+  akhir mengikuti Prettier Blade; fokus standar ini adalah struktur label/input.
