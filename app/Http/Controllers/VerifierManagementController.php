@@ -69,7 +69,10 @@ class VerifierManagementController extends Controller {
 
     public function store(Request $request) {
         $this->authorizeAdmin($request);
-        $request->merge(['email' => Str::lower(trim((string) $request->input('email')))]);
+        $request->merge([
+            'email' => Str::lower(trim((string) $request->input('email'))),
+            'initials' => trim((string) $request->input('initials')),
+        ]);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'min:3', 'max:160'],
@@ -79,7 +82,7 @@ class VerifierManagementController extends Controller {
                 'max:255',
                 Rule::unique('users', 'email')->whereNull('deleted_at'),
             ],
-            'initials' => ['nullable', 'alpha_num', 'max:12'],
+            'initials' => ['nullable', 'string', 'max:12', 'regex:/\A[^\p{C}\p{Zl}\p{Zp}]+\z/u'],
             'password' => ['required', 'confirmed', $this->passwordRule()],
         ]);
 
@@ -98,7 +101,7 @@ class VerifierManagementController extends Controller {
             $verifier->fill([
                 'name' => trim($data['name']),
                 'email' => $data['email'],
-                'initials' => strtoupper((string) ($data['initials'] ?? '')) ?: null,
+                'initials' => $data['initials'] ?? null ?: null,
                 'role' => 'verifier',
                 'password' => $data['password'], // hashed oleh cast User
             ]);
@@ -126,7 +129,10 @@ class VerifierManagementController extends Controller {
     public function update(Request $request, User $verifier) {
         $this->authorizeAdmin($request);
         $this->authorizeVerifier($verifier);
-        $request->merge(['email' => Str::lower(trim((string) $request->input('email')))]);
+        $request->merge([
+            'email' => Str::lower(trim((string) $request->input('email'))),
+            'initials' => trim((string) $request->input('initials')),
+        ]);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'min:3', 'max:160'],
@@ -136,7 +142,7 @@ class VerifierManagementController extends Controller {
                 'max:255',
                 Rule::unique('users', 'email')->ignore($verifier->id),
             ],
-            'initials' => ['nullable', 'alpha_num', 'max:12'],
+            'initials' => ['nullable', 'string', 'max:12', 'regex:/\A[^\p{C}\p{Zl}\p{Zp}]+\z/u'],
             'password' => ['nullable', 'confirmed', $this->passwordRule()],
         ]);
 
@@ -145,7 +151,7 @@ class VerifierManagementController extends Controller {
             $verifier->fill([
                 'name' => trim($data['name']),
                 'email' => $data['email'],
-                'initials' => strtoupper((string) ($data['initials'] ?? '')) ?: null,
+                'initials' => $data['initials'] ?? null ?: null,
             ]);
             if (!empty($data['password'])) {
                 $verifier->password = $data['password']; // hashed otomatis oleh model

@@ -39,12 +39,21 @@ class WaTemplateController extends Controller {
         );
         $data = $request->validate(['body' => ['required', 'string', 'min:40', 'max:3500']]);
         $body = trim($data['body']);
-        foreach (['{nama_pemohon}', '{nomor_tiket}', '{nama_verifikator}'] as $required) {
+        foreach (['{nama_pemohon}', '{nomor_tiket}'] as $required) {
             if (!str_contains($body, $required)) {
                 throw ValidationException::withMessages([
                     'body' => "Preset harus menyertakan {$required}.",
                 ]);
             }
+        }
+        // Tanda tangan petugas boleh berupa nama lengkap atau inisial yang ditetapkan admin.
+        if (
+            !str_contains($body, '{nama_verifikator}') &&
+            !str_contains($body, '{inisial_verifikator}')
+        ) {
+            throw ValidationException::withMessages([
+                'body' => 'Preset harus menyertakan {nama_verifikator} atau {inisial_verifikator}.',
+            ]);
         }
         preg_match_all('/\{[^{}]+\}/u', $body, $matches);
         $unknown = array_diff($matches[0], WaMessageTemplate::PLACEHOLDERS);

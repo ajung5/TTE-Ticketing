@@ -133,7 +133,8 @@ class WhatsAppMessage {
                 : 'belum tercatat (layanan yang diajukan: ' . $ticket->service_label . ')',
             '{form_url}' => route('public.form'),
             '{nama_verifikator}' => (string) ($verifier?->name ?? 'Tim Verifikator TTE'),
-            '{inisial_verifikator}' => (string) ($verifier?->initials ?: '-'),
+            '{inisial_verifikator}' =>
+                (string) ($verifier?->initials ?: $verifier?->name ?: 'Tim Verifikator TTE'),
             '{nama_instansi}' => (string) config('tte.service_name', 'Layanan TTE'),
             '{opd}' => (string) ($ticket->opd ?: '-'),
             '{email}' => (string) ($ticket->email ?: '-'),

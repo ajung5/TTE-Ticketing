@@ -77,6 +77,12 @@
                                     data-insert-token="{nama_verifikator}">
                                     {nama_verifikator}
                                 </button>
+                                <button
+                                    type="button"
+                                    class="token-insert"
+                                    data-insert-token="{inisial_verifikator}">
+                                    {inisial_verifikator}
+                                </button>
                             </div>
                             <details class="tte-preset-inline-guide">
                                 <summary>Semua Placeholder dan Panduan Penulisan</summary>
@@ -96,7 +102,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <p class="small muted mt">Wajib: {nama_pemohon}, {nomor_tiket}, dan {nama_verifikator}. Gunakan {survey_url} untuk notifikasi Selesai.</p>
+                                    <p class="small muted mt">Wajib: {nama_pemohon}, {nomor_tiket}, serta salah satu dari {nama_verifikator} atau {inisial_verifikator}. Gunakan {survey_url} untuk notifikasi Selesai.</p>
                                 </div>
                             </details>
                             <div class="tte-preset-sample">
@@ -150,7 +156,7 @@
                 </div>
                 <div class="note-box">
                     <strong>Token wajib</strong>
-                    <p class="small muted"><code>{nama_pemohon}</code>, <code>{nomor_tiket}</code>, <code>{nama_verifikator}</code>.</p>
+                    <p class="small muted"><code>{nama_pemohon}</code>, <code>{nomor_tiket}</code>, dan salah satu dari <code>{nama_verifikator}</code> atau <code>{inisial_verifikator}</code>.</p>
                 </div>
             </section>
         </aside>

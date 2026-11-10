@@ -155,8 +155,7 @@
                         type="text"
                         value="{{ old('initials') }}"
                         maxlength="12"
-                        pattern="[A-Za-z0-9]*"
-                        placeholder="Contoh: AWN" />
+                        placeholder="Contoh: A.J. / CS" />
                 </div>
                 <div></div>
                 <div class="form-field">
@@ -184,6 +183,7 @@
                         placeholder="Ulangi password" />
                 </div>
             </div>
+            <p class="verifier-help">Inisial/penanda bebas sesuai kebutuhan (maksimal 12 karakter, tanpa baris baru). Penulisan huruf besar/kecil dipertahankan dan dapat digunakan pada preset WhatsApp melalui <code>{inisial_verifikator}</code>.</p>
             <p class="verifier-help">Password minimal 12 karakter dan mengandung huruf besar, huruf kecil, angka, serta simbol. Akun baru otomatis berperan sebagai verifikator, bukan admin.</p>
             <button class="btn btn-primary" type="submit">Tambah Verifikator</button>
         </form>
@@ -339,10 +339,10 @@
                             type="text"
                             name="initials"
                             maxlength="12"
-                            pattern="[A-Za-z0-9]*"
                             value="{{ $verifier->initials }}" />
                     </div>
                 </div>
+                <p class="small muted">Inisial/penanda boleh berupa teks bebas maksimal 12 karakter. Nilai ini dapat muncul sebagai tanda tangan preset WhatsApp <code>{inisial_verifikator}</code>.</p>
                 <p class="small muted">Kosongkan kedua kolom password apabila hanya mengubah profil.</p>
                 <div class="verifier-form-grid">
                     <div class="form-field">

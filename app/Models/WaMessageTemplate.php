@@ -61,7 +61,8 @@ class WaMessageTemplate extends Model {
         '{keterangan}' => 'Keterangan permohonan (jika diisi)',
         '{status_verifikasi_wa}' => 'Status pemeriksaan nomor pada AMS BSrE',
         '{nama_verifikator}' => 'Nama petugas',
-        '{inisial_verifikator}' => 'Inisial petugas',
+        '{inisial_verifikator}' =>
+            'Inisial atau penanda petugas yang ditentukan admin (maks. 12 karakter)',
         '{nama_instansi}' => 'Nama instansi/layanan',
         '{survey_url}' => 'Tautan survei internal (untuk pesan selesai)',
     ];
