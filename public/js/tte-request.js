@@ -1,3 +1,6 @@
+/* TTE v6.17 consolidated asset: public/js/tte-request.js. Original module order preserved. */
+
+/* ===== BEGIN public/js/public-request.js ===== */
 /* v15 public form: NIK/NIP directory autofill, editable profile, immutable full email, touch signature. */
 (() => {
     'use strict';
@@ -263,3 +266,110 @@
     if ([16, 18].includes(nik.value.length)) lookupNik(wasRestored);
     refreshSubmit();
 })();
+/* ===== END public/js/public-request.js ===== */
+
+/* ===== BEGIN public/js/public-email-admin-whatsapp.js ===== */
+/* TTE v65: kontak pengelola email dari formulir publik.
+ * Mobile: tautan native whatsapp:// hanya saat ketukan langsung oleh pengguna.
+ * Browser fallback tetap tersedia tanpa perlu AJAX, login, atau form submission.
+ * Desktop: WhatsApp Web. Tanpa JS: link wa.me dari Blade tetap berfungsi.
+ */
+(() => {
+    'use strict';
+    const primary = document.querySelector('[data-email-admin-wa="1"]');
+    if (!primary) return;
+
+    // Hanya tautan resmi dari konfigurasi server yang dapat menjadi deep link.
+    let destination;
+    try {
+        destination = new URL(primary.href);
+    } catch (_) {
+        return;
+    }
+    if (
+        destination.protocol !== 'https:' ||
+        destination.hostname !== 'wa.me' ||
+        destination.username ||
+        destination.password ||
+        destination.port ||
+        destination.hash
+    )
+        return;
+    const phone = destination.pathname.slice(1);
+    const message = destination.searchParams.get('text');
+    if (!/^628[0-9]{7,12}$/.test(phone) || !message || destination.pathname !== '/' + phone) return;
+
+    const mobile =
+        Boolean(navigator.userAgentData?.mobile) ||
+        /Android|iPhone|iPad|iPod|IEMobile|Windows Phone|Opera Mini/i.test(
+            navigator.userAgent || '',
+        ) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (!mobile) {
+        primary.href =
+            'https://web.whatsapp.com/send?phone=' + phone + '&text=' + encodeURIComponent(message);
+        primary.target = '_blank';
+        primary.rel = 'noopener noreferrer';
+        return;
+    }
+
+    // Anchor scheme harus ditap secara langsung. Jangan memanggilnya setelah await/timer:
+    // Safari/iOS dan sebagian browser Android membatasi deep link tanpa user gesture.
+    primary.href = 'whatsapp://send?phone=' + phone + '&text=' + encodeURIComponent(message);
+    primary.textContent = 'Buka Aplikasi WhatsApp';
+    primary.removeAttribute('target');
+    primary.setAttribute(
+        'aria-label',
+        'Buka aplikasi WhatsApp untuk menghubungi Pengelola Email Dinas',
+    );
+    primary.dataset.waNativeLink = '1';
+
+    const fallback = document.createElement('a');
+    fallback.href = destination.href;
+    fallback.textContent = 'Buka melalui browser';
+    fallback.className = 'btn btn-outline';
+    fallback.target = '_blank';
+    fallback.rel = 'noopener noreferrer';
+    fallback.dataset.waBrowserFallback = '1';
+    primary.insertAdjacentElement('afterend', fallback);
+
+    const notice = document.createElement('p');
+    notice.className = 'small muted';
+    notice.textContent =
+        'Jika WhatsApp tidak terbuka, pilih Buka melalui browser. Pesan baru terkirim setelah Anda menekan Kirim di WhatsApp.';
+    notice.style.flexBasis = '100%';
+    notice.style.margin = '2px 0 0';
+    fallback.insertAdjacentElement('afterend', notice);
+})();
+/* ===== END public/js/public-email-admin-whatsapp.js ===== */
+
+/* ===== BEGIN public/js/public-success-copy.js ===== */
+/* TTE v6.13: clipboard helper for the public success page only. */
+(() => {
+    'use strict';
+    const button = document.querySelector('[data-tte-ticket-copy]');
+    const number = document.getElementById('tte-ux-ticket-number');
+    const feedback = document.getElementById('tte-ux-copy-feedback');
+    if (!button || !number || !feedback) return;
+
+    button.addEventListener('click', async () => {
+        const value = number.textContent?.trim() || '';
+        if (!value) return;
+        try {
+            if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+            await navigator.clipboard.writeText(value);
+            feedback.textContent = 'Nomor tiket berhasil disalin.';
+        } catch (_) {
+            const selection = window.getSelection();
+            if (selection) {
+                const range = document.createRange();
+                range.selectNodeContents(number);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+            feedback.textContent = 'Pilih nomor tiket di atas, lalu salin secara manual.';
+        }
+    });
+})();
+/* ===== END public/js/public-success-copy.js ===== */

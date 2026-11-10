@@ -61,8 +61,8 @@ it('records final mobile notification but does not mark it sent by the user', fu
 });
 
 it('provides direct native deep link and visible fallback after AJAX persistence', function () {
-    $js = file_get_contents(public_path('js/whatsapp-open-refresh.js'));
-    $css = file_get_contents(public_path('css/ams-workflow.css'));
+    $js = file_get_contents(public_path('js/tte-ticket.js'));
+    $css = file_get_contents(public_path('css/tte-ticket.css'));
     expect($js)
         ->toContain('TTE v57: native WhatsApp')
         ->toContain('whatsapp://send?phone=')
@@ -84,7 +84,7 @@ it('provides direct native deep link and visible fallback after AJAX persistence
         ->assertSessionHasNoErrors();
     $this->get(route('tickets.show', $ticket))
         ->assertOk()
-        ->assertSee('whatsapp-open-refresh.js')
-        ->assertSee('whatsapp-open-refresh.js')
-        ->assertSee('?v=57');
+        ->assertSee('tte-ticket.js')
+        ->assertSee('tte-ticket.js')
+        ->assertSee('js/tte-ticket.js?v=617', false);
 });

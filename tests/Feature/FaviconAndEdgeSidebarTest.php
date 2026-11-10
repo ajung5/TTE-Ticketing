@@ -35,8 +35,8 @@ it('places icon-only collapse button on the outer edge of desktop sidebar', func
         ->assertSee('aria-pressed="false"', false)
         ->assertSee('favicon.svg')
         ->assertDontSee('class="tte-sidebar-toggle-label"', false);
-    $css = file_get_contents(public_path('css/tte-internal-refresh.css'));
-    $js = file_get_contents(public_path('js/tte-internal-refresh.js'));
+    $css = file_get_contents(public_path('css/tte-app.css'));
+    $js = file_get_contents(public_path('js/tte-app.js'));
     expect($css)
         ->toContain('TTE v53: centered outer-edge toggle')
         ->toContain('.sidebar > .tte-sidebar-edge-toggle')

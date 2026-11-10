@@ -896,7 +896,6 @@
             </section>
         </div>
     </div>
-    <link rel="stylesheet" href="{{ asset('css/ams-workflow.css') }}?v=57" />
-    <script src="{{ asset('js/ams-workflow.js') }}?v=58" defer></script>
-    <script src="{{ asset('js/whatsapp-open-refresh.js') }}?v=57" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/tte-ticket.css') }}?v=617" />
+    <script src="{{ asset('js/tte-ticket.js') }}?v=617" defer></script>
 @endsection

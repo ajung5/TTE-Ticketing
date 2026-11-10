@@ -15,8 +15,8 @@ it('uses an icon-only sidebar collapse control in the admin shell', function () 
         ->assertSee('data-sidebar-toggle', false)
         ->assertSee('aria-label="Perkecil menu samping"', false)
         ->assertDontSee('class="tte-sidebar-toggle-label"', false)
-        ->assertSee('tte-internal-refresh.css')
-        ->assertSee('tte-internal-refresh.js');
+        ->assertSee('tte-app.css')
+        ->assertSee('tte-app.js');
 });
 
 it('preserves the same icon-only desktop control and mobile menu for verifiers', function () {
@@ -30,8 +30,8 @@ it('preserves the same icon-only desktop control and mobile menu for verifiers',
 });
 
 it('has an icon control and CSS for both expanded and minimized sidebar states', function () {
-    $css = file_get_contents(public_path('css/tte-internal-refresh.css'));
-    $js = file_get_contents(public_path('js/tte-internal-refresh.js'));
+    $css = file_get_contents(public_path('css/tte-app.css'));
+    $js = file_get_contents(public_path('js/tte-app.js'));
     expect($css)
         ->toContain('TTE v52: icon-only desktop sidebar header.')
         ->toContain('.tte-internal.tte-sidebar-collapsed .tte-sidebar-head')

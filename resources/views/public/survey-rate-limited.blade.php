@@ -1,7 +1,7 @@
 @extends ('layouts.app')
 @section ('title', 'Batas Akses Survei')
 @section ('content')
-    <link rel="stylesheet" href="{{ asset('css/survey.css') }}?v=1" />
+    <link rel="stylesheet" href="{{ asset('css/tte-survey.css') }}?v=617" />
     <div class="survey-wrap">
         <section class="card survey-card" role="alert">
             <div class="eyebrow">SURVEI KEPUASAN LAYANAN TTE</div>

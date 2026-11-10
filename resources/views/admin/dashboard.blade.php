@@ -446,5 +446,4 @@
             </table>
         </div>
     </section>
-    <script src="{{ asset('js/tte-admin-period-v614.js') }}?v=614" defer></script>
 @endsection

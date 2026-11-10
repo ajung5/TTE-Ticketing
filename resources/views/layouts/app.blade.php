@@ -15,19 +15,8 @@
     <link rel="icon" href="{{ asset('favicon-16x16.png') }}?v=53" type="image/png" sizes="16x16" />
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=53" sizes="180x180" />
     <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=53" />
-    <link rel="stylesheet" href="{{ asset('css/tte.css') }}?v=3" />
-    <link rel="stylesheet" href="{{ asset('css/tte-ui-fixes.css') }}?v=1" />
-    <link rel="stylesheet" href="{{ asset('css/tte-ux-v613.css') }}?v=613" />
-    <link rel="stylesheet" href="{{ asset('css/tte-footer.css') }}?v=60.1" />
-    @if (request()->routeIs('public.success'))
-        <link rel="stylesheet" href="{{ asset('css/tte-active-request-alert.css') }}?v=61.2" />
-    @endif
-    @auth
-        <link rel="stylesheet" href="{{ asset('css/tte-internal-refresh.css') }}?v=59" />
-        <script src="{{ asset('js/tte-internal-refresh.js') }}?v=51" defer></script>
-        <script src="{{ asset('js/tte-back-to-top.js') }}?v=59" defer></script>
-    @endauth
-    <script src="{{ asset('js/tte.js') }}?v=59" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/tte-app.css') }}?v=617" />
+    <script src="{{ asset('js/tte-app.js') }}?v=617" defer></script>
 </head>
 
 <body>

@@ -14,7 +14,7 @@ it(
             ->assertSee('Jalan Mayjen Soetoyo Nomor 46')
             ->assertSee('Form Permohonan Layanan TTE')
             ->assertSee('Lambang Kabupaten Subang')
-            ->assertSee('public-request-official.css')
+            ->assertSee('tte-request.css')
             ->assertSee('Data belum sesuai? Anda bisa memperbaikinya.')
             ->assertSee('id="signature-pad"', false)
             ->assertSee('Syarat dan Ketentuan')

@@ -17,7 +17,7 @@ it('keeps a local placeholder guide available at the last WhatsApp preset editor
         ->toContain('Semua Placeholder dan Panduan Penulisan')
         ->toContain('data-insert-token="{nama_pemohon}"')
         ->toContain('data-insert-token="{nomor_tiket}"');
-    $js = file_get_contents(public_path('js/tte.js'));
+    $js = file_get_contents(public_path('js/tte-app.js'));
     // TTE v69: format-independent JS assertions (quote style and whitespace may vary).
     $this->assertMatchesRegularExpression(
         '~\bbutton\s*\.\s*closest\s*\(\s*[\x27\x22]\.tte-preset-detail[\x27\x22]\s*\)~',
@@ -35,8 +35,8 @@ it(
             ->assertOk()
             ->assertSee('data-tte-back-top', false)
             ->assertSee('Kembali ke atas')
-            ->assertSee('tte-back-to-top.js');
-        $js = file_get_contents(public_path('js/tte-back-to-top.js'));
+            ->assertSee('tte-app.js');
+        $js = file_get_contents(public_path('js/tte-app.js'));
         expect($js)
             ->toContain('max-width: 680px')
             ->toContain('nearBottom')

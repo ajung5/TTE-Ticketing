@@ -45,6 +45,6 @@
         @endif
     </div>
     @if (!$activeRequestNotice)
-        <script src="{{ asset('js/public-success-copy.js') }}?v=613" defer></script>
+        <script src="{{ asset('js/tte-request.js') }}?v=617" defer></script>
     @endif
 @endsection

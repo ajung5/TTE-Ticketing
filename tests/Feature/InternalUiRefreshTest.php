@@ -23,7 +23,7 @@ it(
         $this->actingAs($verifier)
             ->get(route('tickets.index'))
             ->assertOk()
-            ->assertSee('tte-internal-refresh.css')
+            ->assertSee('tte-app.css')
             ->assertSee('tte-queue-tabs')
             ->assertSee('Milik Saya')
             ->assertSee('Menu Navigasi')

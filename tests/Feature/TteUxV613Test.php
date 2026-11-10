@@ -68,7 +68,7 @@ it('exposes accessible help for a failed public NIK or NIP lookup', function () 
         ->assertOk()
         ->assertSee('id="email-help-trigger"', false)
         ->assertSee('email-help-modal');
-    $js = file_get_contents(public_path('js/public-request.js'));
+    $js = file_get_contents(public_path('js/tte-request.js'));
     expect($js)->toContain("e.key === 'Tab'")->toContain('helpTrigger.hidden = false');
 });
 

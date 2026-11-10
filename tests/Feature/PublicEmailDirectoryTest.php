@@ -199,7 +199,7 @@ it(
 );
 
 it('shows immutable email and only NIK and service before successful lookup', function () {
-    $response = $this->get(route('public.form'))->assertOk()->assertSee('public-request-v5.css');
+    $response = $this->get(route('public.form'))->assertOk()->assertSee('tte-request.css');
 
     // TTE v69: format-independent semantic HTML assertions (attribute order/newlines do not matter).
     $html = $response->getContent();

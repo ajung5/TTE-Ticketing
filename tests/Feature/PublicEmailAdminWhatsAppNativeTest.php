@@ -17,8 +17,8 @@ it(
             ->assertSee('Hubungi Pengelola via WhatsApp')
             ->assertSee('data-email-admin-wa="1"', false)
             ->assertSee('https://wa.me/6281212345678?text=Halo%20Pengelola%20Email', false)
-            ->assertSee('public-email-admin-whatsapp.js')
-            ->assertSee('?v=65');
+            ->assertSee('tte-request.js')
+            ->assertSee('js/tte-request.js?v=617', false);
     },
 );
 
@@ -33,7 +33,7 @@ it('tidak menampilkan link WhatsApp saat kontak pengelola email belum tersedia',
 it(
     'memiliki tautan native user-tap, fallback browser, dan tautan WhatsApp Web untuk desktop',
     function () {
-        $js = file_get_contents(public_path('js/public-email-admin-whatsapp.js'));
+        $js = file_get_contents(public_path('js/tte-request.js'));
         expect($js)
             ->toContain('whatsapp://send?phone=')
             ->toContain('https://web.whatsapp.com/send?phone=')

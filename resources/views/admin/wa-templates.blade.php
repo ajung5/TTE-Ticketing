@@ -161,5 +161,4 @@
             </section>
         </aside>
     </div>
-    <script src="{{ asset('js/tte-preset-preview.js') }}?v=58" defer></script>
 @endsection

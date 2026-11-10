@@ -15,8 +15,8 @@ it(
             ->assertSee('class="shell tte-internal"', false)
             ->assertSee('data-sidebar-toggle', false)
             ->assertSee('aria-pressed="false"', false)
-            ->assertSee('tte-internal-refresh.css')
-            ->assertSee('tte-internal-refresh.js')
+            ->assertSee('tte-app.css')
+            ->assertSee('tte-app.js')
             ->assertSee('tte-ams-disclosure')
             ->assertSee('Statistik Verifikator');
     },
@@ -36,8 +36,8 @@ it('uses the same shell for verifiers without changing ticket authorization', fu
 it(
     'ships responsive viewport and scroll containment rules with the internal stylesheet',
     function () {
-        $css = file_get_contents(public_path('css/tte-internal-refresh.css'));
-        $js = file_get_contents(public_path('js/tte-internal-refresh.js'));
+        $css = file_get_contents(public_path('css/tte-app.css'));
+        $js = file_get_contents(public_path('js/tte-app.js'));
         expect($css)
             ->toContain('TTE v51: viewport-safe shell')
             ->toContain('.tte-internal .table-scroll')

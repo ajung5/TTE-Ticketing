@@ -146,8 +146,8 @@ it(
                 ->assertSee('class="tte-site-footer-copy"', false)
                 ->assertSee('class="tte-site-footer-version"', false)
                 ->assertSee('v3.2.1')
-                ->assertSee('tte-footer.css')
-                ->assertSee('tte-footer.css?v=60.1');
+                ->assertSee('tte-app.css')
+                ->assertSee('tte-app.css?v=617');
             $html = $response->getContent();
             expect(strpos($html, $copyright))->toBeLessThan(strpos($html, 'v3.2.1'));
         };

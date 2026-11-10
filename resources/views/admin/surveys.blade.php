@@ -1,7 +1,7 @@
 @extends ('layouts.app')
 @section ('title', 'Hasil Survei Kepuasan')
 @section ('content')
-    <link rel="stylesheet" href="{{ asset('css/survey.css') }}?v=1" />
+    <link rel="stylesheet" href="{{ asset('css/tte-survey.css') }}?v=617" />
     <div class="page-heading">
         <div>
             <div class="eyebrow">ADMIN / EVALUASI LAYANAN</div>

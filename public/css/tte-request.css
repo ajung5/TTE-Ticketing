@@ -1,0 +1,972 @@
+/* TTE v6.17 consolidated asset: public/css/tte-request.css. Original module order preserved. */
+
+/* ===== BEGIN public/css/public-request-v5.css ===== */
+/* v5: responsive public request, compatible with existing dashboard theme. */
+.public-request-v5 {
+    max-width: 940px;
+    margin: 0 auto;
+}
+.public-request-v5 .public-layout {
+    display: block;
+    max-width: 850px;
+    margin: 0 auto;
+}
+.public-request-v5 .public-header {
+    max-width: 850px;
+    margin: 12px auto 26px;
+    align-items: center;
+}
+.public-request-v5 .public-form-card {
+    width: 100%;
+    padding: 30px 34px;
+    border-radius: 19px;
+}
+.public-request-v5 .request-form-heading {
+    margin-bottom: 23px;
+    gap: 10px;
+}
+.public-request-v5 .request-form-heading h2 {
+    font-size: 19px;
+    margin: 0 0 5px;
+}
+.public-request-v5 .request-form-heading p {
+    max-width: 490px;
+    margin: 0;
+}
+.public-request-v5 .request-step {
+    background: #fff;
+    border: 1px solid #dce6f2;
+    border-radius: 15px;
+    padding: 22px;
+    min-width: 0;
+}
+.public-request-v5 .request-entry {
+    background: linear-gradient(135deg, #f8fbff, #eef5ff);
+    border-color: #ccdff7;
+}
+.public-request-v5 .request-step-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 19px;
+}
+.public-request-v5 .request-step-title h2 {
+    font-size: 16px;
+    margin: 2px 0 4px;
+    line-height: 1.4;
+}
+.public-request-v5 .request-step-title p {
+    margin: 0;
+}
+.public-request-v5 .request-step-number {
+    display: grid;
+    place-items: center;
+    flex: 0 0 29px;
+    width: 29px;
+    height: 29px;
+    background: #e3edfd;
+    border: 1px solid #c5d8f7;
+    border-radius: 9px;
+    color: #325eb0;
+    font-weight: 800;
+    font-size: 13px;
+}
+.public-request-v5 .request-entry-grid,
+.public-request-v5 .public-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 16px;
+}
+.public-request-v5 .request-entry-grid > * {
+    min-width: 0;
+}
+.public-request-v5 label {
+    min-width: 0;
+}
+.public-request-v5 label input,
+.public-request-v5 label select {
+    margin-top: 2px;
+    min-height: 46px;
+    font-size: 14px;
+}
+.public-request-v5 input:focus-visible,
+.public-request-v5 select:focus-visible,
+.public-request-v5 button:focus-visible {
+    outline: 3px solid rgba(58, 115, 210, 0.24);
+    outline-offset: 1px;
+    border-color: #5783ce;
+}
+.public-request-v5 .field-group > p {
+    margin: 0;
+    line-height: 1.5;
+}
+.public-request-v5 .required-mark {
+    color: #b64252;
+    font-weight: 800;
+}
+.public-request-v5 .directory-lookup-status {
+    color: #295a9a;
+    min-height: 20px;
+    margin-top: 4px;
+}
+.public-request-v5 .request-pending-note {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    border: 1px dashed #c9d7e9;
+    border-radius: 14px;
+    background: #f7faff;
+    padding: 20px;
+    color: #385273;
+}
+.public-request-v5 .request-pending-note > span {
+    font-size: 26px;
+    line-height: 1;
+}
+.public-request-v5 .request-pending-note p {
+    margin: 4px 0 0;
+}
+.public-request-v5 .request-details {
+    border-color: #cfe0f3;
+}
+.public-request-v5 #uptd-field[hidden],
+.public-request-v5 .request-details[hidden],
+.public-request-v5 .request-pending-note[hidden] {
+    display: none !important;
+}
+.public-request-v5 .request-email-group input[readonly] {
+    color: #264b7d;
+    background: #eaf2ff;
+    border-color: #cbdbf5;
+    font-weight: 700;
+    cursor: default;
+}
+.public-request-v5 .consent-section,
+.public-request-v5 .signature-section {
+    padding: 21px;
+    border-radius: 15px;
+}
+.public-request-v5 .consent-section .request-step-title {
+    margin-bottom: 8px;
+}
+.public-request-v5 .public-check {
+    padding: 10px 0;
+    min-height: 44px;
+}
+.public-request-v5 .public-check input {
+    height: 19px;
+    width: 19px !important;
+    margin-top: 2px;
+}
+.public-request-v5 #signature-pad {
+    width: 100%;
+    height: 185px;
+    min-height: 185px;
+    max-height: 185px;
+    touch-action: none;
+}
+.public-request-v5 #public-submit {
+    min-height: 51px;
+    font-size: 14px;
+    font-weight: 750;
+}
+.public-request-v5 #public-submit:disabled {
+    opacity: 0.56;
+    cursor: not-allowed;
+}
+@media (max-width: 760px) {
+    .public-request-v5 .public-form-card {
+        padding: 23px;
+    }
+    .public-request-v5 .request-entry-grid,
+    .public-request-v5 .public-fields {
+        grid-template-columns: 1fr;
+    }
+    .public-request-v5 .request-step {
+        padding: 20px;
+    }
+    .public-request-v5 .request-form-heading {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+}
+@media (max-width: 480px) {
+    .public-auth-page {
+        padding: 14px 10px 38px;
+    }
+    .public-request-v5 .public-header {
+        gap: 11px;
+        margin: 8px 2px 19px;
+    }
+    .public-request-v5 .public-header .brand-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+        border-radius: 11px;
+    }
+    .public-request-v5 .public-header .eyebrow {
+        font-size: 9px;
+        letter-spacing: 0.5px;
+    }
+    .public-request-v5 .public-header h1 {
+        font-size: 21px;
+        line-height: 1.23;
+    }
+    .public-request-v5 .public-header p {
+        font-size: 11px;
+    }
+    .public-request-v5 .public-form-card {
+        padding: 18px 13px;
+        border-radius: 14px;
+    }
+    .public-request-v5 .request-form-heading {
+        gap: 9px;
+    }
+    .public-request-v5 .request-step {
+        padding: 16px 12px;
+        border-radius: 12px;
+    }
+    .public-request-v5 .request-step-title {
+        gap: 9px;
+    }
+    .public-request-v5 .request-step-title h2 {
+        font-size: 14px;
+    }
+    .public-request-v5 .request-entry-grid,
+    .public-request-v5 .public-fields {
+        gap: 13px;
+    }
+    .public-request-v5 .consent-section,
+    .public-request-v5 .signature-section {
+        padding: 16px 12px;
+    }
+    .public-request-v5 .signature-section .section-heading {
+        gap: 8px;
+        align-items: flex-start;
+    }
+    .public-request-v5 .signature-section .section-heading h2 {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    .public-request-v5 .signature-section .btn {
+        min-height: 42px;
+        flex-shrink: 0;
+    }
+    .public-request-v5 #signature-pad {
+        height: 170px;
+        min-height: 170px;
+        max-height: 170px;
+    }
+    .public-request-v5 .request-pending-note {
+        padding: 15px 12px;
+    }
+    .directory-modal-body {
+        max-height: calc(100dvh - 30px);
+        overflow-y: auto;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .public-request-v5 * {
+        scroll-behavior: auto !important;
+        transition: none !important;
+    }
+}
+
+/* =============================================
+   Syarat dan Ketentuan - Navy Theme
+   ============================================= */
+
+.public-request-v5 .consent-section {
+    background: #061a3d;
+    border: 1px solid #18345b;
+    border-radius: 15px;
+    padding: 34px 38px;
+    color: #ffffff;
+}
+
+.public-request-v5 .terms-title {
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 600;
+    line-height: 1.3;
+    color: #ffffff;
+    margin: 0;
+}
+
+.public-request-v5 .terms-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.45);
+    margin: 18px 0 36px;
+}
+
+.public-request-v5 .terms-intro {
+    font-size: 17px;
+    line-height: 1.65;
+    font-weight: 400;
+    color: #f2f5fc;
+    margin: 0 0 16px;
+}
+
+.public-request-v5 .terms-intro .required-mark {
+    color: #ff6976;
+}
+
+.public-request-v5 .terms-content {
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 7px;
+    padding: 20px 22px;
+    color: #f4f7ff;
+    background: rgba(255, 255, 255, 0.025);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.8;
+}
+
+.public-request-v5 .terms-content strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.public-request-v5 .terms-notification {
+    margin: 14px 0 0;
+    color: #e0e9fc;
+}
+
+/* Checkbox sejajar secara horizontal */
+
+.public-request-v5 .consent-section .terms-agreement {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start;
+    gap: 14px !important;
+
+    margin: 22px 0 0;
+    padding: 0;
+
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500 !important;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.public-request-v5 .consent-section .terms-agreement input[type='checkbox'] {
+    appearance: auto;
+    display: block;
+
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+
+    flex: 0 0 22px;
+    margin: 0 !important;
+    padding: 0;
+
+    accent-color: #ffffff;
+    cursor: pointer;
+}
+
+.public-request-v5 .terms-agreement span {
+    flex: 1;
+    color: #ffffff;
+}
+
+.public-request-v5 .terms-agreement input:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 4px;
+}
+
+/* Responsive smartphone */
+
+@media (max-width: 480px) {
+    .public-request-v5 .consent-section {
+        padding: 22px 18px;
+        border-radius: 12px;
+    }
+
+    .public-request-v5 .terms-divider {
+        margin: 14px 0 24px;
+    }
+
+    .public-request-v5 .terms-intro {
+        font-size: 14px;
+    }
+
+    .public-request-v5 .terms-content {
+        padding: 16px;
+        font-size: 13px;
+        line-height: 1.75;
+    }
+
+    .public-request-v5 .consent-section .terms-agreement {
+        font-size: 13px;
+        gap: 12px !important;
+        align-items: flex-start !important;
+    }
+}
+/* ===== END public/css/public-request-v5.css ===== */
+
+/* ===== BEGIN public/css/public-request-official.css ===== */
+/* v46 | Form Permohonan TTE - Kop Resmi Kabupaten Subang
+   CSS additive agar tampilan dashboard lainnya tidak berubah.
+   Palet: forest green logo, dark navy, restrained gold, warm-white.
+*/
+.public-auth-page {
+    background: #f4f7f6;
+}
+.public-request-v5 {
+    --tte-green: #075c3b;
+    --tte-green-dark: #064631;
+    --tte-navy: #16354d;
+    --tte-gold: #cfab3d;
+    --tte-border: #dce5e0;
+    --tte-muted: #526477;
+    max-width: 980px;
+    color: #1c3038;
+}
+.public-request-v5 .public-header {
+    max-width: 910px;
+    margin: 8px auto 0;
+    display: block;
+    background: #ffffff;
+    border: 1px solid #e1e7e3;
+    border-bottom: 0;
+    border-radius: 17px 17px 0 0;
+    padding: 26px 30px 0;
+}
+.public-request-v5 .official-letterhead {
+    display: grid;
+    grid-template-columns: 102px minmax(0, 1fr);
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 20px;
+}
+.public-request-v5 .official-letterhead__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.public-request-v5 .official-letterhead__logo img {
+    display: block;
+    height: 108px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+.public-request-v5 .official-letterhead__text {
+    min-width: 0;
+    text-align: center;
+    color: #16201e;
+    line-height: 1.27;
+}
+.public-request-v5 .official-letterhead__government {
+    font-size: clamp(15px, 2.1vw, 21px);
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+.public-request-v5 .official-letterhead__agency {
+    margin: 2px 0 6px;
+    font-size: clamp(18px, 2.6vw, 26px);
+    font-weight: 800;
+    letter-spacing: 0.005em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+.public-request-v5 .official-letterhead__address,
+.public-request-v5 .official-letterhead__contact {
+    font-size: clamp(12px, 1.5vw, 15px);
+    line-height: 1.45;
+}
+.public-request-v5 .official-letterhead__rule {
+    height: 6px;
+    border-top: 3px solid #202a27;
+    border-bottom: 1px solid #202a27;
+}
+.public-request-v5 .public-title-block {
+    max-width: 910px;
+    margin: 0 auto 20px;
+    background: #fff;
+    border: 1px solid #e1e7e3;
+    border-top: 0;
+    border-radius: 0 0 17px 17px;
+    padding: 22px 34px 26px;
+    text-align: center;
+}
+.public-request-v5 .public-title-block h1 {
+    color: var(--tte-navy);
+    font-size: clamp(21px, 2.6vw, 29px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    line-height: 1.25;
+}
+.public-request-v5 .public-title-block h1::after {
+    content: '';
+    display: block;
+    width: 56px;
+    height: 3px;
+    margin: 12px auto 10px;
+    border-radius: 4px;
+    background: var(--tte-gold);
+}
+.public-request-v5 .public-title-block p {
+    margin: 0;
+    color: var(--tte-muted);
+    font-size: 13px;
+}
+.public-request-v5 .public-layout {
+    max-width: 910px;
+}
+.public-request-v5 .public-form-card {
+    padding: 30px 36px;
+    border: 1px solid var(--tte-border);
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: 0 12px 35px rgba(15, 54, 43, 0.055);
+}
+.public-request-v5 #tte-public-form {
+    gap: 18px;
+}
+.public-request-v5 .request-step {
+    border: 1px solid var(--tte-border);
+    border-radius: 13px;
+    padding: 23px 24px;
+    background: #fff;
+}
+.public-request-v5 .request-entry {
+    background: #f8fbf9;
+    border-color: #d5e7dc;
+}
+.public-request-v5 .request-details {
+    border-color: #dce6e0;
+}
+.public-request-v5 .request-step-title {
+    align-items: center;
+    margin-bottom: 17px;
+    gap: 11px;
+}
+.public-request-v5 .request-step-title h2 {
+    margin: 0;
+    color: var(--tte-navy);
+    font-size: 16px;
+    font-weight: 750;
+}
+.public-request-v5 .request-step-title p {
+    color: var(--tte-muted);
+    margin-top: 3px;
+    font-size: 12px;
+}
+.public-request-v5 .request-step-number {
+    border-color: #c5dece;
+    background: #e2f1e8;
+    color: var(--tte-green);
+    border-radius: 9px;
+}
+.public-request-v5 .request-entry-grid,
+.public-request-v5 .public-fields {
+    gap: 15px 18px;
+}
+.public-request-v5 label {
+    font-weight: 600;
+    color: #243b48;
+}
+.public-request-v5 label input,
+.public-request-v5 label select {
+    background: #fff;
+    border: 1px solid #cedbd4;
+    border-radius: 9px;
+    min-height: 46px;
+}
+.public-request-v5 input:focus-visible,
+.public-request-v5 select:focus-visible,
+.public-request-v5 button:focus-visible {
+    border-color: var(--tte-green);
+    outline: 3px solid rgba(7, 92, 59, 0.18);
+    outline-offset: 1px;
+}
+.public-request-v5 #nik-help,
+.public-request-v5 #uptd-help,
+.public-request-v5 #email-help,
+.public-request-v5 #wa-help {
+    color: var(--tte-muted);
+    margin: 5px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.public-request-v5 #nik-status {
+    color: var(--tte-green);
+    min-height: 0;
+    margin-top: 3px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.public-request-v5 .request-pending-note {
+    display: block;
+    background: none;
+    padding: 0 4px;
+    margin: -4px 0 0;
+    border: 0;
+    border-radius: 0;
+    color: var(--tte-muted);
+    font-size: 12px;
+}
+.public-request-v5 .request-inline-note {
+    color: var(--tte-muted);
+    font-size: 12px;
+    margin: -5px 0 15px;
+}
+.public-request-v5 .request-email-group input[readonly],
+.public-request-v5 #uptd_display[readonly] {
+    background: #f0f5f2;
+    border-color: #d4e1d9;
+    color: #2c5143;
+    font-weight: 600;
+}
+.public-request-v5 .wa-phone-input {
+    border-radius: 9px;
+}
+.public-request-v5 .consent-section {
+    padding: 25px 28px;
+    border: 1px solid #154b3b;
+    border-radius: 13px;
+    background: linear-gradient(145deg, #0b4536 0%, #112f3f 100%);
+    color: #fff;
+}
+.public-request-v5 .terms-title {
+    color: #fff;
+    font-size: clamp(19px, 2.2vw, 23px);
+    font-weight: 750;
+    line-height: 1.3;
+}
+.public-request-v5 .terms-divider {
+    margin: 12px 0 18px;
+    background: rgba(255, 255, 255, 0.24);
+}
+.public-request-v5 .terms-intro {
+    font-size: 13px;
+    line-height: 1.65;
+    margin: 0 0 12px;
+    color: #e6f0ea;
+}
+.public-request-v5 .terms-content {
+    padding: 15px 17px;
+    border: 1px solid rgba(225, 242, 231, 0.24);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.055);
+    font-size: 13px;
+    line-height: 1.7;
+    color: #fff;
+}
+.public-request-v5 .terms-content strong,
+.public-request-v5 .terms-agreement span {
+    color: #fff;
+}
+.public-request-v5 .terms-notification {
+    color: #e3efe8;
+    margin-top: 9px;
+}
+.public-request-v5 .consent-section .terms-agreement {
+    margin: 17px 0 0;
+    gap: 12px !important;
+    font-size: 13px;
+    line-height: 1.55;
+}
+.public-request-v5 .consent-section .terms-agreement input[type='checkbox'] {
+    accent-color: #e7bd52;
+}
+.public-request-v5 .signature-section {
+    padding: 21px 24px;
+    border: 1px solid var(--tte-border);
+    background: #fbfcfb;
+    border-radius: 13px;
+}
+.public-request-v5 .signature-section h2 {
+    color: var(--tte-navy);
+    font-weight: 750;
+}
+.public-request-v5 #signature-pad {
+    border: 1px dashed #afc5b8;
+    background: #fff;
+    border-radius: 9px;
+}
+.public-request-v5 .signature-section .small.muted,
+.public-request-v5 .signature-feedback {
+    font-size: 12px;
+}
+.public-request-v5 .request-security-tip {
+    color: var(--tte-muted);
+    font-size: 12px;
+    margin: 0;
+    text-align: center;
+}
+.public-request-v5 #public-submit {
+    background: var(--tte-green);
+    border-color: var(--tte-green);
+    color: #fff;
+    border-radius: 10px;
+    min-height: 53px;
+    font-weight: 750;
+    font-size: 15px;
+}
+.public-request-v5 #public-submit:not(:disabled):hover {
+    background: var(--tte-green-dark);
+    border-color: var(--tte-green-dark);
+}
+.public-request-v5 #public-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+@media (max-width: 760px) {
+    .public-request-v5 .public-header,
+    .public-request-v5 .public-title-block,
+    .public-request-v5 .public-layout {
+        max-width: 100%;
+    }
+    .public-request-v5 .public-form-card {
+        padding: 21px;
+    }
+    .public-request-v5 .request-entry-grid,
+    .public-request-v5 .public-fields {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 540px) {
+    .public-request-v5 .public-header {
+        padding: 17px 13px 0;
+        margin: 4px auto 0;
+        border-radius: 12px 12px 0 0;
+    }
+    .public-request-v5 .official-letterhead {
+        grid-template-columns: 64px minmax(0, 1fr);
+        gap: 10px;
+        padding-bottom: 14px;
+    }
+    .public-request-v5 .official-letterhead__logo img {
+        height: 77px;
+        max-width: 64px;
+    }
+    .public-request-v5 .official-letterhead__government {
+        font-size: clamp(9px, 2.4vw, 12px);
+    }
+    .public-request-v5 .official-letterhead__agency {
+        font-size: clamp(11px, 3vw, 15px);
+        margin: 2px 0 4px;
+    }
+    .public-request-v5 .official-letterhead__address,
+    .public-request-v5 .official-letterhead__contact {
+        font-size: clamp(9px, 2.3vw, 11px);
+        line-height: 1.35;
+    }
+    .public-request-v5 .public-title-block {
+        padding: 16px 13px 19px;
+        margin-bottom: 14px;
+        border-radius: 0 0 12px 12px;
+    }
+    .public-request-v5 .public-title-block h1 {
+        font-size: 20px;
+    }
+    .public-request-v5 .public-title-block p {
+        font-size: 12px;
+    }
+    .public-request-v5 .public-form-card {
+        padding: 17px 13px;
+        border-radius: 12px;
+    }
+    .public-request-v5 .request-step {
+        padding: 17px 13px;
+    }
+    .public-request-v5 .consent-section,
+    .public-request-v5 .signature-section {
+        padding: 18px 14px;
+    }
+    .public-request-v5 .terms-content {
+        padding: 12px;
+        font-size: 12.5px;
+    }
+}
+@media (max-width: 480px) {
+    /* Kop surat disusun vertikal agar teks instansi tetap terbaca di layar kecil. */
+    .public-request-v5 .official-letterhead {
+        grid-template-columns: 1fr;
+        gap: 7px;
+        padding-bottom: 14px;
+    }
+    .public-request-v5 .official-letterhead__logo img {
+        height: 78px;
+        max-width: 72px;
+    }
+    .public-request-v5 .official-letterhead__government {
+        font-size: 12px;
+    }
+    .public-request-v5 .official-letterhead__agency {
+        font-size: 16px;
+    }
+    .public-request-v5 .official-letterhead__address,
+    .public-request-v5 .official-letterhead__contact {
+        font-size: 11px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .public-request-v5 * {
+        transition: none !important;
+    }
+}
+/* ===== END public/css/public-request-official.css ===== */
+
+/* ===== BEGIN public/css/wa-phone-prefix.css ===== */
+/* WhatsApp lokal: prefix Indonesia tetap (+62), pemohon hanya mengisi 8... */
+.public-request-v5 .wa-phone-field > label {
+    display: block;
+    margin-bottom: 7px;
+}
+.public-request-v5 .wa-phone-input {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    min-height: 46px;
+    border: 1px solid #d6e1ef;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    transition:
+        border-color 0.16s,
+        box-shadow 0.16s;
+}
+.public-request-v5 .wa-phone-input:focus-within {
+    border-color: #5783ce;
+    box-shadow: 0 0 0 3px rgba(58, 115, 210, 0.17);
+}
+.public-request-v5 .wa-phone-prefix {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 0 13px;
+    border-right: 1px solid #dce4ef;
+    background: #f7faff;
+    color: #243450;
+    white-space: nowrap;
+}
+.public-request-v5 .wa-flag-id {
+    display: inline-block;
+    width: 23px;
+    height: 16px;
+    border: 1px solid #d5dce6;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, #ce1126 0 50%, #fff 50% 100%);
+}
+.public-request-v5 .wa-phone-code {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+}
+.public-request-v5 .wa-phone-input #no_wa {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 13px;
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+    background: transparent;
+    border-radius: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #243450;
+}
+.public-request-v5 .wa-phone-input #no_wa:focus-visible {
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+}
+.public-request-v5 .wa-phone-input #no_wa::placeholder {
+    color: #8997aa;
+    opacity: 1;
+}
+@media (max-width: 480px) {
+    .public-request-v5 .wa-phone-prefix {
+        padding: 0 10px;
+        gap: 7px;
+    }
+    .public-request-v5 .wa-flag-id {
+        width: 21px;
+        height: 15px;
+    }
+}
+
+/* v14 — keselarasan enam field "Periksa Data Pemohon".
+   Override label flex dari tte.css tanpa mengubah alur/form backend. */
+.public-request-v5 .request-details .public-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 18px;
+    row-gap: 22px;
+    align-items: start;
+}
+.public-request-v5 .request-details .public-fields > label,
+.public-request-v5 .request-details .public-fields .field-group > label {
+    display: block;
+    min-width: 0;
+    min-height: 20px;
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 20px;
+    color: #354765;
+}
+.public-request-v5 .request-details .public-fields > label > input,
+.public-request-v5 .request-details .public-fields .request-email-group > label > input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 46px;
+    min-height: 46px;
+    margin: 7px 0 0;
+    padding: 10px 13px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+.public-request-v5 .request-details .public-fields > .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+.public-request-v5 .request-details .public-fields .field-group > p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.public-request-v5 .request-details .public-fields .wa-phone-input {
+    width: 100%;
+    height: 46px;
+    min-height: 46px;
+}
+.public-request-v5 .request-details .public-fields .required-mark {
+    display: inline;
+    margin-left: 2px;
+    vertical-align: baseline;
+}
+@media (max-width: 760px) {
+    .public-request-v5 .request-details .public-fields {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 18px;
+    }
+}
+@media (max-width: 480px) {
+    .public-request-v5 .request-details .public-fields {
+        row-gap: 16px;
+    }
+    .public-request-v5 .request-details .public-fields > label,
+    .public-request-v5 .request-details .public-fields .field-group > label {
+        font-size: 12px;
+    }
+}
+/* ===== END public/css/wa-phone-prefix.css ===== */

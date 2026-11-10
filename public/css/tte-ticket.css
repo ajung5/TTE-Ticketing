@@ -1,3 +1,6 @@
+/* TTE v6.17 consolidated asset: public/css/tte-ticket.css. Original module order preserved. */
+
+/* ===== BEGIN public/css/ams-workflow.css ===== */
 .ams-conditional[hidden] {
     display: none !important;
 }
@@ -38,3 +41,4 @@
 .tte-wa-native-panel a.btn {
     text-decoration: none;
 }
+/* ===== END public/css/ams-workflow.css ===== */

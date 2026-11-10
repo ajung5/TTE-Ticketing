@@ -128,8 +128,8 @@ it('uses synthetic data preview rather than a real employee record in preset edi
         ->get(route('admin.templates.index'))
         ->assertOk()
         ->assertSee('Pratinjau dengan data contoh')
-        ->assertSee('tte-preset-preview.js')
+        ->assertSee('tte-app.js')
         ->assertSee('data-tte-preset-preview');
-    $js = file_get_contents(public_path('js/tte-preset-preview.js'));
+    $js = file_get_contents(public_path('js/tte-app.js'));
     expect($js)->toContain('contoh@subang.go.id')->not->toContain('fetch(');
 });

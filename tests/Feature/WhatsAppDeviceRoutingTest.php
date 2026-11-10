@@ -112,7 +112,7 @@ it(
 it(
     'keeps mobile navigation progressive with a native form fallback and accessible labels',
     function () {
-        $js = file_get_contents(public_path('js/whatsapp-open-refresh.js'));
+        $js = file_get_contents(public_path('js/tte-ticket.js'));
         expect($js)
             ->toContain('wa_client')
             ->toContain('pendingMobileReturn')
@@ -127,7 +127,7 @@ it(
             ->assertSessionHasNoErrors();
         $this->get(route('tickets.show', $ticket))
             ->assertOk()
-            ->assertSee('whatsapp-open-refresh.js')
+            ->assertSee('tte-ticket.js')
             ->assertSee('Buka WhatsApp');
     },
 );

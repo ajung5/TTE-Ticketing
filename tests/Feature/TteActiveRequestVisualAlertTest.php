@@ -8,7 +8,7 @@ it('shows an accessible red warning for active previous requests', function () {
         ->assertSee('PERMOHONAN SEBELUMNYA MASIH AKTIF')
         ->assertSee('tte-request-blocked--danger')
         ->assertSee('role="alert"', false)
-        ->assertSee('css/tte-active-request-alert.css?v=61.2', false)
+        ->assertSee('css/tte-app.css?v=617', false)
         ->assertDontSee('PERMOHONAN BERHASIL DIKIRIM')
         ->assertDontSee('public-ticket-number');
 });

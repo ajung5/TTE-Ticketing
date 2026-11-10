@@ -309,9 +309,6 @@
             </div>
         </div>
     </div>
-    <link rel="stylesheet" href="{{ asset('css/public-request-v5.css') }}?v=23" />
-    <link rel="stylesheet" href="{{ asset('css/public-request-official.css') }}?v=1" />
-    <link rel="stylesheet" href="{{ asset('css/wa-phone-prefix.css') }}?v=1" />
-    <script src="{{ asset('js/public-request.js') }}?v=613" defer></script>
-    <script src="{{ asset('js/public-email-admin-whatsapp.js') }}?v=65" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/tte-request.css') }}?v=617" />
+    <script src="{{ asset('js/tte-request.js') }}?v=617" defer></script>
 @endsection

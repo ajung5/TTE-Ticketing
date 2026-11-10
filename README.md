@@ -17,6 +17,7 @@ Bagian ini hanya mencatat perubahan sejak baseline dokumentasi 5 November; bagia
 - **v6.15 — Preset WhatsApp:** tanda tangan pesan dapat memakai **`{nama_verifikator}` atau `{inisial_verifikator}`**. Inisial akun dapat ditulis bebas (maksimum 12 karakter, tanpa karakter kontrol/baris baru), tidak dipaksa huruf kapital, dan kembali ke nama lengkap jika inisial kosong. Preset yang telah disimpan tidak ditimpa.
 - **v6.16 — Profil akun:** administrator dan verifikator dapat memperbarui **nama, email login, dan inisial sendiri** melalui `/profile`. Perubahan email mensyaratkan **password saat ini**; perubahan password tetap di form terpisah. Field **Peran** bersifat `readonly` dan telah diberi tampilan read-only seperti field email pada formulir permohonan. Peran dan hak akses tetap ditentukan di backend, bukan oleh input profil.
 
+- **v6.17 — Konsolidasi aset frontend:** 11 CSS dan 10 JS di `public/` menjadi **4 CSS dan 3 JS** (`tte-app`, `tte-request`, `tte-ticket`, `tte-survey`); loader Blade serta regression test diadaptasi. Urutan deklarasi CSS dan logika JS dipertahankan, tanpa perubahan alur bisnis, otorisasi, atau skema database.
 Perubahan profil dan inisial **tidak memerlukan migrasi database**. Uji pada lingkungan development/staging dengan `php artisan test`, termasuk `tests/Feature/VerifierSelfProfileV616Test.php`, `tests/Feature/WaVerifierInitialsV615Test.php`, dan `tests/Feature/AdminCustomPeriodV614Test.php`.
 
 ---
