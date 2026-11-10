@@ -1731,7 +1731,8 @@ td strong {
     font-weight: 700;
     color: #4266a8;
 }
-#email_display[readonly] {
+#email_display[readonly],
+#profile-role[readonly] {
     background: #f1f5fb;
     color: #375572;
     cursor: not-allowed;
