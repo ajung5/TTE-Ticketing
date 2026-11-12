@@ -8,6 +8,10 @@ Aplikasi **Laravel 13** ini menyediakan formulir permohonan tanpa login, direkto
 >
 > **Perhatian production:** pencarian NIK/NIP pada versi ini **tidak menggunakan OTP/verifikasi email** dan masih dapat menampilkan profil pegawai berdasarkan NIK/NIP yang cocok. Rate limit telah tersedia, tetapi **bukan pembuktian kepemilikan identitas**. Sebelum akses dibuka luas, pastikan pengelola layanan menerima risikonya dan menerapkan pembatasan jaringan/WAF/anti-enumerasi yang memadai.
 
+## Versi rilis, perubahan fitur, dan perbaikan bug
+
+Versi aplikasi yang tampil di footer bersumber dari **file `VERSION`** (baseline: `1.0.0`). Perubahan fitur dan bug dicatat terpisah dengan ID `FEAT-...` dan `FIX-...` di [`CHANGELOG.md`](CHANGELOG.md). Label paket implementasi seperti `v6.20.1` bukan versi rilis aplikasi. `VERSION=1.0.0` tidak membuktikan suatu rilis sudah di-deploy; status rilis memerlukan tag Git, tes dan catatan deployment. Lihat [`docs/VERSIONING.md`](docs/VERSIONING.md) untuk tata cara merilis.
+
 ## Pembaruan implementasi — 10 November 2026
 
 Bagian ini hanya mencatat perubahan sejak baseline dokumentasi 5 November; bagian panduan lain tetap dipertahankan.
@@ -71,7 +75,7 @@ Perubahan profil dan inisial **tidak memerlukan migrasi database**. Uji pada lin
 
 **Aturan penting:** administrator tidak menugaskan, mengambil alih, memeriksa AMS, atau menyelesaikan tiket atas nama verifikator. Verifikator hanya boleh memproses tiket yang sudah diambil sendiri. Admin dapat menambah, memperbarui, menonaktifkan, dan memulihkan akun verifikator menurut aturan aplikasi; penghapusan akun menggunakan *soft delete* untuk mempertahankan riwayat.
 
-**UX terkini:** antrean verifikator memprioritaskan **Milik Saya**, sedangkan antrean Baru diurutkan dari tiket yang lebih lama; halaman detail menonjolkan layanan diajukan dan panel **Tindakan Berikutnya** berbasis keputusan backend. Admin memiliki statistik, rincian laporan dan indikator kesehatan direktori/SMTP/queue yang **informatif saja** (bukan bukti pengiriman email atau keberhasilan scheduler). Preset WA memiliki pratinjau dengan data fiktif dan panduan token di setiap editor. Footer seluruh halaman menampilkan copyright **DiskominfoSubang 2026–tahun berjalan** di kiri serta `vX.X.X` di kanan sesuai `TTE_APP_VERSION`.
+**UX terkini:** antrean verifikator memprioritaskan **Milik Saya**, sedangkan antrean Baru diurutkan dari tiket yang lebih lama; halaman detail menonjolkan layanan diajukan dan panel **Tindakan Berikutnya** berbasis keputusan backend. Admin memiliki statistik, rincian laporan dan indikator kesehatan direktori/SMTP/queue yang **informatif saja** (bukan bukti pengiriman email atau keberhasilan scheduler). Preset WA memiliki pratinjau dengan data fiktif dan panduan token di setiap editor. Footer seluruh halaman menampilkan copyright **DiskominfoSubang 2026–tahun berjalan** di kiri serta `vX.X.X` di kanan sesuai file `VERSION` di root repository.
 
 ### Formulir permohonan
 
@@ -407,7 +411,7 @@ QUEUE_CONNECTION=database
 FILESYSTEM_DISK=local
 
 TTE_SERVICE_NAME="Layanan TTE Kabupaten Subang"
-TTE_APP_VERSION=1.0.0
+# Versi rilis: baca file VERSION di root (bukan dari .env).
 TTE_NEW_TICKET_INBOX_EMAIL=inbox-operasional@domain-anda
 TTE_EMAIL_SHEET_ID=ISI_ID_SPREADSHEET
 TTE_EMAIL_SHEET_RANGE="Data ASN Merge!A1:R"
@@ -424,7 +428,7 @@ MAIL_FROM_ADDRESS=alamat-pengirim@domain-anda
 MAIL_FROM_NAME="${APP_NAME}"
 ```
 
-Isi `APP_KEY` melalui `php artisan key:generate` **hanya** jika instalasi baru dan database masih kosong. Jangan menyalin kunci production dari lingkungan development. `MAIL_MAILER=log` hanya untuk development; SMTP valid diperlukan untuk notifikasi inbox operasional dan reset password. Jika `QUEUE_CONNECTION=database`, pastikan worker dipantau dan berjalan terus-menerus. `TTE_APP_VERSION` adalah versi produk semantik; jangan otomatis menyamakannya dengan nomor patch.
+Isi `APP_KEY` melalui `php artisan key:generate` **hanya** jika instalasi baru dan database masih kosong. Jangan menyalin kunci production dari lingkungan development. `MAIL_MAILER=log` hanya untuk development; SMTP valid diperlukan untuk notifikasi inbox operasional dan reset password. Jika `QUEUE_CONNECTION=database`, pastikan worker dipantau dan berjalan terus-menerus. Versi aplikasi sekarang dibaca dari file Git-tracked `VERSION`; `TTE_APP_VERSION` di `.env` tidak lagi dipakai. Nomor paket patch bukan nomor rilis aplikasi.
 
 **Zona waktu:** `config/app.php` pada commit acuan masih menggunakan `UTC` secara hard-coded. Tampilan dan periode laporan yang relevan menggunakan `Asia/Jakarta` secara eksplisit. Menambahkan `APP_TIMEZONE=Asia/Jakarta` ke `.env` **tidak otomatis** mengubah konfigurasi tersebut tanpa perubahan source.
 
