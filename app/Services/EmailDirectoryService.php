@@ -38,7 +38,14 @@ class EmailDirectoryService {
     }
 
     public function available(): bool {
-        $lastSynced = DB::table('email_directories')->max('synced_at');
+        // Checkpoint sinkronisasi independen dari updated_at/synced_at setiap pegawai.
+        $lastSynced = DB::table('email_directory_sync_states')
+            ->where('name', 'email_directory')
+            ->value('last_success_at');
+        // Kompatibilitas direktori yang sudah ada sebelum migrasi checkpoint pertama.
+        if (!$lastSynced) {
+            $lastSynced = DB::table('email_directories')->max('synced_at');
+        }
         if (!$lastSynced) {
             return false;
         }
