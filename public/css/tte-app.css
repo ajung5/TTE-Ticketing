@@ -3525,3 +3525,8 @@ a.tte-page-item:focus-visible {
     }
 }
 /* ===== END public/css/tte-internal-refresh.css ===== */
+
+.tte-age-alert {
+    color: #7a4912;
+    font-weight: 700;
+}

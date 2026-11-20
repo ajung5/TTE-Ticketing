@@ -110,6 +110,10 @@
                                 <use href="#tte-ico-users" />
                             </svg>
                             Manajemen Verifikator</a>
+                        <a class="nav-item {{ request()->routeIs('admin.transfers.*') ? 'active' : '' }}"
+                            href="{{ route('admin.transfers.index') }}" @if (request()->routeIs('admin.transfers.*')) aria-current="page" @endif>
+                            <svg class="nav-symbol" aria-hidden="true" focusable="false"><use href="#tte-ico-ticket" /></svg>
+                            Pengalihan Tiket</a>
                         <a
                             class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
                             href="{{ route('admin.reports.tickets.index') }}"

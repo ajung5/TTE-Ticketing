@@ -83,52 +83,52 @@
                 }}
             </div>
             <div class="stat-foot">
-                <a href="{{ route('tickets.index', ['status' => 'Returned']) }}"
+                <a href="{{ route('tickets.index', $filters + ['status' => 'Returned']) }}"
                     >Lihat tiket yang Anda kembalikan →</a>
             </div>
         </div>
     </div>
     <nav class="tte-ux-focus-nav" aria-label="Fokus pekerjaan verifikator">
         <a
-            href="{{ route('tickets.index', ['focus' => 'action']) }}"
-            class="tte-ux-focus-link {{ request('focus') === 'action' ? 'is-active' : '' }}"
-            @if (request('focus') === 'action') aria-current="page" @endif>
+            href="{{ route('tickets.index', $filters + ['focus' => 'action']) }}"
+            class="tte-ux-focus-link {{ $focus === 'action' ? 'is-active' : '' }}"
+            @if ($focus === 'action') aria-current="page" @endif>
             Perlu Tindakan <strong>{{ $stats['actionable'] }}</strong>
         </a>
         <a
-            href="{{ route('tickets.index', ['focus' => 'waiting']) }}"
-            class="tte-ux-focus-link {{ request('focus') === 'waiting' ? 'is-active' : '' }}"
-            @if (request('focus') === 'waiting') aria-current="page" @endif>
+            href="{{ route('tickets.index', $filters + ['focus' => 'waiting']) }}"
+            class="tte-ux-focus-link {{ $focus === 'waiting' ? 'is-active' : '' }}"
+            @if ($focus === 'waiting') aria-current="page" @endif>
             Menunggu Pemohon <strong>{{ $stats['waiting'] }}</strong>
         </a>
     </nav>
     <nav class="tte-queue-tabs" aria-label="Filter cepat status tiket">
         <a
-            href="{{ route('tickets.index', ['status' => 'all']) }}"
-            @class (['is-active' => request('status') === 'all'])
-            @if (request('status') === 'all') aria-current="page" @endif
+            href="{{ route('tickets.index', $filters + ['status' => 'all']) }}"
+            @class (['is-active' => !$focus && $status === 'all'])
+            @if (!$focus && $status === 'all') aria-current="page" @endif
             >Semua Tiket</a>
         <a
-            href="{{ route('tickets.index', ['status' => 'Open']) }}"
-            @class (['is-active' => request('status') === 'Open'])
-            @if (request('status') === 'Open') aria-current="page" @endif
+            href="{{ route('tickets.index', $filters + ['status' => 'Open']) }}"
+            @class (['is-active' => !$focus && $status === 'Open'])
+            @if (!$focus && $status === 'Open') aria-current="page" @endif
             >Baru <strong>{{ $stats['new'] }}</strong></a>
         <a
-            href="{{ route('tickets.index', ['status' => 'In Progress']) }}"
+            href="{{ route('tickets.index', $filters + ['status' => 'In Progress']) }}"
             @class ([
-                'is-active' => in_array(request('status'), [null, 'In Progress'], true) && !request('focus')
+                'is-active' => !$focus && $status === 'In Progress'
             ])
-            @if (in_array(request('status'), [null, 'In Progress'], true) && !request('focus')) aria-current="page" @endif
+            @if (!$focus && $status === 'In Progress') aria-current="page" @endif
             >Milik Saya <strong>{{ $stats['mine'] }}</strong></a>
         <a
-            href="{{ route('tickets.index', ['status' => 'Done']) }}"
-            @class (['is-active' => request('status') === 'Done'])
-            @if (request('status') === 'Done') aria-current="page" @endif
+            href="{{ route('tickets.index', $filters + ['status' => 'Done']) }}"
+            @class (['is-active' => !$focus && $status === 'Done'])
+            @if (!$focus && $status === 'Done') aria-current="page" @endif
             >Selesai <strong>{{ $stats['completed'] }}</strong></a>
         <a
-            href="{{ route('tickets.index', ['status' => 'Returned']) }}"
-            @class (['is-active' => request('status') === 'Returned'])
-            @if (request('status') === 'Returned') aria-current="page" @endif
+            href="{{ route('tickets.index', $filters + ['status' => 'Returned']) }}"
+            @class (['is-active' => !$focus && $status === 'Returned'])
+            @if (!$focus && $status === 'Returned') aria-current="page" @endif
             >Pengajuan Ulang <strong>{{ $stats['returned'] }}</strong></a>
     </nav>
     <section class="card">
@@ -143,24 +143,29 @@
         <form class="filters" method="get" action="{{ route('tickets.index') }}">
             <input
                 name="q"
-                type="search"
+                type="search" maxlength="200"
                 value="{{ request('q') }}"
                 placeholder="Cari nama pemohon / nomor tiket"
                 aria-label="Cari tiket" />
-            <select name="status" aria-label="Filter status">
-                <option value="all" @selected (request('status') === 'all')>Semua Status</option>
-                @foreach ([
-                        'Open' => 'Baru',
-                        'In Progress' => 'Milik Saya',
-                        'Done' => 'Selesai',
-                        'Returned' => 'Perlu Pengajuan Ulang'
-                    ]
-                    as $value => $label)
-                    <option value="{{ $value }}" @selected (request('status') === $value)>
-                        {{ $label }}
-                    </option>
-                @endforeach
-            </select>
+            @if ($focus)
+                <input type="hidden" name="focus" value="{{ $focus }}" />
+                <strong>{{ $focus === 'waiting' ? 'Menunggu Pemohon' : 'Perlu Tindakan' }}</strong>
+            @else
+                <select name="status" aria-label="Filter status">
+                    <option value="all" @selected ($status === 'all')>Semua Status</option>
+                    @foreach ([
+                            'Open' => 'Baru',
+                            'In Progress' => 'Milik Saya',
+                            'Done' => 'Selesai',
+                            'Returned' => 'Perlu Pengajuan Ulang'
+                        ]
+                        as $value => $label)
+                        <option value="{{ $value }}" @selected ($status === $value)>
+                            {{ $label }}
+                        </option>
+                    @endforeach
+                </select>
+            @endif
             <select name="layanan" aria-label="Filter layanan">
                 <option value="">Semua Layanan</option>
                 @foreach ([
@@ -175,6 +180,9 @@
                 @endforeach
             </select>
             <button class="btn btn-primary" type="submit">Terapkan Filter</button><a href="{{ route('tickets.index') }}" class="btn btn-ghost">Reset</a>
+            @if (filled(request('q')) || filled(request('layanan')))
+                <a class="btn btn-ghost" href="{{ route('tickets.index', $scope) }}">Hapus filter di tab ini</a>
+            @endif
         </form>
         <div class="table-scroll">
             <table class="ticket-table">
@@ -191,7 +199,7 @@
                 </thead>
                 <tbody>
                     @forelse ($tickets as $ticket)
-                        <tr>
+                        <tr id="ticket-{{ $ticket->id }}">
                             <td data-label="Nomor Tiket">
                                 <strong class="ticket-number">{{
                                     $ticket->ticket_number ??
@@ -204,6 +212,11 @@
                                             ->format('d M Y · H:i')
                                     }}
                                 </div>
+                                @if ($ticket->status === 'Open' && $ticket->created_at)
+                                    <div @class (['small', 'tte-age-alert' => $ticket->created_at->lt(now()->subHours($attentionHours))])>
+                                        Menunggu {{ $ticket->created_at->locale('id')->diffForHumans(null, true) }}
+                                    </div>
+                                @endif
                                 @if ($ticket->source === 'simulated')
                                     <span class="demo-label">DATA SIMULASI</span>
                                 @endif
@@ -247,7 +260,7 @@
                                 @if ($ticket->status === 'Open')
                                     <form
                                         method="post"
-                                        action="{{ route('tickets.claim', $ticket) }}">
+                                        action="{{ route('tickets.claim', ['ticket' => $ticket, 'queue' => $queue]) }}">
                                         @csrf
                                         <button class="btn btn-primary btn-small" type="submit">
                                             Ambil Tiket →
@@ -256,8 +269,15 @@
                                 @elseif ($ticket->claimed_by === auth()->id())
                                     <a
                                         class="btn btn-outline btn-small"
-                                        href="{{ route('tickets.show', $ticket) }}"
-                                        >Lihat Detail →</a>
+                                        href="{{ route('tickets.show', ['ticket' => $ticket, 'queue' => $queue]) }}"
+                                        >{{ match (true) {
+                                             $ticket->status === 'Done' && $ticket->wa_pending => 'Konfirmasi WA akhir',
+                                             $ticket->status !== 'In Progress' => 'Lihat Detail',
+                                             $ticket->wa_pending => 'Konfirmasi WA',
+                                             !$ticket->wa_checked_at => 'Periksa AMS',
+                                             (bool) $ticket->awaiting_applicant_action => 'Cek tindak lanjut',
+                                             default => 'Lanjutkan penanganan',
+                                         } }} →</a>
                                 @else
                                     <span class="small muted">Petugas lain</span>
                                 @endif

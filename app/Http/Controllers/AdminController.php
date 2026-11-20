@@ -66,6 +66,24 @@ class AdminController extends Controller {
                 ->where('completed_at', '>=', now()->subDays(7))
                 ->count(),
         ];
+        $warningLabels = array_keys(array_filter([
+            'Direktori email perlu diperbarui' => !$health['directory_fresh'],
+            'Akses Google Sheets belum lengkap' => !$health['sheet_configured'],
+            'Konfigurasi SMTP perlu diperiksa' => !$health['smtp_ready'],
+            'Ada pekerjaan antrean yang gagal' => ($health['failed_jobs'] ?? 0) > 0,
+        ]));
+        $attentionList = null;
+        $attentionType = $request->query('attention');
+        if (in_array($attentionType, ['waiting', 'idle'], true)) {
+            $isOpen = $attentionType === 'waiting';
+            $dateColumn = $isOpen ? 'created_at' : 'updated_at';
+            $attentionList = Ticket::query()
+                ->where('status', $isOpen ? 'Open' : 'In Progress')
+                ->where($dateColumn, '<', now()->subHours($attentionHours))
+                ->orderBy($dateColumn)->orderBy('id')
+                ->paginate(12, ['id', 'ticket_number', 'layanan', $dateColumn], 'attention_page')
+                ->withQueryString()->fragment('attention-list');
+        }
         // Distribusi hasil aktual, berbeda dengan distribusi layanan yang diminta pemohon.
         $outcomes = Ticket::query()
             ->where('status', 'Done')
@@ -154,6 +172,7 @@ class AdminController extends Controller {
                 'ams',
                 'outcomes',
                 'health',
+                'warningLabels', 'attentionList', 'attentionType',
                 'attention',
                 'period',
                 'periodLabel',

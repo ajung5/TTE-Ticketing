@@ -167,20 +167,45 @@
             navigator.userAgent || '',
         ) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    let pendingMobileReturn = false;
-    let mobileWentBackground = false;
+    let pendingMobileReturn = null;
 
-    const refreshOnReturn = () => {
-        if (pendingMobileReturn && mobileWentBackground && document.visibilityState === 'visible') {
-            pendingMobileReturn = false;
-            window.location.reload();
+    async function refreshConfirmation(form) {
+        const state = document.getElementById(form.dataset.waState);
+        if (!state || state.dataset.loading) return;
+        state.dataset.loading = '1';
+        try {
+            const response = await fetch(window.location.href, {
+                cache: 'no-store',
+                credentials: 'same-origin',
+                headers: { Accept: 'text/html' },
+            });
+            if (!response.ok || response.redirected) throw new Error();
+            const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+            const updated = page.getElementById(state.id);
+            if (!updated || !updated.textContent.trim()) throw new Error();
+            state.replaceChildren(...updated.childNodes);
+            const next = page.querySelector('.tte-next-action');
+            if (next) document.querySelector('.tte-next-action')?.replaceWith(next);
+        } catch {
+            const retry = document.createElement('button');
+            retry.type = 'button';
+            retry.className = 'btn btn-outline';
+            retry.textContent = 'Muat ulang status konfirmasi';
+            retry.addEventListener('click', () => refreshConfirmation(form));
+            state.replaceChildren('Status konfirmasi belum tersedia. ', retry);
+        } finally {
+            delete state.dataset.loading;
         }
-    };
-    document.addEventListener('visibilitychange', () => {
-        if (pendingMobileReturn && document.visibilityState === 'hidden')
-            mobileWentBackground = true;
-        refreshOnReturn();
-    });
+    }
+
+    function refreshOnReturn() {
+        if (pendingMobileReturn && document.visibilityState === 'visible') {
+            const form = pendingMobileReturn;
+            pendingMobileReturn = null;
+            refreshConfirmation(form);
+        }
+    }
+    document.addEventListener('visibilitychange', refreshOnReturn);
     window.addEventListener('pageshow', refreshOnReturn);
     window.addEventListener('focus', refreshOnReturn);
 
@@ -251,16 +276,14 @@
         const native = makeLink('Buka Aplikasi WhatsApp', links.native, 'btn btn-wa full');
         native.setAttribute('data-wa-native-link', '1');
         native.addEventListener('click', () => {
-            pendingMobileReturn = true;
-            mobileWentBackground = false;
+            pendingMobileReturn = form;
         });
         const fallback = makeLink('Buka melalui browser', links.web, 'btn btn-outline full');
         fallback.target = '_blank';
         fallback.rel = 'noopener noreferrer';
         fallback.setAttribute('data-wa-browser-link', '1');
         fallback.addEventListener('click', () => {
-            pendingMobileReturn = true;
-            mobileWentBackground = false;
+            pendingMobileReturn = form;
         });
         const info = document.createElement('p');
         info.className = 'small muted';
@@ -270,7 +293,7 @@
         reload.type = 'button';
         reload.className = 'btn btn-ghost full';
         reload.textContent = 'Kembali ke Tiket / Tampilkan Konfirmasi';
-        reload.addEventListener('click', () => window.location.reload());
+        reload.addEventListener('click', () => refreshConfirmation(form));
 
         panel.append(title, explanation, native, fallback, info, reload);
         form.insertAdjacentElement('afterend', panel);
@@ -315,8 +338,7 @@
                 }
                 waTab.opener = null;
                 waTab.location.replace(destination.href);
-                // opened_at has already been persisted; enable the confirm button on reload.
-                window.location.reload();
+                await refreshConfirmation(form);
             }
         } catch (error) {
             if (waTab) waTab.close();
@@ -330,3 +352,31 @@
     });
 })();
 /* ===== END public/js/whatsapp-open-refresh.js ===== */
+
+// Warn only when navigation would discard edits in a different, unsubmitted form.
+(() => {
+    const dirty = new Set();
+    const warn = (event) => {
+        event.preventDefault();
+        event.returnValue = '';
+    };
+    function watch() {
+        window.removeEventListener('beforeunload', warn);
+        if (dirty.size) window.addEventListener('beforeunload', warn);
+    }
+    document.addEventListener('input', (event) => {
+        const form = event.target.form;
+        if (!form || !form.closest('.detail-columns')) return;
+        dirty.add(form);
+        watch();
+    });
+    document.addEventListener('submit', (event) => {
+        if (event.defaultPrevented || !dirty.delete(event.target)) return;
+        watch();
+        // Restore tracking if the user cancels navigation to keep another draft.
+        setTimeout(() => {
+            dirty.add(event.target);
+            watch();
+        }, 250);
+    });
+})();

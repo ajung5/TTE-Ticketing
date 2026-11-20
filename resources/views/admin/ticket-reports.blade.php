@@ -304,6 +304,9 @@
                 color: #333
             }
         }
+        .report-compact :is(th, td):is(:nth-child(2), :nth-child(7), :nth-child(8), :nth-child(9), :nth-child(12)) {
+            display: none;
+        }
     </style>
     <div class="report-page">
         <div class="page-heading report-heading">
@@ -393,11 +396,50 @@
                         @endforeach
                     </select>
                 </label>
+                <label for="report-q">Nama pemohon atau nomor tiket
+                    <input type="search" id="report-q" name="q" maxlength="200" value="{{ $filters['q'] ?? '' }}" />
+                </label>
+                <label for="report-opd">Unit kerja
+                    <select id="report-opd" name="opd">
+                        <option value="">Semua OPD</option>
+                        @foreach ($opds as $opd)
+                            <option value="{{ $opd }}" @selected (($filters['opd'] ?? '') === $opd)>{{ $opd }}</option>
+                        @endforeach
+                        @if (isset($filters['opd']) && !$opds->contains($filters['opd']))
+                            <option selected>{{ $filters['opd'] }}</option>
+                        @endif
+                    </select>
+                </label>
+                <label for="report-service">Layanan
+                    <select id="report-service" name="layanan">
+                        <option value="">Semua layanan</option>
+                        @foreach (['Reset Passphrase', 'Pembaruan', 'Pendaftaran'] as $service)
+                            <option @selected (($filters['layanan'] ?? '') === $service)>{{ $service }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label for="report-verifier">Verifikator
+                    <select id="report-verifier" name="verifier">
+                        <option value="">Semua verifikator</option>
+                        @foreach ($verifiers->sortBy('name') as $person)
+                            <option value="{{ $person->id }}" @selected ((int) ($filters['verifier'] ?? 0) === $person->id)>{{ $person->name }}</option>
+                        @endforeach
+                        @if (isset($filters['verifier']) && !$verifiers->has($filters['verifier']))
+                            <option value="{{ $filters['verifier'] }}" selected>Petugas #{{ $filters['verifier'] }} (tanpa tiket periode ini)</option>
+                        @endif
+                    </select>
+                </label>
+                <label for="report-display">Kolom rincian
+                    <select id="report-display" name="display">
+                        <option value="compact" @selected (($filters['display'] ?? 'compact') === 'compact')>Ringkas</option>
+                        <option value="full" @selected (($filters['display'] ?? '') === 'full')>Lengkap</option>
+                    </select>
+                </label>
                 <button type="submit" class="btn btn-primary report-action">
                     Tampilkan Laporan
                 </button>
             </form>
-            <p class="report-period-note" id="report-status-help">Filter status berlaku untuk rincian tiket dan unduhan CSV. Ringkasan serta tabel rekap tetap menampilkan semua status dalam periode.</p>
+            <p class="report-period-note" id="report-status-help">Filter status berlaku untuk rincian tiket dan unduhan CSV. Pencarian, OPD, layanan, dan verifikator juga membatasi keduanya. Ringkasan serta tabel rekap tetap menampilkan semua status dalam periode.</p>
         </section>
 
         <section class="report-no-print">
@@ -680,9 +722,9 @@
             <p class="report-period-note">Status rincian: <strong>{{
                 $statusLabels[$filters['status']] ??
                     'Semua Status'
-            }}</strong>. Menampilkan 20 baris per halaman. <strong>Unduh CSV Lengkap</strong> memuat seluruh baris sesuai periode dan status, termasuk halaman berikutnya. NIK, email, dan nomor WA tidak dimasukkan dalam laporan.</p>
+            }}</strong>. Menampilkan 20 baris per halaman. <strong>Unduh CSV Lengkap</strong> memuat seluruh baris sesuai periode dan filter rincian, termasuk halaman berikutnya. NIK, email, dan nomor WA tidak dimasukkan dalam laporan.</p>
             <div class="table-scroll">
-                <table class="report-table">
+                <table @class (['report-table', 'report-compact' => ($filters['display'] ?? 'compact') === 'compact'])>
                     <thead>
                         <tr>
                             <th>No. Tiket</th>

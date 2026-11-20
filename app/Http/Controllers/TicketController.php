@@ -33,8 +33,18 @@ class TicketController extends Controller {
 
     public function index(Request $request) {
         $this->verifier($request);
+        $request->validate([
+            'q' => ['nullable', 'string', 'max:200'],
+            'layanan' => ['nullable', Rule::in(['Reset Passphrase', 'Pembaruan', 'Pendaftaran'])],
+        ]);
         $query = Ticket::query()
             ->with('claimant')
+            ->withExists(['whatsappNotifications as wa_pending' => fn ($notice) => $notice
+                ->whereNotNull('opened_at')->whereNull('confirmed_at')
+                ->where(function ($stage) {
+                    $stage->where(fn ($final) => $final->where('tickets.status', 'Done')->where('event_type', 'completed'))
+                        ->orWhere(fn ($service) => $service->where('tickets.status', 'In Progress')->where('event_type', '<>', 'completed'));
+                })])
             ->where(
                 fn($q) => $q->where('status', 'Open')->orWhere('claimed_by', $request->user()->id),
             );
@@ -42,8 +52,10 @@ class TicketController extends Controller {
         $focus = in_array($request->query('focus'), ['waiting', 'action'], true)
             ? $request->query('focus')
             : null;
-        // Default to actionable work. Explicit status=all keeps full queue visible.
-        $status = $request->query('status', 'In Progress');
+        $status = $request->query('status');
+        if (!in_array($status, ['Open', 'In Progress', 'Done', 'Returned', 'all'], true)) {
+            $status = 'In Progress';
+        }
         if ($focus === 'waiting') {
             $query
                 ->where('status', 'In Progress')
@@ -128,7 +140,11 @@ class TicketController extends Controller {
                         ->orWhereNull('awaiting_applicant_action');
                 })
                 ->count();
-        return view('tickets.index', compact('tickets', 'stats'));
+        $filters = $request->only(['q', 'layanan']);
+        $scope = $focus ? ['focus' => $focus] : ['status' => $status];
+        $queue = $scope + $filters + ['page' => $tickets->currentPage()];
+        $attentionHours = max(1, (int) config('tte.ticket_attention_hours', 24));
+        return view('tickets.index', compact('tickets', 'stats', 'filters', 'scope', 'queue', 'status', 'focus', 'attentionHours'));
     }
 
     /** Pilih notifikasi dari hasil AMS aktual, bukan hanya layanan awal. */
@@ -338,12 +354,32 @@ class TicketController extends Controller {
         };
     }
 
+    /** Keep only internal queue parameters, also across redirects after a ticket action. */
+    private function queueContext(Request $request, Ticket $ticket): array {
+        $contexts = $request->session()->get('tte_queue_contexts', []);
+        if ($request->has('queue')) {
+            $context = $request->validate([
+                'queue' => ['array:status,focus,q,layanan,page'],
+                'queue.status' => ['sometimes', Rule::in(['Open', 'In Progress', 'Done', 'Returned', 'all'])],
+                'queue.focus' => ['sometimes', Rule::in(['action', 'waiting'])],
+                'queue.q' => ['nullable', 'string', 'max:200'],
+                'queue.layanan' => ['nullable', Rule::in(['Reset Passphrase', 'Pembaruan', 'Pendaftaran'])],
+                'queue.page' => ['sometimes', 'integer', 'min:1'],
+            ])['queue'];
+            unset($contexts[$ticket->id]);
+            $contexts[$ticket->id] = $context;
+            $request->session()->put('tte_queue_contexts', array_slice($contexts, -32, null, true));
+        }
+        return $contexts[$ticket->id] ?? [];
+    }
+
     public function show(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp) {
         $this->verifier($request);
         abort_unless(
             $ticket->status === 'Open' || $ticket->claimed_by === $request->user()->id,
             403,
         );
+        $queueContext = $this->queueContext($request, $ticket);
         $ticket->load(['claimant', 'activities.actor', 'whatsappNotifications', 'resetResends']);
         $applicantUptd = $ticket->uptd;
         if ($applicantUptd === null && $ticket->source !== 'simulated') {
@@ -410,6 +446,7 @@ class TicketController extends Controller {
                 'applicantUptd',
                 'completionReady',
                 'nextAction',
+                'queueContext',
             ),
         );
     }
@@ -430,6 +467,7 @@ class TicketController extends Controller {
 
     public function claim(Request $request, Ticket $ticket) {
         $this->verifier($request);
+        $this->queueContext($request, $ticket);
         DB::transaction(function () use ($ticket, $request) {
             $updated = Ticket::whereKey($ticket->id)
                 ->where('status', 'Open')
@@ -474,7 +512,7 @@ class TicketController extends Controller {
             ]);
         });
         return redirect()
-            ->route('tickets.index')
+            ->route('tickets.index', $this->queueContext($request, $ticket))
             ->with('success', 'Tiket dikembalikan ke antrean.');
     }
 

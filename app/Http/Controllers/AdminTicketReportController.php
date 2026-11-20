@@ -39,6 +39,11 @@ class AdminTicketReportController extends Controller {
                 'after_or_equal:from',
             ],
             'status' => ['nullable', Rule::in(array_keys(self::STATUS_LABELS))],
+            'q' => ['nullable', 'string', 'max:200'],
+            'opd' => ['nullable', 'string', 'max:255'],
+            'layanan' => ['nullable', Rule::in(['Reset Passphrase', 'Pembaruan', 'Pendaftaran'])],
+            'verifier' => ['nullable', 'integer', 'min:1'],
+            'display' => ['nullable', Rule::in(['compact', 'full'])],
         ]);
         $mode = $data['mode'] ?? 'month';
         if ($mode === 'custom') {
@@ -73,6 +78,10 @@ class AdminTicketReportController extends Controller {
             $label = $from->locale('id')->translatedFormat('F Y');
         }
         $filters['status'] = $data['status'] ?? '';
+        $filters += array_filter(
+            \Illuminate\Support\Arr::only($data, ['q', 'opd', 'layanan', 'verifier', 'display']),
+            static fn ($value) => $value !== null && $value !== '',
+        );
         return [$from->utc(), $to->addDay()->utc(), $filters, $label];
     }
 
@@ -86,6 +95,21 @@ class AdminTicketReportController extends Controller {
             ->where('created_at', '<', $endExclusive);
         if ($status) {
             $query->where('status', $status);
+        }
+        return $query;
+    }
+
+    private function detailRows(CarbonImmutable $start, CarbonImmutable $endExclusive, array $filters): Builder {
+        $query = $this->incoming($start, $endExclusive, $filters['status']);
+        foreach (['opd' => 'opd', 'layanan' => 'layanan', 'verifier' => 'claimed_by'] as $filter => $column) {
+            if (isset($filters[$filter])) {
+                $query->where($column, $filters[$filter]);
+            }
+        }
+        if (isset($filters['q'])) {
+            $pattern = '%' . trim($filters['q']) . '%';
+            $query->where(fn ($rows) => $rows->where('ticket_number', 'like', $pattern)
+                ->orWhere('nama_user', 'like', $pattern));
         }
         return $query;
     }
@@ -164,12 +188,14 @@ class AdminTicketReportController extends Controller {
             ->get(['id', 'name', 'initials'])
             ->keyBy('id');
         $statusLabels = self::STATUS_LABELS;
-        $tickets = $this->incoming($start, $endExclusive, $filters['status'])
+        $opds = $this->incoming($start, $endExclusive)->whereNotNull('opd')
+            ->where('opd', '<>', '')->distinct()->orderBy('opd')->pluck('opd');
+        $tickets = $this->detailRows($start, $endExclusive, $filters)
             ->with('claimant:id,name,initials')
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(20)
-            ->withQueryString();
+            ->withQueryString()->fragment('tte-report-details');
         return response()
             ->view(
                 'admin.ticket-reports',
@@ -177,6 +203,7 @@ class AdminTicketReportController extends Controller {
                     'summary',
                     'amsSummary',
                     'completedDuringPeriod',
+                    'opds',
                     'byService',
                     'byOutcome',
                     'bySource',
@@ -236,7 +263,7 @@ class AdminTicketReportController extends Controller {
                     '',
                 );
                 foreach (
-                    $this->incoming($start, $endExclusive, $filters['status'])
+                    $this->detailRows($start, $endExclusive, $filters)
                         ->with('claimant:id,name,initials')
                         ->lazyById(500)
                     as $ticket

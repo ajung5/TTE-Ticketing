@@ -12,8 +12,37 @@
             <h1>Statistik Layanan TTE</h1>
             <p class="muted">Ringkasan kinerja dan antrean permohonan lintas layanan.</p>
         </div>
-        <span class="pill pill-blue">● Monitoring aktif</span>
+        @if ($warningLabels)
+            <a class="pill pill-neutral" href="#tte-health">Kesehatan sistem · {{ count($warningLabels) }} perlu perhatian</a>
+        @endif
     </div>
+    @if ($warningLabels)
+        <div class="alert warn" role="status"><strong>Perlu perhatian.</strong> {{ implode(' · ', $warningLabels) }}.</div>
+    @endif
+    <nav class="tte-queue-tabs" aria-label="Tiket melewati ambang perhatian">
+        @foreach (['waiting' => 'Belum diambil', 'idle' => 'Diproses tanpa pembaruan'] as $key => $label)
+            <a href="{{ route('admin.dashboard', request()->only(['period', 'from', 'to']) + ['attention' => $key]) }}#attention-list"
+                @if ($attentionType === $key) aria-current="page" class="is-active" @endif>
+                {{ $label }} &gt; {{ $attention['hours'] }} jam <strong>{{ $attention[$key] }}</strong>
+            </a>
+        @endforeach
+    </nav>
+    @if ($attentionList !== null)
+        <section class="card" id="attention-list">
+            <h2>{{ $attentionType === 'waiting' ? 'Antrean belum diambil' : 'Tiket diproses tanpa pembaruan' }}</h2>
+            <p class="small muted">Kondisi saat ini · melewati {{ $attention['hours'] }} jam.</p>
+            <ul>
+                @forelse ($attentionList as $item)
+                    <li>{{ $item->ticket_number ?: '#' . $item->id }} · {{ $item->service_label }} ·
+                        {{ ($attentionType === 'waiting' ? $item->created_at : $item->updated_at)->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB
+                    </li>
+                @empty
+                    <li>Seluruh tiket dalam kelompok ini masih di bawah ambang perhatian.</li>
+                @endforelse
+            </ul>
+            {{ $attentionList->links() }}
+        </section>
+    @endif
     <section class="card tte-ux-period-card" aria-labelledby="tte-ux-period-heading">
         <div class="tte-ux-period-head">
             <div>
@@ -210,11 +239,12 @@
             <div class="stat-foot">Tidak dihitung sebagai tiket selesai</div>
         </div>
     </div>
-    <details class="card mt tte-collapsible tte-health-disclosure">
+    <details id="tte-health" class="card mt tte-collapsible tte-health-disclosure" @if ($warningLabels) open @endif>
         <summary class="section-heading tte-disclosure-heading">
             <div>
                 <div class="eyebrow">MONITORING OPERASIONAL</div>
                 <h2>Kesehatan Sistem TTE</h2>
+                @if ($warningLabels)<strong>{{ count($warningLabels) }} perlu perhatian</strong>@endif
                 <p class="small muted">Status direktori, SMTP, dan antrean pekerjaan. Tidak mengubah konfigurasi server.</p>
             </div>
         </summary>
