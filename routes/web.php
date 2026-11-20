@@ -90,10 +90,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/tickets/{ticket}/reset-resends', [TicketResetResendController::class, 'store'])
         ->middleware('throttle:10,1')
         ->name('tickets.reset-resends.store');
-    Route::post('/tickets/{ticket}/reset-resends/{resend}/whatsapp', [TicketResetResendController::class, 'openWhatsApp'])
+    Route::post('/tickets/{ticket}/reset-resends/{resend}/whatsapp', [
+        TicketResetResendController::class,
+        'openWhatsApp',
+    ])
         ->middleware('throttle:20,1')
         ->name('tickets.reset-resends.whatsapp');
-    Route::post('/tickets/{ticket}/reset-resends/{resend}/confirm', [TicketResetResendController::class, 'confirmWhatsApp'])
+    Route::post('/tickets/{ticket}/reset-resends/{resend}/confirm', [
+        TicketResetResendController::class,
+        'confirmWhatsApp',
+    ])
         ->middleware('throttle:20,1')
         ->name('tickets.reset-resends.confirm');
     Route::post('/tickets/{ticket}/return-for-correction', [
@@ -114,9 +120,13 @@ Route::middleware('auth')->group(function () {
         TicketController::class,
         'confirmWhatsApp',
     ])->name('tickets.whatsapp.confirm');
-    Route::get('/admin/pengalihan-tiket', [AdminTicketTransferController::class, 'index'])
-        ->name('admin.transfers.index');
-    Route::post('/admin/pengalihan-tiket/{ticket}', [AdminTicketTransferController::class, 'transfer'])
+    Route::get('/admin/pengalihan-tiket', [AdminTicketTransferController::class, 'index'])->name(
+        'admin.transfers.index',
+    );
+    Route::post('/admin/pengalihan-tiket/{ticket}', [
+        AdminTicketTransferController::class,
+        'transfer',
+    ])
         ->middleware('throttle:10,1')
         ->name('admin.transfers.store');
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');

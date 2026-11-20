@@ -13,28 +13,43 @@
             <p class="muted">Ringkasan kinerja dan antrean permohonan lintas layanan.</p>
         </div>
         @if ($warningLabels)
-            <a class="pill pill-neutral" href="#tte-health">Kesehatan sistem · {{ count($warningLabels) }} perlu perhatian</a>
+            <a class="pill pill-neutral" href="#tte-health"
+                >Kesehatan sistem · {{ count($warningLabels) }} perlu perhatian</a>
         @endif
     </div>
     @if ($warningLabels)
-        <div class="alert warn" role="status"><strong>Perlu perhatian.</strong> {{ implode(' · ', $warningLabels) }}.</div>
+        <div class="alert warn" role="status">
+            <strong>Perlu perhatian.</strong> {{ implode(' · ', $warningLabels) }}.
+        </div>
     @endif
     <nav class="tte-queue-tabs" aria-label="Tiket melewati ambang perhatian">
         @foreach (['waiting' => 'Belum diambil', 'idle' => 'Diproses tanpa pembaruan'] as $key => $label)
-            <a href="{{ route('admin.dashboard', request()->only(['period', 'from', 'to']) + ['attention' => $key]) }}#attention-list"
+            <a
+                href="{{ route('admin.dashboard', request()->only(['period', 'from', 'to']) + ['attention' => $key]) }}#attention-list"
                 @if ($attentionType === $key) aria-current="page" class="is-active" @endif>
-                {{ $label }} &gt; {{ $attention['hours'] }} jam <strong>{{ $attention[$key] }}</strong>
+                {{ $label }} &gt; {{ $attention['hours'] }} jam
+                <strong>{{ $attention[$key] }}</strong>
             </a>
         @endforeach
     </nav>
     @if ($attentionList !== null)
         <section class="card" id="attention-list">
-            <h2>{{ $attentionType === 'waiting' ? 'Antrean belum diambil' : 'Tiket diproses tanpa pembaruan' }}</h2>
+            <h2>
+                {{
+                    $attentionType === 'waiting'
+                        ? 'Antrean belum diambil'
+                        : 'Tiket diproses tanpa pembaruan'
+                }}
+            </h2>
             <p class="small muted">Kondisi saat ini · melewati {{ $attention['hours'] }} jam.</p>
             <ul>
                 @forelse ($attentionList as $item)
-                    <li>{{ $item->ticket_number ?: '#' . $item->id }} · {{ $item->service_label }} ·
-                        {{ ($attentionType === 'waiting' ? $item->created_at : $item->updated_at)->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB
+                    <li>
+                        {{ $item->ticket_number ?: '#' . $item->id }} · {{ $item->service_label }} · {{
+                            ($attentionType === 'waiting' ? $item->created_at : $item->updated_at)
+                                ->timezone('Asia/Jakarta')
+                                ->format('d/m/Y H:i')
+                        }} WIB
                     </li>
                 @empty
                     <li>Seluruh tiket dalam kelompok ini masih di bawah ambang perhatian.</li>
@@ -239,12 +254,17 @@
             <div class="stat-foot">Tidak dihitung sebagai tiket selesai</div>
         </div>
     </div>
-    <details id="tte-health" class="card mt tte-collapsible tte-health-disclosure" @if ($warningLabels) open @endif>
+    <details
+        id="tte-health"
+        class="card mt tte-collapsible tte-health-disclosure"
+        @if ($warningLabels) open @endif>
         <summary class="section-heading tte-disclosure-heading">
             <div>
                 <div class="eyebrow">MONITORING OPERASIONAL</div>
                 <h2>Kesehatan Sistem TTE</h2>
-                @if ($warningLabels)<strong>{{ count($warningLabels) }} perlu perhatian</strong>@endif
+                @if ($warningLabels)
+                    <strong>{{ count($warningLabels) }} perlu perhatian</strong>
+                @endif
                 <p class="small muted">Status direktori, SMTP, dan antrean pekerjaan. Tidak mengubah konfigurasi server.</p>
             </div>
         </summary>
@@ -431,7 +451,8 @@
             <span class="pill pill-neutral">{{ $verifiers->count() }} verifikator</span>
         </div>
         <p class="small muted mt">Admin dapat mengalihkan tiket yang sedang diproses kepada verifikator lain tanpa mengubah nomor atau hasil AMS.</p>
-        <a class="btn btn-outline mt" href="{{ route('admin.transfers.index') }}">Kelola Pengalihan Tiket Aktif →</a>
+        <a class="btn btn-outline mt" href="{{ route('admin.transfers.index') }}"
+            >Kelola Pengalihan Tiket Aktif →</a>
         <div class="table-scroll">
             <table>
                 <thead>

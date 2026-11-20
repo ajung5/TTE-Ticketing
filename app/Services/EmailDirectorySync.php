@@ -83,15 +83,16 @@ class EmailDirectorySync {
                 $seenNip[$nip] = true;
             }
 
-            $hash = $nik !== ''
-                ? $this->directory->nikHash($nik)
-                : $this->directory->nipOnlyHash($nip);
+            $hash =
+                $nik !== '' ? $this->directory->nikHash($nik) : $this->directory->nipOnlyHash($nip);
             if (isset($records[$hash])) {
                 throw new \RuntimeException('NIK/NIP duplikat pada baris ' . ($line + 2) . '.');
             }
             $email = $this->directory->normalizedEmail($emailRaw);
             if ($emailRaw !== '' && !$email) {
-                throw new \RuntimeException('Email Gov tidak valid pada baris ' . ($line + 2) . '.');
+                throw new \RuntimeException(
+                    'Email Gov tidak valid pada baris ' . ($line + 2) . '.',
+                );
             }
 
             $records[$hash] = [
@@ -162,11 +163,7 @@ class EmailDirectorySync {
             });
 
             $removeCount = count($removeIds);
-            if (
-                !$allowLargeRemoval &&
-                $removeCount > 2 &&
-                $removeCount * 4 > $existingCount
-            ) {
+            if (!$allowLargeRemoval && $removeCount > 2 && $removeCount * 4 > $existingCount) {
                 throw new \RuntimeException(
                     'Sinkronisasi ditolak: lebih dari 25% direktori lama akan terhapus ' .
                         "({$removeCount}/{$existingCount}). Periksa kelengkapan spreadsheet; " .

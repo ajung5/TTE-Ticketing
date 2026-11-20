@@ -791,7 +791,9 @@ it(
                 ->assertSee('class="tte-site-footer-version"', false)
                 ->assertSee('v3.2.1')
                 ->assertSee('tte-app.css')
-                ->assertSee('tte-app.css?v=' . \App\Support\VersionedAsset::version('css/tte-app.css'));
+                ->assertSee(
+                    'tte-app.css?v=' . \App\Support\VersionedAsset::version('css/tte-app.css'),
+                );
             $html = $response->getContent();
             expect(strpos($html, $copyright))->toBeLessThan(strpos($html, 'v3.2.1'));
         };

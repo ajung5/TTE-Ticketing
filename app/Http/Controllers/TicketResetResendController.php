@@ -24,8 +24,11 @@ class TicketResetResendController extends Controller {
     private function attempt(Request $request, Ticket $ticket, TicketResetResend $resend): void {
         $this->owner($request, $ticket);
         abort_unless($resend->ticket_id === $ticket->id, 404);
-        abort_unless($resend->verifier_id === $request->user()->id,
-            403, 'Riwayat pengiriman ini milik petugas sebelumnya. Buat permintaan baru.');
+        abort_unless(
+            $resend->verifier_id === $request->user()->id,
+            403,
+            'Riwayat pengiriman ini milik petugas sebelumnya. Buat permintaan baru.',
+        );
     }
 
     public function store(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp) {
@@ -48,10 +51,14 @@ class TicketResetResendController extends Controller {
                     'reason' => 'Kirim ulang berikutnya baru dapat dicatat setelah 2 menit.',
                 ]);
             }
-            if (TicketResetResend::where('ticket_id', $record->id)
-                ->where('created_at', '>=', now()->subDay())->count() >= 5) {
+            if (
+                TicketResetResend::where('ticket_id', $record->id)
+                    ->where('created_at', '>=', now()->subDay())
+                    ->count() >= 5
+            ) {
                 throw ValidationException::withMessages([
-                    'reason' => 'Batas 5 permintaan per 24 jam tercapai. Eskalasi jika masih gagal.',
+                    'reason' =>
+                        'Batas 5 permintaan per 24 jam tercapai. Eskalasi jika masih gagal.',
                 ]);
             }
             $record->load('claimant');
@@ -71,17 +78,28 @@ class TicketResetResendController extends Controller {
                 'ticket_id' => $record->id,
                 'actor_id' => $request->user()->id,
                 'action' => 'reset_link_resent',
-                'note' => 'Permintaan #' . $attempt->id . '; alasan: ' . $reason .
+                'note' =>
+                    'Permintaan #' .
+                    $attempt->id .
+                    '; alasan: ' .
+                    $reason .
                     '; verifikator menyatakan telah mengirim ulang melalui AMS BSrE. ' .
                     'Belum ada konfirmasi email diterima.',
             ]);
         });
-        return redirect()->route('tickets.show', $ticket)->with('success',
-            'Kirim ulang melalui AMS tercatat. Silakan buka WhatsApp dan konfirmasi setelah pesan dikirim.');
+        return redirect()
+            ->route('tickets.show', $ticket)
+            ->with(
+                'success',
+                'Kirim ulang melalui AMS tercatat. Silakan buka WhatsApp dan konfirmasi setelah pesan dikirim.',
+            );
     }
 
     public function openWhatsApp(
-        Request $request, Ticket $ticket, TicketResetResend $resend, WhatsAppMessage $whatsapp,
+        Request $request,
+        Ticket $ticket,
+        TicketResetResend $resend,
+        WhatsAppMessage $whatsapp,
     ) {
         $this->attempt($request, $ticket, $resend);
         DB::transaction(function () use ($request, $ticket, $resend) {
@@ -113,11 +131,14 @@ class TicketResetResendController extends Controller {
                 'ticket_id' => $record->id,
                 'actor_id' => $request->user()->id,
                 'action' => 'reset_resend_wa_confirmed',
-                'note' => 'Notifikasi pengiriman ulang #' . $attempt->id .
+                'note' =>
+                    'Notifikasi pengiriman ulang #' .
+                    $attempt->id .
                     ' dikonfirmasi manual oleh verifikator; bukan bukti email BSrE diterima.',
             ]);
         });
-        return redirect()->route('tickets.show', $ticket)
+        return redirect()
+            ->route('tickets.show', $ticket)
             ->with('success', 'Notifikasi WhatsApp kirim ulang dikonfirmasi manual.');
     }
 }

@@ -143,13 +143,18 @@
         <form class="filters" method="get" action="{{ route('tickets.index') }}">
             <input
                 name="q"
-                type="search" maxlength="200"
+                type="search"
+                maxlength="200"
                 value="{{ request('q') }}"
                 placeholder="Cari nama pemohon / nomor tiket"
                 aria-label="Cari tiket" />
             @if ($focus)
                 <input type="hidden" name="focus" value="{{ $focus }}" />
-                <strong>{{ $focus === 'waiting' ? 'Menunggu Pemohon' : 'Perlu Tindakan' }}</strong>
+                <strong>{{
+                    $focus === 'waiting'
+                        ? 'Menunggu Pemohon'
+                        : 'Perlu Tindakan'
+                }}</strong>
             @else
                 <select name="status" aria-label="Filter status">
                     <option value="all" @selected ($status === 'all')>Semua Status</option>
@@ -181,7 +186,8 @@
             </select>
             <button class="btn btn-primary" type="submit">Terapkan Filter</button><a href="{{ route('tickets.index') }}" class="btn btn-ghost">Reset</a>
             @if (filled(request('q')) || filled(request('layanan')))
-                <a class="btn btn-ghost" href="{{ route('tickets.index', $scope) }}">Hapus filter di tab ini</a>
+                <a class="btn btn-ghost" href="{{ route('tickets.index', $scope) }}"
+                    >Hapus filter di tab ini</a>
             @endif
         </form>
         <div class="table-scroll">
@@ -213,8 +219,13 @@
                                     }}
                                 </div>
                                 @if ($ticket->status === 'Open' && $ticket->created_at)
-                                    <div @class (['small', 'tte-age-alert' => $ticket->created_at->lt(now()->subHours($attentionHours))])>
-                                        Menunggu {{ $ticket->created_at->locale('id')->diffForHumans(null, true) }}
+                                    <div
+                                        @class ([ 'small', 'tte-age-alert' => $ticket->created_at->lt(now()->subHours($attentionHours)) ])>
+                                        Menunggu {{
+                                            $ticket->created_at
+                                                ->locale('id')
+                                                ->diffForHumans(null, true)
+                                        }}
                                     </div>
                                 @endif
                                 @if ($ticket->source === 'simulated')
@@ -270,14 +281,16 @@
                                     <a
                                         class="btn btn-outline btn-small"
                                         href="{{ route('tickets.show', ['ticket' => $ticket, 'queue' => $queue]) }}"
-                                        >{{ match (true) {
-                                             $ticket->status === 'Done' && $ticket->wa_pending => 'Konfirmasi WA akhir',
-                                             $ticket->status !== 'In Progress' => 'Lihat Detail',
-                                             $ticket->wa_pending => 'Konfirmasi WA',
-                                             !$ticket->wa_checked_at => 'Periksa AMS',
-                                             (bool) $ticket->awaiting_applicant_action => 'Cek tindak lanjut',
-                                             default => 'Lanjutkan penanganan',
-                                         } }} →</a>
+                                        >{{
+                                            match (true) {
+                                                $ticket->status === 'Done' && $ticket->wa_pending => 'Konfirmasi WA akhir',
+                                                $ticket->status !== 'In Progress' => 'Lihat Detail',
+                                                $ticket->wa_pending => 'Konfirmasi WA',
+                                                !$ticket->wa_checked_at => 'Periksa AMS',
+                                                (bool) $ticket->awaiting_applicant_action => 'Cek tindak lanjut',
+                                                default => 'Lanjutkan penanganan',
+                                            }
+                                        }} →</a>
                                 @else
                                     <span class="small muted">Petugas lain</span>
                                 @endif

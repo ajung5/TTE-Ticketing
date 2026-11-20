@@ -39,12 +39,24 @@ class TicketController extends Controller {
         ]);
         $query = Ticket::query()
             ->with('claimant')
-            ->withExists(['whatsappNotifications as wa_pending' => fn ($notice) => $notice
-                ->whereNotNull('opened_at')->whereNull('confirmed_at')
-                ->where(function ($stage) {
-                    $stage->where(fn ($final) => $final->where('tickets.status', 'Done')->where('event_type', 'completed'))
-                        ->orWhere(fn ($service) => $service->where('tickets.status', 'In Progress')->where('event_type', '<>', 'completed'));
-                })])
+            ->withExists([
+                'whatsappNotifications as wa_pending' => fn($notice) => $notice
+                    ->whereNotNull('opened_at')
+                    ->whereNull('confirmed_at')
+                    ->where(function ($stage) {
+                        $stage
+                            ->where(
+                                fn($final) => $final
+                                    ->where('tickets.status', 'Done')
+                                    ->where('event_type', 'completed'),
+                            )
+                            ->orWhere(
+                                fn($service) => $service
+                                    ->where('tickets.status', 'In Progress')
+                                    ->where('event_type', '<>', 'completed'),
+                            );
+                    }),
+            ])
             ->where(
                 fn($q) => $q->where('status', 'Open')->orWhere('claimed_by', $request->user()->id),
             );
@@ -144,7 +156,19 @@ class TicketController extends Controller {
         $scope = $focus ? ['focus' => $focus] : ['status' => $status];
         $queue = $scope + $filters + ['page' => $tickets->currentPage()];
         $attentionHours = max(1, (int) config('tte.ticket_attention_hours', 24));
-        return view('tickets.index', compact('tickets', 'stats', 'filters', 'scope', 'queue', 'status', 'focus', 'attentionHours'));
+        return view(
+            'tickets.index',
+            compact(
+                'tickets',
+                'stats',
+                'filters',
+                'scope',
+                'queue',
+                'status',
+                'focus',
+                'attentionHours',
+            ),
+        );
     }
 
     /** Pilih notifikasi dari hasil AMS aktual, bukan hanya layanan awal. */
@@ -360,10 +384,16 @@ class TicketController extends Controller {
         if ($request->has('queue')) {
             $context = $request->validate([
                 'queue' => ['array:status,focus,q,layanan,page'],
-                'queue.status' => ['sometimes', Rule::in(['Open', 'In Progress', 'Done', 'Returned', 'all'])],
+                'queue.status' => [
+                    'sometimes',
+                    Rule::in(['Open', 'In Progress', 'Done', 'Returned', 'all']),
+                ],
                 'queue.focus' => ['sometimes', Rule::in(['action', 'waiting'])],
                 'queue.q' => ['nullable', 'string', 'max:200'],
-                'queue.layanan' => ['nullable', Rule::in(['Reset Passphrase', 'Pembaruan', 'Pendaftaran'])],
+                'queue.layanan' => [
+                    'nullable',
+                    Rule::in(['Reset Passphrase', 'Pembaruan', 'Pendaftaran']),
+                ],
                 'queue.page' => ['sometimes', 'integer', 'min:1'],
             ])['queue'];
             unset($contexts[$ticket->id]);

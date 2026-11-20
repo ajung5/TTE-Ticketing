@@ -80,7 +80,7 @@ class AdminTicketReportController extends Controller {
         $filters['status'] = $data['status'] ?? '';
         $filters += array_filter(
             \Illuminate\Support\Arr::only($data, ['q', 'opd', 'layanan', 'verifier', 'display']),
-            static fn ($value) => $value !== null && $value !== '',
+            static fn($value) => $value !== null && $value !== '',
         );
         return [$from->utc(), $to->addDay()->utc(), $filters, $label];
     }
@@ -99,17 +99,27 @@ class AdminTicketReportController extends Controller {
         return $query;
     }
 
-    private function detailRows(CarbonImmutable $start, CarbonImmutable $endExclusive, array $filters): Builder {
+    private function detailRows(
+        CarbonImmutable $start,
+        CarbonImmutable $endExclusive,
+        array $filters,
+    ): Builder {
         $query = $this->incoming($start, $endExclusive, $filters['status']);
-        foreach (['opd' => 'opd', 'layanan' => 'layanan', 'verifier' => 'claimed_by'] as $filter => $column) {
+        foreach (
+            ['opd' => 'opd', 'layanan' => 'layanan', 'verifier' => 'claimed_by']
+            as $filter => $column
+        ) {
             if (isset($filters[$filter])) {
                 $query->where($column, $filters[$filter]);
             }
         }
         if (isset($filters['q'])) {
             $pattern = '%' . trim($filters['q']) . '%';
-            $query->where(fn ($rows) => $rows->where('ticket_number', 'like', $pattern)
-                ->orWhere('nama_user', 'like', $pattern));
+            $query->where(
+                fn($rows) => $rows
+                    ->where('ticket_number', 'like', $pattern)
+                    ->orWhere('nama_user', 'like', $pattern),
+            );
         }
         return $query;
     }
@@ -188,14 +198,19 @@ class AdminTicketReportController extends Controller {
             ->get(['id', 'name', 'initials'])
             ->keyBy('id');
         $statusLabels = self::STATUS_LABELS;
-        $opds = $this->incoming($start, $endExclusive)->whereNotNull('opd')
-            ->where('opd', '<>', '')->distinct()->orderBy('opd')->pluck('opd');
+        $opds = $this->incoming($start, $endExclusive)
+            ->whereNotNull('opd')
+            ->where('opd', '<>', '')
+            ->distinct()
+            ->orderBy('opd')
+            ->pluck('opd');
         $tickets = $this->detailRows($start, $endExclusive, $filters)
             ->with('claimant:id,name,initials')
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(20)
-            ->withQueryString()->fragment('tte-report-details');
+            ->withQueryString()
+            ->fragment('tte-report-details');
         return response()
             ->view(
                 'admin.ticket-reports',

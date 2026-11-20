@@ -3,7 +3,10 @@
 @section ('content')
     <div class="page-heading">
         <div>
-            <a href="{{ route('tickets.index', $queueContext) }}#ticket-{{ $ticket->id }}" class="breadcrumb-link">← Kembali ke antrean</a>
+            <a
+                href="{{ route('tickets.index', $queueContext) }}#ticket-{{ $ticket->id }}"
+                class="breadcrumb-link"
+                >← Kembali ke antrean</a>
             <div class="eyebrow mt">DETAIL PERMOHONAN</div>
             <h1>
                 {{
@@ -354,7 +357,10 @@
             </details>
         </div>
         <div class="stack">
-            @if ($ticket->layanan === 'Reset Passphrase' && in_array($ticket->status, ['In Progress', 'Done'], true) && $ticket->claimed_by === auth()->id() && $ticket->source !== 'simulated')
+            @if ($ticket->layanan === 'Reset Passphrase' &&
+                in_array($ticket->status, ['In Progress', 'Done'], true) &&
+                $ticket->claimed_by === auth()->id() &&
+                $ticket->source !== 'simulated')
                 <section class="card" id="tte-reset-resend">
                     <div class="section-heading">
                         <div>
@@ -364,7 +370,10 @@
                     </div>
                     <p class="small muted">Kirim ulang tautan resmi hanya melalui AMS BSrE. Aplikasi ini mencatat tindakannya dan menyiapkan pesan WhatsApp; tidak mengirim email Reset Passphrase.</p>
                     <p class="small muted">Email tujuan: <strong>{{ $ticket->email ?: '-' }}</strong>. Nomor tiket tidak berubah.</p>
-                    <form method="post" action="{{ route('tickets.reset-resends.store', $ticket) }}" class="stack mt">
+                    <form
+                        method="post"
+                        action="{{ route('tickets.reset-resends.store', $ticket) }}"
+                        class="stack mt">
                         @csrf
                         <label for="tte-resend-reason">Alasan kirim ulang</label>
                         <select id="tte-resend-reason" name="reason" required>
@@ -372,8 +381,11 @@
                             <option value="expired">Tautan kedaluwarsa</option>
                             <option value="cannot_open">Tautan tidak dapat digunakan</option>
                         </select>
-                        <label><input type="checkbox" name="ams_confirmed" value="1" required /> Saya telah melakukan kirim ulang di AMS BSrE.</label>
-                        <button type="submit" class="btn btn-primary full">Catat Kirim Ulang &amp; Siapkan Notifikasi WA</button>
+                        <label><input type="checkbox" name="ams_confirmed" value="1" required /> Saya
+                            telah melakukan kirim ulang di AMS BSrE.</label>
+                        <button type="submit" class="btn btn-primary full">
+                            Catat Kirim Ulang &amp; Siapkan Notifikasi WA
+                        </button>
                     </form>
                     <p class="small muted mt">Maksimal 5 kali per 24 jam pada tiket ini, dengan jeda minimal 2 menit. Tidak ada email yang dikirim langsung dari TTE-Ticketing.</p>
                     @if ($ticket->resetResends->isNotEmpty())
@@ -381,19 +393,48 @@
                         <h3>Riwayat Kirim Ulang</h3>
                         @foreach ($ticket->resetResends->sortByDesc('id')->take(10) as $attempt)
                             <details class="note-box mt" {{ $loop->first ? 'open' : '' }}>
-                                <summary>Permintaan #{{ $attempt->id }} · {{ $attempt->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} · {{ $attempt->wa_confirmed_at ? 'WA dikonfirmasi' : 'WA belum dikonfirmasi' }}</summary>
-                                <p class="small muted">Alasan: {{ ['not_received' => 'Email belum diterima', 'expired' => 'Tautan kedaluwarsa', 'cannot_open' => 'Tautan tidak dapat digunakan'][$attempt->reason] ?? 'Lainnya' }}</p>
+                                <summary>
+                                    Permintaan #{{ $attempt->id }} · {{
+                                        $attempt->created_at
+                                            ->timezone('Asia/Jakarta')
+                                            ->format('d/m/Y H:i')
+                                    }} · {{
+                                        $attempt->wa_confirmed_at
+                                            ? 'WA dikonfirmasi'
+                                            : 'WA belum dikonfirmasi'
+                                    }}
+                                </summary>
+                                <p class="small muted">Alasan: {{
+                                    [
+                                        'not_received' => 'Email belum diterima',
+                                        'expired' => 'Tautan kedaluwarsa',
+                                        'cannot_open' => 'Tautan tidak dapat digunakan',
+                                    ][$attempt->reason] ?? 'Lainnya'
+                                }}</p>
                                 <div class="message-preview">{{ $attempt->message }}</div>
                                 @if (!$attempt->wa_confirmed_at && $attempt->verifier_id === auth()->id())
-                                    <form method="post" target="tte_whatsapp_web" data-wa-open="1" data-wa-state="wa-state-resend-{{ $attempt->id }}" action="{{ route('tickets.reset-resends.whatsapp', [$ticket, $attempt]) }}" class="mt">
+                                    <form
+                                        method="post"
+                                        target="tte_whatsapp_web"
+                                        data-wa-open="1"
+                                        data-wa-state="wa-state-resend-{{ $attempt->id }}"
+                                        action="{{ route('tickets.reset-resends.whatsapp', [$ticket, $attempt]) }}"
+                                        class="mt">
                                         @csrf
-                                        <button type="submit" class="btn btn-wa full">Buka WhatsApp ↗</button>
+                                        <button type="submit" class="btn btn-wa full">
+                                            Buka WhatsApp ↗
+                                        </button>
                                     </form>
                                     <div id="wa-state-resend-{{ $attempt->id }}" aria-live="polite">
                                         @if ($attempt->wa_opened_at)
-                                            <form method="post" action="{{ route('tickets.reset-resends.confirm', [$ticket, $attempt]) }}" class="mt">
+                                            <form
+                                                method="post"
+                                                action="{{ route('tickets.reset-resends.confirm', [$ticket, $attempt]) }}"
+                                                class="mt">
                                                 @csrf
-                                                <button type="submit" class="btn btn-outline full">Saya Sudah Mengirim Pesan</button>
+                                                <button type="submit" class="btn btn-outline full">
+                                                    Saya Sudah Mengirim Pesan
+                                                </button>
                                             </form>
                                         @endif
                                     </div>
@@ -401,7 +442,11 @@
                                 @elseif (!$attempt->wa_confirmed_at)
                                     <p class="small muted mt">Permintaan ini dicatat petugas sebelumnya. Jika perlu, lakukan pengiriman ulang baru melalui AMS.</p>
                                 @else
-                                    <p class="small muted mt">Pengiriman WhatsApp dikonfirmasi {{ $attempt->wa_confirmed_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} oleh petugas. Ini bukan bukti email BSrE telah diterima.</p>
+                                    <p class="small muted mt">Pengiriman WhatsApp dikonfirmasi {{
+                                        $attempt->wa_confirmed_at
+                                            ->timezone('Asia/Jakarta')
+                                            ->format('d/m/Y H:i')
+                                    }} oleh petugas. Ini bukan bukti email BSrE telah diterima.</p>
                                 @endif
                             </details>
                         @endforeach
@@ -693,7 +738,8 @@
                             <strong>Pendaftaran Diproses — penutupan administratif.</strong>
                             <p>
                                 Kirim Notifikasi 4 melalui WhatsApp. Setelah benar-benar mengirim
-                                pesan, klik <strong>Konfirmasi WA &amp; Selesaikan Administrasi</strong>. Tiket
+                                pesan, klik
+                                <strong>Konfirmasi WA &amp; Selesaikan Administrasi</strong>. Tiket
                                 otomatis menjadi <strong>Selesai</strong>, lalu tersedia Notifikasi
                                 Selesai + Survei.
                                 @if ($ticket->activation_status === 'not_activated')
@@ -747,7 +793,8 @@
                         <form
                             target="tte_whatsapp_web"
                             method="post"
-                            data-wa-open="1" data-wa-state="wa-state-service-{{ $serviceEvent }}"
+                            data-wa-open="1"
+                            data-wa-state="wa-state-service-{{ $serviceEvent }}"
                             action="{{ route('tickets.whatsapp.service', $ticket) }}">
                             @csrf
                             <button class="btn btn-wa full" type="submit">Buka WhatsApp ↗</button>
@@ -770,9 +817,12 @@
                                         class="mt">
                                         @csrf
                                         <button class="btn btn-outline full" type="submit">
-                                            {{ $serviceEvent === 'registration' && $ticket->layanan === 'Pendaftaran'
-                                                ? 'Konfirmasi WA & Selesaikan Administrasi'
-                                                : 'Saya Sudah Mengirim Pesan' }}
+                                            {{
+                                                $serviceEvent === 'registration' &&
+                                                $ticket->layanan === 'Pendaftaran'
+                                                    ? 'Konfirmasi WA & Selesaikan Administrasi'
+                                                    : 'Saya Sudah Mengirim Pesan'
+                                            }}
                                         </button>
                                     </form>
                                 @endif
@@ -812,7 +862,8 @@
                         <form
                             target="tte_whatsapp_web"
                             method="post"
-                            data-wa-open="1" data-wa-state="wa-state-final"
+                            data-wa-open="1"
+                            data-wa-state="wa-state-final"
                             action="{{ route('tickets.whatsapp', $ticket) }}">
                             @csrf
                             <button class="btn btn-wa full" type="submit">

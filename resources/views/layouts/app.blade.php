@@ -10,10 +10,24 @@
         · TTE Ticketing
     </title>
     <link rel="icon" href="{{ \App\Support\VersionedAsset::url('favicon.ico') }}" sizes="any" />
-    <link rel="icon" href="{{ \App\Support\VersionedAsset::url('favicon.svg') }}" type="image/svg+xml" />
-    <link rel="icon" href="{{ \App\Support\VersionedAsset::url('favicon-32x32.png') }}" type="image/png" sizes="32x32" />
-    <link rel="icon" href="{{ \App\Support\VersionedAsset::url('favicon-16x16.png') }}" type="image/png" sizes="16x16" />
-    <link rel="apple-touch-icon" href="{{ \App\Support\VersionedAsset::url('apple-touch-icon.png') }}" sizes="180x180" />
+    <link
+        rel="icon"
+        href="{{ \App\Support\VersionedAsset::url('favicon.svg') }}"
+        type="image/svg+xml" />
+    <link
+        rel="icon"
+        href="{{ \App\Support\VersionedAsset::url('favicon-32x32.png') }}"
+        type="image/png"
+        sizes="32x32" />
+    <link
+        rel="icon"
+        href="{{ \App\Support\VersionedAsset::url('favicon-16x16.png') }}"
+        type="image/png"
+        sizes="16x16" />
+    <link
+        rel="apple-touch-icon"
+        href="{{ \App\Support\VersionedAsset::url('apple-touch-icon.png') }}"
+        sizes="180x180" />
     <link rel="manifest" href="{{ \App\Support\VersionedAsset::url('site.webmanifest') }}" />
     <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-app.css') }}" />
     <script src="{{ \App\Support\VersionedAsset::url('js/tte-app.js') }}" defer></script>
@@ -110,8 +124,10 @@
                                 <use href="#tte-ico-users" />
                             </svg>
                             Manajemen Verifikator</a>
-                        <a class="nav-item {{ request()->routeIs('admin.transfers.*') ? 'active' : '' }}"
-                            href="{{ route('admin.transfers.index') }}" @if (request()->routeIs('admin.transfers.*')) aria-current="page" @endif>
+                        <a
+                            class="nav-item {{ request()->routeIs('admin.transfers.*') ? 'active' : '' }}"
+                            href="{{ route('admin.transfers.index') }}"
+                            @if (request()->routeIs('admin.transfers.*')) aria-current="page" @endif>
                             <svg class="nav-symbol" aria-hidden="true" focusable="false"><use href="#tte-ico-ticket" /></svg>
                             Pengalihan Tiket</a>
                         <a

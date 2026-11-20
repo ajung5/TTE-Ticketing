@@ -80,14 +80,20 @@ it('preserves the distinct AMS, WhatsApp and responsive-interface logic', functi
 });
 it('builds stable content-hash URLs for every published CSS and JavaScript bundle', function () {
     foreach (
-        ['css/tte-app.css', 'css/tte-request.css', 'css/tte-ticket.css',
-         'css/tte-survey.css', 'js/tte-app.js', 'js/tte-request.js', 'js/tte-ticket.js']
+        [
+            'css/tte-app.css',
+            'css/tte-request.css',
+            'css/tte-ticket.css',
+            'css/tte-survey.css',
+            'js/tte-app.js',
+            'js/tte-request.js',
+            'js/tte-ticket.js',
+        ]
         as $path
     ) {
         $digest = substr(hash_file('sha256', public_path($path)), 0, 12);
         expect(\App\Support\VersionedAsset::version($path))->toBe($digest);
-        expect(\App\Support\VersionedAsset::url($path))
-            ->toBe(asset($path) . '?v=' . $digest);
+        expect(\App\Support\VersionedAsset::url($path))->toBe(asset($path) . '?v=' . $digest);
     }
 });
 
@@ -99,14 +105,17 @@ it('uses dynamic asset hashes on public and authenticated pages', function () {
         ->assertSee(\App\Support\VersionedAsset::url('js/tte-request.js'), false);
 
     $admin = \App\Models\User::factory()->create(['role' => 'admin']);
-    $this->actingAs($admin)->get(route('admin.dashboard'))
+    $this->actingAs($admin)
+        ->get(route('admin.dashboard'))
         ->assertOk()
         ->assertSee(\App\Support\VersionedAsset::url('js/tte-app.js'), false);
 });
 
 it('rejects unsafe or unavailable asset paths', function () {
-    expect(fn () => \App\Support\VersionedAsset::url('../.env'))
-        ->toThrow(\InvalidArgumentException::class);
-    expect(fn () => \App\Support\VersionedAsset::url('css/nonexistent-test-file.css'))
-        ->toThrow(\RuntimeException::class);
+    expect(fn() => \App\Support\VersionedAsset::url('../.env'))->toThrow(
+        \InvalidArgumentException::class,
+    );
+    expect(fn() => \App\Support\VersionedAsset::url('css/nonexistent-test-file.css'))->toThrow(
+        \RuntimeException::class,
+    );
 });

@@ -300,7 +300,11 @@ document.addEventListener('submit', (event) => {
     const form = event.target;
     if (!form.matches('form[data-transfer-ticket]')) return;
     const receiver = form.elements.verifier_id.selectedOptions[0]?.textContent.trim();
-    if (!window.confirm(`Alihkan tiket ${form.dataset.transferTicket} dari ${form.dataset.owner} kepada ${receiver}?`)) {
+    if (
+        !window.confirm(
+            `Alihkan tiket ${form.dataset.transferTicket} dari ${form.dataset.owner} kepada ${receiver}?`,
+        )
+    ) {
         event.preventDefault();
     }
 });

@@ -11,7 +11,5 @@ Artisan::command('inspire', function () {
 // Scheduler memeriksa Google Sheets tiap 5 menit, tetapi importer hanya
 // mengubah record pegawai jika nilainya benar-benar berubah atau bertambah.
 if (config('email_directory.spreadsheet_id') && config('email_directory.service_account_json')) {
-    Schedule::command('tte:sync-email-directory')
-        ->everyFiveMinutes()
-        ->withoutOverlapping(15);
+    Schedule::command('tte:sync-email-directory')->everyFiveMinutes()->withoutOverlapping(15);
 }
