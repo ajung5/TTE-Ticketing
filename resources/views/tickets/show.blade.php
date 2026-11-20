@@ -29,7 +29,9 @@
                 'Belum diambil'
         }}</span>
     </div>
-    @php ($latestTransfer = $ticket->activities->where('action', 'admin_reassigned')->last())
+    @php
+        $latestTransfer = $ticket->activities->where('action', 'admin_reassigned')->last();
+    @endphp
     @if ($latestTransfer)
         <div class="alert warn" role="status">
             <strong>Tiket pernah dialihkan oleh admin.</strong>
@@ -378,7 +380,7 @@
                         <hr />
                         <h3>Riwayat Kirim Ulang</h3>
                         @foreach ($ticket->resetResends->sortByDesc('id')->take(10) as $attempt)
-                            <details class="note-box mt" @if ($loop->first) open @endif>
+                            <details class="note-box mt" {{ $loop->first ? 'open' : '' }}>
                                 <summary>Permintaan #{{ $attempt->id }} · {{ $attempt->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} · {{ $attempt->wa_confirmed_at ? 'WA dikonfirmasi' : 'WA belum dikonfirmasi' }}</summary>
                                 <p class="small muted">Alasan: {{ ['not_received' => 'Email belum diterima', 'expired' => 'Tautan kedaluwarsa', 'cannot_open' => 'Tautan tidak dapat digunakan'][$attempt->reason] ?? 'Lainnya' }}</p>
                                 <div class="message-preview">{{ $attempt->message }}</div>
