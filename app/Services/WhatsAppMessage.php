@@ -51,6 +51,8 @@ class WhatsAppMessage {
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nBerdasarkan pemeriksaan AMS BSrE, sertifikat elektronik aktif belum ditemukan untuk NIK Anda. Silakan hubungi petugas untuk tindak lanjut.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'reset' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Reset Passphrase nomor tiket {nomor_tiket} telah diproses. Silakan periksa Inbox/Spam pada email dinas {email} untuk instruksi resmi BSrE.\nPetugas: {nama_verifikator}",
+            'reset_resend' =>
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nMenindaklanjuti laporan email Reset Passphrase belum diterima atau tautan tidak dapat digunakan, verifikator telah melakukan pengiriman ulang melalui AMS BSrE ke email dinas {email}. Silakan periksa Inbox, Spam/Junk, dan folder email lainnya. Jika masih belum diterima, hubungi petugas pada tiket yang sama.\n\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}\n\nJangan membagikan OTP, password, atau passphrase.",
             'renewal' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Pembaruan Sertifikat Elektronik nomor tiket {nomor_tiket} telah diproses. Silakan periksa Inbox/Spam email dinas {email} untuk informasi pembaruan BSrE.\nPetugas: {nama_verifikator}",
             'registration' =>

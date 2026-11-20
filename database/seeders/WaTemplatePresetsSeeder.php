@@ -15,6 +15,8 @@ class WaTemplatePresetsSeeder extends Seeder {
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nNomor WhatsApp Anda belum terverifikasi pada AMS BSrE. Silakan lakukan verifikasi sebelum melanjutkan layanan.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'reset' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Reset Passphrase nomor tiket {nomor_tiket} telah diproses. Periksa inbox/spam email dinas {email} untuk instruksi BSrE. Jangan bagikan passphrase.\nPetugas: {nama_verifikator}",
+            'reset_resend' =>
+                "Yth. Bapak/Ibu {nama_pemohon},\n\nTautan Reset Passphrase telah diminta dikirim ulang melalui AMS BSrE ke email dinas {email} oleh verifikator. Silakan periksa Inbox, Spam/Junk, dan folder lain. Jika email belum diterima, hubungi petugas pada tiket yang sama.\n\nNomor tiket: {nomor_tiket}\nPetugas: {nama_verifikator}\n\nJangan membagikan OTP, password, atau passphrase.",
             'renewal' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPermohonan Pembaruan Sertifikat Elektronik nomor tiket {nomor_tiket} telah diproses. Pantau email dinas {email} untuk informasi resmi BSrE.\nPetugas: {nama_verifikator}",
             'registration' =>

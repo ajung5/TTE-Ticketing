@@ -29,6 +29,13 @@
                 'Belum diambil'
         }}</span>
     </div>
+    @php ($latestTransfer = $ticket->activities->where('action', 'admin_reassigned')->last())
+    @if ($latestTransfer)
+        <div class="alert warn" role="status">
+            <strong>Tiket pernah dialihkan oleh admin.</strong>
+            {{ $latestTransfer->note }}
+        </div>
+    @endif
     @if ($ticket->duplicate_attempts > 0 && in_array($ticket->status, ['Open', 'In Progress'], true))
         <div class="alert warn" role="status">
             <strong>Permohonan berulang telah ditahan: {{ $ticket->duplicate_attempts }} kali.</strong>
@@ -320,6 +327,9 @@
                                         'email_corrected_from_ams' => 'Koreksi email berdasarkan AMS',
                                         'wa_service_confirmed' => 'Pengiriman notifikasi layanan dikonfirmasi',
                                         'wa_confirmed' => 'Notifikasi selesai + survei dikonfirmasi',
+                                        'admin_reassigned' => 'Admin mengalihkan penanggung jawab tiket',
+                                        'reset_link_resent' => 'Tautan Reset Passphrase dikirim ulang melalui AMS',
+                                        'reset_resend_wa_confirmed' => 'Notifikasi kirim ulang Reset Passphrase dikonfirmasi',
                                         default => $entry->action,
                                     }
                                 }}</strong>
@@ -342,6 +352,57 @@
             </details>
         </div>
         <div class="stack">
+            @if ($ticket->layanan === 'Reset Passphrase' && in_array($ticket->status, ['In Progress', 'Done'], true) && $ticket->claimed_by === auth()->id() && $ticket->source !== 'simulated')
+                <section class="card" id="tte-reset-resend">
+                    <div class="section-heading">
+                        <div>
+                            <div class="eyebrow">TINDAK LANJUT EMAIL BSrE</div>
+                            <h2>Kirim Ulang Link Reset Passphrase</h2>
+                        </div>
+                    </div>
+                    <p class="small muted">Kirim ulang tautan resmi hanya melalui AMS BSrE. Aplikasi ini mencatat tindakannya dan menyiapkan pesan WhatsApp; tidak mengirim email Reset Passphrase.</p>
+                    <p class="small muted">Email tujuan: <strong>{{ $ticket->email ?: '-' }}</strong>. Nomor tiket tidak berubah.</p>
+                    <form method="post" action="{{ route('tickets.reset-resends.store', $ticket) }}" class="stack mt">
+                        @csrf
+                        <label for="tte-resend-reason">Alasan kirim ulang</label>
+                        <select id="tte-resend-reason" name="reason" required>
+                            <option value="not_received">Email belum diterima</option>
+                            <option value="expired">Tautan kedaluwarsa</option>
+                            <option value="cannot_open">Tautan tidak dapat digunakan</option>
+                        </select>
+                        <label><input type="checkbox" name="ams_confirmed" value="1" required /> Saya telah melakukan kirim ulang di AMS BSrE.</label>
+                        <button type="submit" class="btn btn-primary full">Catat Kirim Ulang &amp; Siapkan Notifikasi WA</button>
+                    </form>
+                    <p class="small muted mt">Maksimal 5 kali per 24 jam pada tiket ini, dengan jeda minimal 2 menit. Tidak ada email yang dikirim langsung dari TTE-Ticketing.</p>
+                    @if ($ticket->resetResends->isNotEmpty())
+                        <hr />
+                        <h3>Riwayat Kirim Ulang</h3>
+                        @foreach ($ticket->resetResends->sortByDesc('id')->take(10) as $attempt)
+                            <details class="note-box mt" @if ($loop->first) open @endif>
+                                <summary>Permintaan #{{ $attempt->id }} · {{ $attempt->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} · {{ $attempt->wa_confirmed_at ? 'WA dikonfirmasi' : 'WA belum dikonfirmasi' }}</summary>
+                                <p class="small muted">Alasan: {{ ['not_received' => 'Email belum diterima', 'expired' => 'Tautan kedaluwarsa', 'cannot_open' => 'Tautan tidak dapat digunakan'][$attempt->reason] ?? 'Lainnya' }}</p>
+                                <div class="message-preview">{{ $attempt->message }}</div>
+                                @if (!$attempt->wa_confirmed_at && $attempt->verifier_id === auth()->id())
+                                    <form method="post" target="tte_whatsapp_web" data-wa-open="1" action="{{ route('tickets.reset-resends.whatsapp', [$ticket, $attempt]) }}" class="mt">
+                                        @csrf
+                                        <button type="submit" class="btn btn-wa full">Buka WhatsApp ↗</button>
+                                    </form>
+                                    @if ($attempt->wa_opened_at)
+                                        <form method="post" action="{{ route('tickets.reset-resends.confirm', [$ticket, $attempt]) }}" class="mt">
+                                            @csrf
+                                            <button type="submit" class="btn btn-outline full">Saya Sudah Mengirim Pesan</button>
+                                        </form>
+                                    @endif
+                                @elseif (!$attempt->wa_confirmed_at)
+                                    <p class="small muted mt">Permintaan ini dicatat petugas sebelumnya. Jika perlu, lakukan pengiriman ulang baru melalui AMS.</p>
+                                @else
+                                    <p class="small muted mt">Pengiriman WhatsApp dikonfirmasi {{ $attempt->wa_confirmed_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} oleh petugas. Ini bukan bukti email BSrE telah diterima.</p>
+                                @endif
+                            </details>
+                        @endforeach
+                    @endif
+                </section>
+            @endif
             @if ($ticket->status === 'In Progress')
                 @php
                     $issuanceNoticeConfirmed = $ticket->activities

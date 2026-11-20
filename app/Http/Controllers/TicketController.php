@@ -344,7 +344,7 @@ class TicketController extends Controller {
             $ticket->status === 'Open' || $ticket->claimed_by === $request->user()->id,
             403,
         );
-        $ticket->load(['claimant', 'activities.actor', 'whatsappNotifications']);
+        $ticket->load(['claimant', 'activities.actor', 'whatsappNotifications', 'resetResends']);
         $applicantUptd = $ticket->uptd;
         if ($applicantUptd === null && $ticket->source !== 'simulated') {
             $identifier = trim((string) ($ticket->nik ?: $ticket->nip));

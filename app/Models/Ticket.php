@@ -79,6 +79,10 @@ class Ticket extends Model {
         return $this->hasMany(WaNotification::class);
     }
 
+    public function resetResends(): HasMany {
+        return $this->hasMany(TicketResetResend::class);
+    }
+
     public function getMaskedNikAttribute(): string {
         $value = (string) ($this->nik ?? '');
         return preg_match('/^[0-9]{16}$/', $value) ? str_repeat('•', 12) . substr($value, -4) : '-';

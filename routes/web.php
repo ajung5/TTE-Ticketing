@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminTicketTransferController;
 use App\Http\Controllers\AdminTicketReportController;
 use App\Http\Controllers\AdminSurveyController;
 use App\Http\Controllers\AuthController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PublicSurveyController;
 use App\Http\Controllers\PublicTicketController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TicketResetResendController;
 use App\Http\Controllers\VerifierManagementController;
 use App\Http\Controllers\WaTemplateController;
 use Illuminate\Support\Facades\Route;
@@ -85,6 +87,15 @@ Route::middleware('auth')->group(function () {
         TicketController::class,
         'confirmServiceWhatsApp',
     ])->name('tickets.whatsapp.service.confirm');
+    Route::post('/tickets/{ticket}/reset-resends', [TicketResetResendController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('tickets.reset-resends.store');
+    Route::post('/tickets/{ticket}/reset-resends/{resend}/whatsapp', [TicketResetResendController::class, 'openWhatsApp'])
+        ->middleware('throttle:20,1')
+        ->name('tickets.reset-resends.whatsapp');
+    Route::post('/tickets/{ticket}/reset-resends/{resend}/confirm', [TicketResetResendController::class, 'confirmWhatsApp'])
+        ->middleware('throttle:20,1')
+        ->name('tickets.reset-resends.confirm');
     Route::post('/tickets/{ticket}/return-for-correction', [
         TicketController::class,
         'returnForCorrection',
@@ -103,6 +114,11 @@ Route::middleware('auth')->group(function () {
         TicketController::class,
         'confirmWhatsApp',
     ])->name('tickets.whatsapp.confirm');
+    Route::get('/admin/pengalihan-tiket', [AdminTicketTransferController::class, 'index'])
+        ->name('admin.transfers.index');
+    Route::post('/admin/pengalihan-tiket/{ticket}', [AdminTicketTransferController::class, 'transfer'])
+        ->middleware('throttle:10,1')
+        ->name('admin.transfers.store');
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/survei', [AdminSurveyController::class, 'index'])->name(
         'admin.surveys.index',

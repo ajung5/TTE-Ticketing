@@ -16,6 +16,7 @@ class WaMessageTemplate extends Model {
     public const EVENTS = [
         'unverified' => 'Nomor WA Belum Terverifikasi',
         'reset' => 'Reset Passphrase',
+        'reset_resend' => 'Pengiriman Ulang Link Reset Passphrase',
         'renewal' => 'Pembaruan Sertifikat',
         'registration' => 'Pendaftaran Diproses',
         'completed' => 'Selesai + Survei',
@@ -30,6 +31,7 @@ class WaMessageTemplate extends Model {
     public const TEMPLATE_SERVICE_CODES = [
         'unverified' => '*',
         'reset' => 'Reset Passphrase',
+        'reset_resend' => 'Reset Passphrase',
         'renewal' => 'Pembaruan',
         'registration' => 'Pendaftaran',
         'completed' => '*',

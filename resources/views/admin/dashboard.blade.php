@@ -354,7 +354,7 @@
             </div>
             <a class="btn btn-primary full mt" href="{{ route('admin.templates.index') }}"
                 >Kelola Preset WhatsApp <span aria-hidden="true">→</span></a>
-            <p class="small muted mt">Admin tidak dapat mengambil atau memproses tiket.</p>
+            <p class="small muted mt">Admin tidak memproses tiket. Pengalihan tanggung jawab tersedia di bagian Statistik Verifikator.</p>
         </section>
     </div>
     <details class="card mt tte-collapsible tte-outcome-disclosure">
@@ -400,6 +400,8 @@
             </div>
             <span class="pill pill-neutral">{{ $verifiers->count() }} verifikator</span>
         </div>
+        <p class="small muted mt">Admin dapat mengalihkan tiket yang sedang diproses kepada verifikator lain tanpa mengubah nomor atau hasil AMS.</p>
+        <a class="btn btn-outline mt" href="{{ route('admin.transfers.index') }}">Kelola Pengalihan Tiket Aktif →</a>
         <div class="table-scroll">
             <table>
                 <thead>

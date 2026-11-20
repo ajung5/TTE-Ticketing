@@ -6,6 +6,18 @@ tidak dengan sendirinya menjadi rilis production.
 
 ## [Unreleased]
 
+### Pengembangan 20 November 2026
+- **FEAT-20261120-001 — Kirim ulang link Reset Passphrase.** Verifikator
+  melakukan pengiriman ulang resmi melalui AMS BSrE, kemudian mencatat
+  percobaan per tiket dan menyiapkan notifikasi WhatsApp. Pengiriman
+  tidak diklaim sebagai bukti bahwa email diterima.
+- **FEAT-20261120-002 — Pengalihan tiket aktif oleh admin.** Admin dapat
+  mengalihkan penanggung jawab tiket berstatus Diproses kepada verifikator
+  aktif, dengan alasan wajib, audit trail, dan tanpa mengubah nomor tiket.
+- **SEC-20261120-001 — Kontrol tindak lanjut.** Otorisasi berbasis kepemilikan,
+  pencatatan per percobaan, pembatasan permintaan, serta konfirmasi WA manual.
+
+
 ### Fitur (feat)
 - **FEAT-20261112-001 — Sinkronisasi direktori email inkremental.** Pembacaan
   Google Sheets setiap 5 menit; record yang identik tidak ditulis ulang;
