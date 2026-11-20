@@ -280,6 +280,12 @@ class TicketController extends Controller {
             ->exists();
     }
 
+    private function continuesPreviousMismatch(Ticket $ticket): bool {
+        return $ticket->service_alignment_status === 'unsuitable' &&
+            ($this->hadCertificateState($ticket, 'revoked') ||
+                $this->hadCertificateState($ticket, 'not_issued'));
+    }
+
     private function hasConfirmedNotice(Ticket $ticket, string $event): bool {
         return TicketActivity::query()
             ->where('ticket_id', $ticket->id)
@@ -430,6 +436,14 @@ class TicketController extends Controller {
         if ($applicantUptd === '-') {
             $applicantUptd = '';
         }
+        $continuationMismatch =
+            $ticket->status === 'In Progress' &&
+            in_array($ticket->layanan, ['Reset Passphrase', 'Pembaruan'], true) &&
+            $this->continuesPreviousMismatch($ticket);
+        $onboardingHistory =
+            $ticket->status === 'In Progress' &&
+            $ticket->layanan === 'Pendaftaran' &&
+            $this->hasOnboardingHistory($ticket);
         $serviceEvent = $ticket->status === 'In Progress' ? $this->serviceEvent($ticket) : null;
         // Pendaftaran Diproses ditutup lewat konfirmasi pengiriman, bukan tombol Tandai Selesai.
         $completionReady =
@@ -477,6 +491,8 @@ class TicketController extends Controller {
                 'completionReady',
                 'nextAction',
                 'queueContext',
+                'onboardingHistory',
+                'continuationMismatch',
             ),
         );
     }
@@ -679,11 +695,10 @@ class TicketController extends Controller {
                             'Layanan tidak sesuai: pilih layanan hasil klarifikasi.',
                     ]);
                 }
-                $continuationMismatch =
-                    $record->service_alignment_status === 'unsuitable' &&
-                    ($this->hadCertificateState($record, 'revoked') ||
-                        $this->hadCertificateState($record, 'not_issued'));
-                $alignment = $recommended || $continuationMismatch ? 'unsuitable' : 'suitable';
+                $alignment =
+                    $recommended || $this->continuesPreviousMismatch($record)
+                        ? 'unsuitable'
+                        : 'suitable';
             } elseif ($activation === 'activated' && $issuance === 'not_issued') {
                 // Set passphrase tetap pada tiket ini, walau pilihan semula adalah Reset/Pembaruan.
                 $alignment = $record->layanan === 'Pendaftaran' ? 'suitable' : 'unsuitable';

@@ -1,24 +1,103 @@
 /* TTE v6.17 consolidated asset: public/css/tte-ticket.css. Original module order preserved. */
 
 /* ===== BEGIN public/css/ams-workflow.css ===== */
+#ams-verification-form [hidden],
 .ams-conditional[hidden] {
     display: none !important;
 }
-.ams-conditional {
+.ams-field {
+    padding: 0;
+    margin: 0;
+    border: 0;
     min-width: 0;
 }
-#ams-verification-form select {
-    min-height: 46px;
+.ams-field legend {
+    padding: 0;
+    color: #263b4e;
+    font-weight: 700;
 }
-.ams-decision-preview {
-    border: 1px solid #d6e3f5;
-    background: #f5f9ff;
-    color: #27528b;
-    padding: 12px 14px;
+.ams-choices,
+.ams-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+.ams-choices .ams-choice {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1 1 9rem;
+    min-height: 44px;
+    padding: 8px 11px;
+    border: 1px solid #b7c8c2;
+    border-radius: 8px;
+    background: white;
+    color: #31443e;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+.ams-choice:hover {
+    border-color: #658979;
+}
+.ams-choice:has(input:checked) {
+    border-color: #438467;
+    background: #edf7f0;
+    color: #104d38;
+    box-shadow: inset 0 0 0 1px #438467;
+}
+.ams-choice:has(input:focus-visible) {
+    outline: 3px solid #217aa6;
+    outline-offset: 2px;
+}
+.ams-choice input[type='radio'] {
+    appearance: auto;
+    flex: none;
+    width: 17px;
+    height: 17px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    accent-color: #17654e;
+}
+.ams-summary {
+    padding: 14px;
+    border: 1px solid #cbdad2;
     border-radius: 10px;
-    line-height: 1.6;
+    background: white;
 }
-
+.ams-summary h3,
+.ams-recap,
+.ams-recap dd {
+    margin: 0;
+}
+#ams-decision-preview {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-left: 3px solid #438467;
+    background: #edf7f0;
+    color: #194836;
+}
+.ams-recap div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+    font-size: 13px;
+}
+.ams-recap dd {
+    text-align: right;
+    font-weight: 650;
+}
+.ams-actions {
+    justify-content: space-between;
+}
+.ams-actions .btn {
+    min-height: 44px;
+    white-space: normal;
+}
 /* TTE v57: mobile native WhatsApp handoff after an authorized AJAX POST. */
 .tte-wa-native-panel {
     margin-top: 12px;

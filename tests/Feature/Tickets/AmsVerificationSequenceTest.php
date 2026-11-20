@@ -257,3 +257,145 @@ it('does not infer an active certificate from historical issued status', functio
         ->assertSee('Masa berlaku belum diperiksa');
     $this->post(route('tickets.complete', $ticket))->assertStatus(409);
 });
+
+it(
+    'renders accessible single-choice groups for saved AMS results and excludes the requested service from recommendations',
+    function () {
+        $owner = User::factory()->create(['role' => 'verifier']);
+        $ticket = amsV27Ticket($owner, 'Reset Passphrase');
+        $ticket
+            ->forceFill([
+                'wa_checked_at' => now(),
+                'activation_status' => 'activated',
+                'wa_verification_status' => 'verified',
+                'certificate_issuance_status' => 'issued',
+                'certificate_validity_status' => 'active',
+                'service_alignment_status' => 'unsuitable',
+                'recommended_service' => 'Pembaruan',
+            ])
+            ->save();
+        $html = $this->actingAs($owner)
+            ->get(route('tickets.show', $ticket))
+            ->assertOk()
+            ->getContent();
+        $document = new DOMDocument();
+        $document->loadHTML($html, LIBXML_NOERROR | LIBXML_NOWARNING);
+        $xpath = new DOMXPath($document);
+        $form = $xpath->query('//form[@id="ams-verification-form"]')->item(0);
+        expect($form)->not->toBeNull();
+        expect($xpath->query('.//select', $form)->length)
+            ->toBe(0)
+            ->and($xpath->query('.//fieldset/legend', $form)->length)
+            ->toBe(6)
+            ->and($xpath->query('.//label/input[@type="radio"]', $form)->length)
+            ->toBe(12)
+            ->and(
+                $xpath->query(
+                    './/input[@name="recommended_service" and @value="Reset Passphrase"]',
+                    $form,
+                )->length,
+            )
+            ->toBe(0);
+        foreach ($xpath->query('.//fieldset', $form) as $field) {
+            $checked = $xpath->query('.//input[@type="radio" and @checked]', $field);
+            expect($checked->length)
+                ->toBe(1)
+                ->and($checked->item(0)->getAttribute('value'))
+                ->toBe($ticket->{$field->getAttribute('data-ams-field')});
+        }
+    },
+);
+
+it('restores only the submitted AMS answers after a failed recheck', function () {
+    $owner = User::factory()->create(['role' => 'verifier']);
+    $ticket = amsV27Ticket($owner);
+    $ticket
+        ->forceFill([
+            'activation_status' => 'activated',
+            'wa_verification_status' => 'verified',
+            'certificate_issuance_status' => 'issued',
+            'certificate_validity_status' => 'active',
+            'wa_verification_note' => 'Catatan lama',
+        ])
+        ->save();
+    $url = route('tickets.show', $ticket);
+    $this->actingAs($owner)
+        ->from($url)
+        ->post(route('tickets.verify-whatsapp', $ticket), [
+            'activation_status' => 'activated',
+            'wa_verification_status' => 'unverified',
+            'certificate_issuance_status' => 'issued',
+        ])
+        ->assertSessionHasErrors('certificate_validity_status');
+    $document = new DOMDocument();
+    $document->loadHTML(
+        $this->get($url)->assertOk()->getContent(),
+        LIBXML_NOERROR | LIBXML_NOWARNING,
+    );
+    $xpath = new DOMXPath($document);
+    $form = $xpath->query('//form[@id="ams-verification-form"]')->item(0);
+    expect(
+        $xpath
+            ->query('.//input[@name="wa_verification_status" and @checked]', $form)
+            ->item(0)
+            ->getAttribute('value'),
+    )
+        ->toBe('unverified')
+        ->and(
+            $xpath->query('.//input[@name="certificate_validity_status" and @checked]', $form)
+                ->length,
+        )
+        ->toBe(0)
+        ->and(trim($xpath->query('.//textarea', $form)->item(0)->textContent))
+        ->toBe('');
+});
+
+it(
+    'recognizes an earlier AMS check as registration history before asking for a correction',
+    function () {
+        $owner = User::factory()->create(['role' => 'verifier']);
+        $ticket = amsV27Ticket($owner, 'Pendaftaran');
+        $url = route('tickets.show', $ticket);
+        $this->actingAs($owner)
+            ->get($url)
+            ->assertOk()
+            ->assertSee('data-onboarding-history="0"', false);
+        $this->post(route('tickets.verify-whatsapp', $ticket), [
+            'activation_status' => 'activated',
+            'wa_verification_status' => 'verified',
+            'certificate_issuance_status' => 'not_issued',
+        ])->assertSessionHasNoErrors();
+        $this->get($url)->assertOk()->assertSee('data-onboarding-history="1"', false);
+    },
+);
+
+it(
+    'allows a continued mismatch to stay on the same ticket without requiring a new recommendation',
+    function () {
+        $owner = User::factory()->create(['role' => 'verifier']);
+        $ticket = amsV27Ticket($owner);
+        $this->actingAs($owner);
+        $url = route('tickets.verify-whatsapp', $ticket);
+        $answers = ['activation_status' => 'activated', 'wa_verification_status' => 'verified'];
+        $this->post(
+            $url,
+            $answers + ['certificate_issuance_status' => 'not_issued'],
+        )->assertSessionHasNoErrors();
+        $this->get(route('tickets.show', $ticket))
+            ->assertOk()
+            ->assertSee('data-continuation-mismatch="1"', false);
+        $this->post(
+            $url,
+            $answers + [
+                'certificate_issuance_status' => 'issued',
+                'certificate_validity_status' => 'active',
+                'service_alignment_status' => 'suitable',
+            ],
+        )->assertSessionHasNoErrors();
+        expect($ticket->fresh()->service_alignment_status)
+            ->toBe('unsuitable')
+            ->and($ticket->fresh()->recommended_service)
+            ->toBeNull();
+        $this->get(route('tickets.show', $ticket))->assertOk()->assertSee('Lanjut pada tiket ini');
+    },
+);
