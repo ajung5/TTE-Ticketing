@@ -4,17 +4,24 @@
 
 Aplikasi **Laravel 13** ini menyediakan formulir permohonan tanpa login, direktori email dinas dari Google Sheets, antrean **self-claim**, pemeriksaan manual AMS BSrE, komunikasi WhatsApp Web (desktop) / aplikasi WhatsApp native (mobile), email pemberitahuan tiket baru ke satu inbox operasional, laporan, dan survei kepuasan layanan. Tampilan admin/verifikator menggunakan panel **Tindakan Berikutnya**, dashboard kesehatan sistem *read-only*, serta footer copyright dan versi aplikasi yang konsisten.
 
-> **Status dokumentasi:** panduan dasar diverifikasi terhadap kode branch `main` per **5 November 2026**, baseline [`26504c2`](https://github.com/ajung5/TTE-Ticketing/commit/26504c27176a53f3f26f00eece0f62f4ae7a26d8). Ringkasan perubahan di bawah diverifikasi terhadap source sampai commit [`1e842a5`](https://github.com/ajung5/TTE-Ticketing/commit/1e842a57234032c04125dda4aac387e44d42b5c2) (**10 November 2026**). Pembaruan dokumentasi **tidak membuktikan** kesiapan konfigurasi server, SMTP, sinkronisasi direktori, keamanan, atau keberhasilan seluruh test pada deployment tertentu.
+> **Acuan dokumentasi** · 20 November 2026, branch `main`, [commit `5ff07cd`](https://github.com/ajung5/TTE-Ticketing/commit/5ff07cd2c71618e58948c1d2ad0778d8494dac33).
 >
 > **Perhatian production:** pencarian NIK/NIP pada versi ini **tidak menggunakan OTP/verifikasi email** dan masih dapat menampilkan profil pegawai berdasarkan NIK/NIP yang cocok. Rate limit telah tersedia, tetapi **bukan pembuktian kepemilikan identitas**. Sebelum akses dibuka luas, pastikan pengelola layanan menerima risikonya dan menerapkan pembatasan jaringan/WAF/anti-enumerasi yang memadai.
 
 ## Versi rilis, perubahan fitur, dan perbaikan bug
 
-Versi aplikasi yang tampil di footer bersumber dari **file `VERSION`** (baseline: `1.0.0`). Perubahan fitur dan bug dicatat terpisah dengan ID `FEAT-...` dan `FIX-...` di [`CHANGELOG.md`](CHANGELOG.md). Label paket implementasi seperti `v6.20.1` bukan versi rilis aplikasi. `VERSION=1.0.0` tidak membuktikan suatu rilis sudah di-deploy; status rilis memerlukan tag Git, tes dan catatan deployment. Lihat [`docs/VERSIONING.md`](docs/VERSIONING.md) untuk tata cara merilis.
+Pada commit acuan, footer membaca **v1.1.0** dari berkas [`VERSION`](VERSION). **v1.2.0** merupakan kandidat rilis minor untuk fitur berikut. Versi yang berjalan pada suatu server dapat diperiksa dari berkas `VERSION` dan commit yang di-deploy.
 
-## Pembaruan implementasi — 10 November 2026
+| Perubahan sejak v1.1.0 | Cara menggunakannya |
+| --- | --- |
+| Pemeriksaan AMS bertahap | Pilih satu hasil per pertanyaan. Form menampilkan tahap yang relevan dan ringkasan tindak lanjut sebelum disimpan. |
+| Kirim ulang tautan Reset Passphrase | Verifikator melakukan kirim ulang di AMS BSrE, lalu mencatat percobaan dan mengonfirmasi pesan WhatsApp pada tiket yang sama. |
+| Pengalihan tiket aktif | Admin memilih tiket yang sedang diproses, verifikator pengganti, dan alasan pengalihan. Nomor tiket dan riwayat tetap dapat ditelusuri. |
+| Antrean dan laporan | Verifikator dapat kembali ke antrean dengan filter sebelumnya. Admin dapat memakai filter rincian yang sama untuk ekspor CSV. |
 
-Bagian ini hanya mencatat perubahan sejak baseline dokumentasi 5 November; bagian panduan lain tetap dipertahankan.
+Label paket Python seperti `v6.20.1` mengidentifikasi paket pemasangan. Untuk riwayat fitur dan prosedur penetapan versi, lihat [catatan perubahan](CHANGELOG.md) dan [kebijakan rilis](docs/VERSIONING.md).
+
+### Riwayat paket implementasi November 2026
 
 - **v6.13 — UX layanan:** filter antrean verifikator **Perlu Tindakan** dan **Menunggu Pemohon** (tetap menghormati kepemilikan tiket), ringkasan hasil AMS tersimpan pada detail tiket, bantuan jika NIK/NIP tidak ditemukan pada formulir publik, dan tombol salin nomor tiket setelah pengajuan berhasil.
 - **v6.13–v6.14 — Dashboard admin:** ringkasan **Bulan Berjalan**, **7 Hari Terakhir**, **Semua Waktu**, dan **Tanggal Kustom** dengan tanggal awal/akhir inklusif menurut WIB. *Tiket Masuk* berdasarkan `created_at`, *Selesai dalam Periode* berdasarkan `completed_at`; indikator antrean saat ini dan statistik akumulasi tetap tidak dipengaruhi filter periode.
@@ -63,6 +70,8 @@ Perubahan profil dan inisial **tidak memerlukan migrasi database**. Uji pada lin
 | Mencari NIK 16 digit atau NIP 18 digit melalui direktori | Ya | — | — |
 | Mengambil tiket baru (*self-claim*) | — | Ya | **Tidak** |
 | Memeriksa AMS, mengirim pesan layanan, menyelesaikan atau mengembalikan tiket | — | Tiket miliknya | **Tidak** |
+| Mencatat kirim ulang tautan Reset Passphrase | — | Tiket miliknya | — |
+| Mengalihkan penanggung jawab tiket yang sedang diproses | — | — | Ya |
 | Melihat statistik tiket | — | Statistik pekerjaan sendiri | Statistik keseluruhan |
 | Mengelola akun verifikator | — | — | Ya |
 | Mengelola template WhatsApp | — | — | Ya |
@@ -73,7 +82,7 @@ Perubahan profil dan inisial **tidak memerlukan migrasi database**. Uji pada lin
 | Mengubah password sendiri | — | Ya | Ya |
 | Mengirim tautan reset password verifikator | — | — | Ya |
 
-**Aturan penting:** administrator tidak menugaskan, mengambil alih, memeriksa AMS, atau menyelesaikan tiket atas nama verifikator. Verifikator hanya boleh memproses tiket yang sudah diambil sendiri. Admin dapat menambah, memperbarui, menonaktifkan, dan memulihkan akun verifikator menurut aturan aplikasi; penghapusan akun menggunakan *soft delete* untuk mempertahankan riwayat.
+Tiket **Baru** diambil sendiri oleh verifikator. Untuk mengganti penanggung jawab tiket **Diproses**, admin membuka **Pengalihan Tiket Aktif**, memilih verifikator aktif lain, mengisi alasan, lalu mengonfirmasi pengalihan. Sistem mencatat petugas asal, petugas tujuan, dan alasan. Sejak itu, hanya pemilik baru yang dapat melanjutkan pemeriksaan. Admin tetap mengelola akun verifikator dan dapat menonaktifkan akun dengan mempertahankan riwayatnya.
 
 **UX terkini:** antrean verifikator memprioritaskan **Milik Saya**, sedangkan antrean Baru diurutkan dari tiket yang lebih lama; halaman detail menonjolkan layanan diajukan dan panel **Tindakan Berikutnya** berbasis keputusan backend. Admin memiliki statistik, rincian laporan dan indikator kesehatan direktori/SMTP/queue yang **informatif saja** (bukan bukti pengiriman email atau keberhasilan scheduler). Preset WA memiliki pratinjau dengan data fiktif dan panduan token di setiap editor. Footer seluruh halaman menampilkan copyright **DiskominfoSubang 2026–tahun berjalan** di kiri serta `vX.X.X` di kanan sesuai file `VERSION` di root repository.
 
@@ -98,48 +107,28 @@ Tiket mempunyai nomor unik. Tombol **Lepas Tiket** hanya dapat digunakan sebelum
 
 ### Alur umum
 
-```text
-Pemohon mengisi formulir publik
-          │
-          ▼
-Tiket Open → verifikator melakukan self-claim
-          │
-          ▼
-Tiket In Progress
-          │
-          ▼
-LANGKAH 1 — Pemeriksaan AMS BSrE (manual)
-   1. Status aktivasi akun: activated / not_activated
-   2. Status nomor WA: verified / unverified (jika akun aktif)
-   3. Status penerbitan SE: issued / not_issued (jika akun aktif)
-   4. Jika issued: active / expired / revoked
-   5. Kesesuaian jenis permohonan
-          │
-          ▼
-LANGKAH 2 — Notifikasi berdasarkan keputusan AMS
-          │
-          ▼
-Desktop: WhatsApp Web / mobile: tautan ke aplikasi WhatsApp
-→ kirim pesan secara manual → klik “Saya Sudah Mengirim Pesan”
-          │
-          ├── Pendaftaran Diproses → otomatis Done
-          ├── Perbaikan Jenis Permohonan → Returned (setelah dikembalikan)
-          └── Penanganan lain → pemeriksaan/tindakan lanjutan → Done bila memenuhi syarat
-          │
-          ▼
-Jika Done → Notifikasi Selesai + tautan survei
-          │
-          ▼
-Pemohon mengisi survei → hasil dapat dilihat administrator
-```
+1. Pemohon mengirim formulir dan memperoleh nomor tiket. Verifikator mengambil tiket **Baru** sehingga statusnya menjadi **Diproses**.
+2. Pada **Pemeriksaan AMS**, verifikator memilih satu tombol radio untuk setiap pertanyaan yang tampil.
 
-**WhatsApp tidak terintegrasi dengan API pengiriman.** Di desktop sistem membuka WhatsApp Web; di mobile sistem mencatat pembukaan lalu menyediakan tombol **Buka Aplikasi WhatsApp** (`whatsapp://`) dan fallback browser. Kedua jalur tetap memerlukan pengiriman pesan dan konfirmasi manual **Saya Sudah Mengirim Pesan**. Membuka tautan tidak membuktikan pesan terkirim/diterima; membuka ulang pesan identik tidak membatalkan konfirmasi yang masih berlaku, sementara perubahan isi notifikasi memerlukan konfirmasi ulang.
+   | Urutan | Pemeriksaan | Kapan dijawab |
+   | --- | --- | --- |
+   | 1 | Aktivasi akun | Selalu. Jika akun belum aktif, simpan hasil ini untuk menampilkan tindak lanjut aktivasi atau pendaftaran. |
+   | 2 | Verifikasi nomor WhatsApp | Setelah memilih **Sudah aktivasi**. |
+   | 3 | Penerbitan SE | Setelah status WhatsApp dipilih, termasuk jika nomor belum terverifikasi. |
+   | 4 | Status SE | Jika SE sudah terbit, pilih **Aktif**, **Kedaluwarsa**, atau **Dicabut**. |
+   | 5 | Kesesuaian dan rekomendasi layanan | Muncul saat perlu penilaian atau klarifikasi. Kondisi yang sudah pasti, seperti SE dicabut, langsung menghasilkan arahan di ringkasan. |
+
+3. Periksa **Ringkasan & tindak lanjut**, tambahkan catatan bila perlu, lalu klik **Simpan Hasil Pemeriksaan AMS**. Mengganti jawaban sebelumnya mengosongkan pilihan pada tahap berikutnya. Saat tiket dibuka lagi, form menampilkan hasil tersimpan.
+4. Ikuti panel **Tindakan Berikutnya**. Verifikator mengirim pesan WhatsApp secara manual dan mengonfirmasi pengiriman pada tiket. Untuk koreksi jenis layanan, lanjutkan dengan **Kembalikan Permohonan**. Untuk **Pendaftaran Diproses**, konfirmasi pengiriman menyelesaikan penanganan administratif.
+5. Setelah tiket **Selesai**, kirim notifikasi akhir beserta tautan survei. Admin dapat membaca hasil survei yang telah diisi pemohon.
+
+**WhatsApp tidak terintegrasi dengan API pengiriman.** Di desktop sistem membuka WhatsApp Web; di mobile sistem mencatat pembukaan lalu menyediakan tombol **Buka Aplikasi WhatsApp** (`whatsapp://`) dan fallback browser. Kedua jalur tetap memerlukan pengiriman pesan dan konfirmasi manual pada tiket. Untuk Notifikasi 4, gunakan **Konfirmasi WA & Selesaikan Administrasi**. Membuka tautan tidak membuktikan pesan terkirim/diterima; membuka ulang pesan identik tidak membatalkan konfirmasi yang masih berlaku, sementara perubahan isi notifikasi memerlukan konfirmasi ulang.
 
 ### Aturan khusus: Penerbitan SE (`Pendaftaran`)
 
 1. Jika pada AMS akun **belum diaktivasi** (`not_activated`), sistem memilih **Notifikasi 4 — Pendaftaran Diproses**, **bukan** `Aktivasi Akun Diperlukan`.
 2. Pesan Pendaftaran Diproses memberikan arahan aktivasi kepada pemohon, tanpa menyatakan SE sudah terbit.
-3. Ketika verifikator **mengonfirmasi pengiriman Notifikasi 4** melalui **Saya Sudah Mengirim Pesan**, sistem **otomatis menutup tiket sebagai `Done`** dalam transaksi yang sama.
+3. Ketika verifikator **mengonfirmasi pengiriman Notifikasi 4** melalui **Konfirmasi WA & Selesaikan Administrasi**, sistem **otomatis menutup tiket sebagai `Done`** dalam transaksi yang sama.
 4. Hasil tersimpan sebagai `actual_process = registration_followup` dan `service_outcome = registration_processed`.
 5. Setelah `Done`, verifikator mengirim **Notifikasi Selesai + Survei** secara manual melalui WhatsApp Web (desktop) atau aplikasi WhatsApp (mobile).
 6. **Status Done pada skenario ini berarti tindak lanjut administratif selesai, bukan akun sudah aktif atau SE sudah diterbitkan.** Jangan menghitungnya sebagai jumlah sertifikat yang benar-benar terbit.
@@ -158,18 +147,29 @@ Alur di atas juga berlaku saat event yang dipilih adalah `registration` pada tik
 - Untuk jalur penyelesaian melalui tombol **Tandai Selesai**, backend mensyaratkan akun `activated`, WA `verified`, SE `issued`, dan masa berlaku `active`. Hasil layanan aktual dicatat pada tiket.
 - Sistem mencatat apabila konfirmasi notifikasi antara belum ditemukan. Karena itu, prosedur operasional tetap mewajibkan petugas memastikan pesan sudah dikirim sebelum menutup penanganan.
 
+### Kirim ulang tautan Reset Passphrase
+
+Fitur ini tersedia untuk verifikator pemilik tiket **Reset Passphrase** berstatus **Diproses** atau **Selesai**, dengan email dinas yang valid. Tiket simulasi dikecualikan.
+
+1. Lakukan pengiriman ulang tautan resmi di **AMS BSrE**.
+2. Di detail tiket, buka **Kirim Ulang Link Reset Passphrase**. Pilih alasan (email belum diterima, tautan kedaluwarsa, atau tautan tidak dapat dibuka), centang konfirmasi tindakan di AMS, lalu klik **Catat Kirim Ulang & Siapkan Notifikasi WA**.
+3. Buka WhatsApp dari percobaan tersebut, kirim pemberitahuan, lalu klik **Saya Sudah Mengirim Pesan**. Riwayat membedakan pencatatan di AMS, pembukaan WhatsApp, dan konfirmasi petugas. Penerimaan email oleh pemohon perlu diperiksa secara terpisah.
+
+Jeda antarpercobaan minimal **2 menit**, dengan batas **5 percobaan per tiket dalam 24 jam**. Setelah tiket dialihkan, verifikator baru dapat mencatat percobaan sendiri. Konfirmasi percobaan lama terikat pada petugas yang membuatnya.
+
 ### Permohonan tidak sesuai
 
 Jika hasil AMS dan klarifikasi menunjukkan jenis layanan perlu diajukan ulang, sistem menampilkan notifikasi koreksi. Setelah pesan dikonfirmasi, verifikator menggunakan **Kembalikan Permohonan** sehingga status menjadi **`Returned` / Perlu Pengajuan Ulang**. Tiket lama tidak dihapus, **bukan** `Done`, tidak dihitung sebagai layanan berhasil, dan **tidak** menerima survei selesai.
 
 ## 3. Notifikasi WhatsApp dan hasil pelayanan
 
-Saat ini terdapat **11 event/template WhatsApp**, bukan enam seperti dokumentasi lama. Pemilihan event dilakukan berdasarkan kondisi AMS dan konteks tiket; tidak semua event menjadi bagian dari alur normal setiap permohonan.
+Aplikasi mengenali 12 jenis notifikasi WhatsApp. Pesan mengikuti hasil AMS atau tindakan yang sedang dilakukan pada tiket.
 
 | Event | Judul notifikasi |
 | --- | --- |
 | `unverified` | Nomor WA Belum Terverifikasi |
 | `reset` | Reset Passphrase |
+| `reset_resend` | Pengiriman Ulang Link Reset Passphrase |
 | `renewal` | Pembaruan Sertifikat |
 | `registration` | **Pendaftaran Diproses (Notifikasi 4)** |
 | `completed` | **Selesai + Survei (Notifikasi 5)** |
@@ -192,7 +192,7 @@ Administrator dapat menyunting pesan pada **`/admin/wa-templates`**. Preset bawa
 | `certificate_renewed` | SE berhasil diperbarui |
 | `passphrase_reset` | Reset Passphrase selesai |
 
-Laporan admin menampilkan status tiket, kategori hasil AMS, rekap per layanan/verifikator, rincian berpaginasi, dan ekspor CSV. Filter status pada rincian/CSV tidak mengubah **rekap keseluruhan** periode. Indikator **Selesai Selama Periode** dihitung dari tanggal penyelesaian, termasuk tiket yang dibuat pada periode sebelumnya.
+Laporan admin menampilkan status tiket, kategori hasil AMS, rekap per layanan/verifikator, rincian berpaginasi, dan ekspor CSV. Rincian dan CSV memakai filter status, OPD, jenis layanan, verifikator, serta pencarian nomor tiket atau nama pemohon. Keduanya menampilkan UPTD. Rekap keseluruhan tetap dihitung untuk seluruh tiket pada periode terpilih. Indikator **Selesai Selama Periode** dihitung dari tanggal penyelesaian, termasuk tiket yang dibuat pada periode sebelumnya.
 
 ### Survei
 
@@ -303,7 +303,7 @@ Jika role belum ada, `TteBaselineSeeder` akan meminta **akun admin** dan **akun 
 - Tidak ada password akun default, akun demo, atau variabel `TTE_BASELINE_*` yang perlu dimasukkan ke `.env`.
 - Seeder hanya menyimpan **hash password** dalam database.
 - Jika akun dengan role tersebut sudah tersedia, provisioning tidak diulang; password dan profil existing tidak diubah.
-- Seeder mengisi **11 preset WhatsApp** yang belum ada, tanpa menimpa template kustom.
+- Seeder mengisi **12 preset WhatsApp** yang belum ada, tanpa menimpa template kustom.
 - Seeder **tidak membuat tiket, survei, atau pegawai dummy**.
 - Fresh install tidak membuat tabel `webhook_events` (legacy Zoho); `tickets.source` default `direct`. Kolom `external_submission_id` tetap diperlukan untuk idempotensi form internal.
 - Audit migration/seeder dan prosedur instalasi bersih: [`docs/FRESH-INSTALL-DATABASE.md`](docs/FRESH-INSTALL-DATABASE.md).
@@ -496,14 +496,22 @@ Di aaPanel, atur cron **setiap menit** untuk menjalankan Laravel Scheduler (gant
 * * * * * cd /www/wwwroot/tte-ticket.my.id && /PATH/KE/PHP artisan schedule:run >> /dev/null 2>&1
 ```
 
-`routes/console.php` menjadwalkan `tte:sync-email-directory` **setiap jam**, hanya jika ID spreadsheet dan path JSON service account dikonfigurasi. Periksa dengan:
+Laravel menjadwalkan `tte:sync-email-directory` **setiap 5 menit** bila ID spreadsheet dan lokasi JSON service account terisi. Cron di atas tetap berjalan **setiap menit** agar Laravel dapat memanggil tugas saat jatuh tempo. Sumber jadwal ada di [routes/console.php](routes/console.php).
+
+Perintah pertama menampilkan jadwal. Perintah kedua langsung menjalankan sinkronisasi.
 
 ```bash
 php artisan schedule:list
 php artisan tte:sync-email-directory
 ```
 
-Jika pengaturan `TTE_EMAIL_DIRECTORY_MAX_AGE_HOURS=24`, direktori dianggap tidak tersedia ketika tidak tersinkron dengan sukses selama 24 jam. Pantau kegagalan sinkronisasi; aplikasi tidak otomatis memperbaiki kredensial Google yang dicabut atau spreadsheet yang berubah struktur.
+Setiap sinkronisasi yang sukses memperbarui `email_directory_sync_states.last_success_at`, termasuk ketika seluruh data pegawai sama. Untuk mengecek waktu keberhasilan terakhir dan jumlah baris tanpa menjalankan impor, gunakan perintah berikut dari root aplikasi.
+
+```bash
+php artisan tinker --execute="dump(DB::table('email_directory_sync_states')->where('name', 'email_directory')->first(['last_success_at', 'row_count']));"
+```
+
+Dengan `TTE_EMAIL_DIRECTORY_MAX_AGE_HOURS=24`, lookup berhenti memakai direktori jika keberhasilan terakhir sudah lebih dari 24 jam. Jika waktu keberhasilan terus tertinggal, periksa eksekusi cron dan keluaran perintah sinkronisasi manual. Daftar jadwal hanya menunjukkan tugas yang terdaftar.
 
 ### 6.7 Pemeriksaan setelah deployment
 
@@ -524,7 +532,7 @@ Jika pengaturan `TTE_EMAIL_DIRECTORY_MAX_AGE_HOURS=24`, direktori dianggap tidak
 
 ## 7. Pembaruan deployment pada database existing
 
-**Bagian ini berbeda dari instalasi baru.** Repository sekarang mempunyai **9 migration aktif** (3 bawaan Laravel, 4 skema domain, 1 kompatibilitas ukuran `wa_message_templates.event_type`, dan 1 migrasi v6.1 untuk tiket ganda/koreksi email AMS). Riwayat migration lama telah dikonsolidasikan; nama migration yang pernah tercatat dapat tetap ada di tabel `migrations` database existing.
+Pada commit acuan terdapat **11 berkas migrasi**. Dua penambahan terbaru membuat tabel `email_directory_sync_states` untuk menyimpan waktu sinkronisasi sukses dan `ticket_reset_resends` untuk riwayat kirim ulang. Periksa migrasi yang masih tertunda pada masing-masing instalasi. [Daftar migrasi](database/migrations)
 
 Prinsipnya:
 
@@ -533,7 +541,7 @@ Prinsipnya:
 3. Jalankan `php artisan migrate:status` dan cocokkan dengan skema aktual; jangan berasumsi migration gabungan yang berubah otomatis memperbaiki tabel lama.
 4. Perbarui kode dengan metode deployment yang Anda gunakan dan pasang dependency sesuai `composer.lock`.
 5. Jalankan `php artisan optimize:clear`, kemudian `php artisan migrate --force` **setelah** memeriksa migration pending.
-6. `php artisan db:seed --class=DatabaseSeeder --force` dapat dijalankan kembali secara interaktif; akun yang sudah ada dan template kustom tidak ditimpa.
+6. Untuk memasang preset WhatsApp baru pada instalasi yang sudah memiliki akun, jalankan `php artisan db:seed --class=WaTemplatePresetsSeeder --force`. Seeder hanya menambahkan preset yang belum ada.
 7. Periksa proses bisnis pada staging sebelum menerapkan ke pengguna nyata.
 
 **JANGAN jalankan** pada database existing:
@@ -615,11 +623,21 @@ Test yang relevan untuk verifikasi perubahan penting:
 ```bash
 php artisan test tests/Feature/Infrastructure/DatabaseAndSeedersTest.php --compact
 php artisan test tests/Feature/Tickets/AmsDecisionsTest.php --compact
+php artisan test tests/Feature/Tickets/AmsVerificationSequenceTest.php --compact
+php artisan test tests/Feature/Tickets/ResetResendAndAdminTransferTest.php --compact
+php artisan test tests/Feature/Infrastructure/EmailDirectoryIncrementalSyncTest.php --compact
 php artisan test tests/Feature/Notifications/WhatsAppDeliveryTest.php --compact
 php artisan test tests/Feature/Reporting/DashboardAndTicketReportsTest.php --compact
 php artisan test tests/Feature/Presentation/InternalInterfaceTest.php --compact
 php artisan test tests/Feature/Notifications/EmailNotificationsTest.php --compact
 php artisan test tests/Feature/Surveys/SurveyWorkflowsTest.php --compact
+```
+
+Untuk memeriksa format Blade, PHP, JavaScript, CSS, dan SQL di mesin pengembangan, gunakan skrip repo. Perintah `format:check` hanya memeriksa. Jalankan `npm run format` jika ingin menerapkan perubahan, lalu tinjau `git diff`.
+
+```bash
+npm ci
+npm run format:check
 ```
 
 Lakukan juga pemeriksaan dependency dan lingkungan:
@@ -637,12 +655,15 @@ php artisan schedule:list
 
 1. Buat permohonan Pendaftaran dengan akun AMS belum aktivasi. Pastikan **Notifikasi 4** muncul.
 2. Buka WA Web tanpa mengonfirmasi: tiket tetap `In Progress`.
-3. Konfirmasi **Saya Sudah Mengirim Pesan**: tiket `Done`, `service_outcome = registration_processed`, tanpa klaim SE terbit.
+3. Pilih **Konfirmasi WA & Selesaikan Administrasi**. Pastikan tiket `Done`, `service_outcome = registration_processed`, tanpa klaim SE terbit.
 4. Pastikan Notifikasi **Selesai + Survei** tersedia, signed URL valid, dan survei hanya bisa diisi sekali.
 5. Uji Reset Passphrase/Pembaruan dengan kombinasi akun belum aktivasi, WA belum verified, SE belum terbit, expired, revoked, dan active. Khusus riwayat aktivasi/set passphrase yang setelah pemeriksaan ulang menjadi **WA verified + SE active**, pastikan langsung **Tandai Selesai**, tanpa notifikasi Reset/Pembaruan antara.
 6. Uji koreksi layanan hingga status `Returned`; pastikan tidak dihitung sebagai `Done` atau dikirimi survei.
 7. Uji pembatasan akses: admin tidak dapat memproses tiket, verifikator kedua tidak bisa mengambil alih tiket milik petugas lain.
-8. Uji laporan admin: total per status, **Selesai Selama Periode**, pagination, filter, dan unduhan CSV.
+8. Alihkan tiket **Diproses** ke verifikator lain. Pastikan pemilik lama kehilangan akses penanganan, pemilik baru dapat melanjutkan, dan alasan pengalihan tercatat.
+9. Pada tiket Reset Passphrase uji, catat pengiriman ulang di AMS, buka WhatsApp, lalu konfirmasi. Periksa bahwa percobaan langsung berikutnya ditolak sebelum dua menit.
+10. Ubah hasil AMS dari **Sudah Terbit** menjadi **Belum Terbit**. Pastikan pilihan masa berlaku hilang dan status lama tidak tersimpan kembali.
+11. Bandingkan rincian admin dengan CSV untuk kombinasi filter yang sama, termasuk UPTD dan status **Perlu Pengajuan Ulang**.
 
 ## 10. Operasional, keamanan, dan backup
 
@@ -717,7 +738,9 @@ tail -n 80 storage/logs/laravel.log
 | `/login` | Login petugas | Publik |
 | `/tickets` | Antrean dan filter tiket | Verifikator |
 | `/tickets/{ticket}` | Detail, pemeriksaan AMS, WhatsApp, workflow | Verifikator yang berhak |
+| `/tickets/{ticket}/reset-resends` | Catat percobaan kirim ulang setelah tindakan di AMS (POST) | Verifikator pemilik tiket Reset Passphrase |
 | `/admin` | Statistik layanan | Admin |
+| `/admin/pengalihan-tiket` | Pilih tiket aktif dan verifikator pengganti | Admin |
 | `/admin/verifiers` | Manajemen verifikator | Admin |
 | `/admin/laporan-tiket` | Laporan dan filter periode | Admin |
 | `/admin/laporan-tiket/csv` | Ekspor seluruh hasil filter | Admin |
@@ -734,6 +757,8 @@ app/
   Http/Controllers/
     PublicTicketController.php
     TicketController.php
+    TicketResetResendController.php
+    AdminTicketTransferController.php
     PublicSurveyController.php
     AdminController.php
     AdminTicketReportController.php
@@ -750,9 +775,9 @@ config/
   database.php
   email_directory.php
   filesystems.php
-  tte.php          # termasuk TTE_APP_VERSION dan inbox notifikasi
+  tte.php          # membaca VERSION dan konfigurasi inbox notifikasi
 database/
-  migrations/         # 8 migration aktif
+  migrations/
   seeders/
     DatabaseSeeder.php
     TteBaselineSeeder.php
@@ -767,7 +792,6 @@ resources/views/
   admin/
 routes/
   web.php
-  api.php
   console.php
 tests/Feature/
 ```
@@ -776,17 +800,15 @@ tests/Feature/
 
 ## 13. Dokumentasi operasional yang dipertahankan
 
-Folder `docs/` dibersihkan dari petunjuk patch historis yang tidak lagi berlaku setelah implementasi v58–v60.1. Dokumentasi acuan saat ini adalah **README ini** dan berkas berikut:
+Panduan operasional dan pengembangan tersedia di folder [docs](docs).
 
 | Berkas | Kegunaan |
 | --- | --- |
 | [`PANDUAN-EMAIL-SMTP-DAN-RESET.md`](docs/PANDUAN-EMAIL-SMTP-DAN-RESET.md) | Setup SMTP, mailbox tiket baru, queue, reset password dan smoke test |
 | [`CONTOH-DIREKTORI-EMAIL-TEST.csv`](docs/CONTOH-DIREKTORI-EMAIL-TEST.csv) | Contoh data **sintetis** untuk menguji impor direktori, bukan data pegawai nyata |
-
-Panduan patch yang dihapus tetap tersedia dalam riwayat Git. Pembersihan integrasi legacy tidak menghapus data aplikasi, migration, seeder, atau tiket historis.
-
----
-
-## Catatan terakhir
-
-Panduan dasar README ini berasal dari pemeriksaan **5 November 2026** (baseline `26504c2`), sedangkan bagian **Pembaruan implementasi** mencatat perubahan sampai **10 November 2026** (commit `1e842a5`). Pembaruan dokumentasi **tidak menjalankan** migration, test suite, deployment, ataupun pemeriksaan production. Uji perubahan proses bisnis dan keamanan secara terpisah sebelum rilis.
+| [Kebijakan versi dan rilis](docs/VERSIONING.md) | Penomoran rilis, tag Git dan catatan deployment |
+| [Standar format source](docs/CODE-FORMATTING.md) | Perintah Prettier untuk Blade, PHP, JS dan CSS |
+| [Instalasi database baru](docs/FRESH-INSTALL-DATABASE.md) | Provisioning akun awal dan penggunaan seeder |
+| [Uji antrean dan dashboard](docs/TTE-UX-V613-UAT.md) | Skenario penerimaan antarmuka |
+| [Panduan preset dan inisial](docs/WA-PRESET-INISIAL-V615.md) | Pengaturan tanda tangan pesan WhatsApp |
+| [Permohonan ganda dan koreksi email](docs/PATCH-V61-PERMOHONAN-GANDA-EMAIL-AMS.md) | Panduan perubahan untuk penanganan tiket aktif dan email AMS |
