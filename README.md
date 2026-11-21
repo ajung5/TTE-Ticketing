@@ -656,6 +656,12 @@ php artisan route:list
 php artisan schedule:list
 ```
 
+**Pemeriksaan antarmuka di ponsel**
+
+Pada formulir publik dan halaman petugas yang panjang, geser sedikit sebelum mencapai bagian bawah. Tombol **Ke Atas** muncul saat posisi gulir meninggalkan bagian atas halaman dan tersembunyi lagi setelah kembali ke atas. Uji juga saat memutar ponsel serta saat menggunakan tombol Kembali di browser.
+
+Untuk mengevaluasi performa produksi, periksa persentil ke-75 pada ponsel dan desktop secara terpisah. Targetnya LCP ≤ 2,5 detik, CLS ≤ 0,1, dan INP ≤ 200 ms. Uji interaksi seperti mengisi formulir, memilih hasil AMS, dan menyisipkan placeholder pada preset. [Panduan Core Web Vitals](https://web.dev/articles/vitals)
+
 **Minimal UAT proses bisnis:**
 
 1. Buat permohonan Pendaftaran dengan akun AMS belum aktivasi. Pastikan **Notifikasi 4** muncul.

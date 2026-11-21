@@ -31,7 +31,7 @@
     const ctx = canvas.getContext('2d');
     let matched = false;
     let signed = false;
-    let drawing = false;
+    let previousPoint = null;
     let debounce;
     let controller;
     let sequence = 0;
@@ -219,26 +219,29 @@
     };
     canvas.addEventListener('pointerdown', (e) => {
         if (!e.isPrimary) return;
-        drawing = true;
         canvas.setPointerCapture(e.pointerId);
-        const p = point(e);
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
+        previousPoint = point(e);
     });
     canvas.addEventListener('pointermove', (e) => {
-        if (!drawing || !e.isPrimary) return;
+        if (!previousPoint || !e.isPrimary) return;
         const p = point(e);
+        ctx.beginPath();
+        ctx.moveTo(previousPoint.x, previousPoint.y);
         ctx.lineTo(p.x, p.y);
         ctx.stroke();
-        signed = true;
-        signatureStatus.textContent = 'Tanda tangan telah diisi.';
-        refreshSubmit();
+        previousPoint = p;
+        if (!signed) {
+            signed = true;
+            signatureStatus.textContent = 'Tanda tangan telah diisi.';
+            refreshSubmit();
+        }
     });
-    const endStroke = () => {
-        drawing = false;
+    const endStroke = (e) => {
+        if (e.isPrimary) previousPoint = null;
     };
     canvas.addEventListener('pointerup', endStroke);
     canvas.addEventListener('pointercancel', endStroke);
+    canvas.addEventListener('lostpointercapture', endStroke);
     document.getElementById('signature-clear').addEventListener('click', () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         signed = false;

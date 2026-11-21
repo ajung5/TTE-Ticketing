@@ -8,6 +8,8 @@ tidak dengan sendirinya menjadi rilis production.
 
 ### Perbaikan 21 November 2026
 
+- **FIX-20261121-003 — Navigasi dan performa halaman.** Tombol Ke Atas tersedia setelah guliran pertama di ponsel. Formulir memakai logo WebP, halaman memuat CSS khusus melalui head, dan editor preset menampilkan daftar placeholder lengkap saat dibuka. Dashboard dan antrean juga membutuhkan lebih sedikit kueri untuk menghitung status tiket.
+
 - **FIX-20261121-002 — Kanal tautan kirim ulang.** Preset verifikasi nomor WA mengarahkan pemohon ke chat WhatsApp dari BSrE. Preset aktivasi dan pembaruan menyebut email dinas, seperti preset reset passphrase. Seeder memperbarui teks bawaan lama dan mempertahankan suntingan admin.
 
 ### Pengembangan 20 November 2026

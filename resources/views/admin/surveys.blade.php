@@ -1,7 +1,9 @@
 @extends ('layouts.app')
 @section ('title', 'Hasil Survei Kepuasan')
-@section ('content')
+@push ('page-styles')
     <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-survey.css') }}" />
+@endpush
+@section ('content')
     <div class="page-heading">
         <div>
             <div class="eyebrow">ADMIN / EVALUASI LAYANAN</div>

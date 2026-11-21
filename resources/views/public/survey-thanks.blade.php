@@ -1,7 +1,9 @@
 @extends ('layouts.app')
 @section ('title', 'Terima Kasih')
-@section ('content')
+@push ('page-styles')
     <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-survey.css') }}" />
+@endpush
+@section ('content')
     <div class="survey-wrap">
         <section class="card survey-card survey-thanks">
             <div class="survey-check" aria-hidden="true">✓</div>

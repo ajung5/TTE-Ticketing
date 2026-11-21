@@ -118,6 +118,16 @@ class TicketController extends Controller {
                 ->orderBy('id', $oldestFirst ? 'asc' : 'desc');
         }
         $tickets = $query->paginate(12)->withQueryString();
+        $mine = Ticket::where('claimed_by', $request->user()->id)
+            ->whereIn('status', ['In Progress', 'Done', 'Returned'])
+            ->select('status')
+            ->selectRaw(
+                'COUNT(*) as total, COUNT(CASE WHEN awaiting_applicant_action = ? THEN 1 END) as waiting',
+                [true],
+            )
+            ->groupBy('status')
+            ->get()
+            ->keyBy('status');
         $stats = [
             'duplicate_alerts' => Ticket::where('duplicate_attempts', '>', 0)
                 ->whereIn('status', ['Open', 'In Progress'])
@@ -128,30 +138,12 @@ class TicketController extends Controller {
                 )
                 ->count(),
             'new' => Ticket::where('status', 'Open')->count(),
-            'mine' => Ticket::where('claimed_by', $request->user()->id)
-                ->where('status', 'In Progress')
-                ->count(),
-            'completed' => Ticket::where('claimed_by', $request->user()->id)
-                ->where('status', 'Done')
-                ->count(),
-            'returned' => Ticket::where('claimed_by', $request->user()->id)
-                ->where('status', 'Returned')
-                ->count(),
+            'mine' => (int) ($mine->get('In Progress')?->total ?? 0),
+            'completed' => (int) ($mine->get('Done')?->total ?? 0),
+            'returned' => (int) ($mine->get('Returned')?->total ?? 0),
+            'waiting' => (int) ($mine->get('In Progress')?->waiting ?? 0),
         ];
-        $stats['waiting'] = Ticket::where('status', 'In Progress')
-            ->where('claimed_by', $request->user()->id)
-            ->where('awaiting_applicant_action', true)
-            ->count();
-        $stats['actionable'] =
-            $stats['new'] +
-            Ticket::where('status', 'In Progress')
-                ->where('claimed_by', $request->user()->id)
-                ->where(function ($flag) {
-                    $flag
-                        ->where('awaiting_applicant_action', false)
-                        ->orWhereNull('awaiting_applicant_action');
-                })
-                ->count();
+        $stats['actionable'] = $stats['new'] + $stats['mine'] - $stats['waiting'];
         $filters = $request->only(['q', 'layanan']);
         $scope = $focus ? ['focus' => $focus] : ['status' => $status];
         $queue = $scope + $filters + ['page' => $tickets->currentPage()];

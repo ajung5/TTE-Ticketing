@@ -1,5 +1,8 @@
 @extends ('layouts.app')
 @section ('title', 'Detail Tiket')
+@push ('page-styles')
+    <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-ticket.css') }}" />
+@endpush
 @section ('content')
     <div class="page-heading">
         <div>
@@ -294,6 +297,9 @@
                             src="{{ route('tickets.signature', $ticket) }}"
                             alt="Tanda tangan persetujuan formulir pemohon"
                             class="signature-evidence"
+                            width="620"
+                            height="185"
+                            decoding="async"
                             loading="lazy" />
                         <div class="small muted">
                             Tanda tangan persetujuan bukan TTE tersertifikasi BSrE dan tidak
@@ -881,6 +887,5 @@
             @endif
         </div>
     </div>
-    <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-ticket.css') }}" />
     <script src="{{ \App\Support\VersionedAsset::url('js/tte-ticket.js') }}" defer></script>
 @endsection

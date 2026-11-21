@@ -91,20 +91,7 @@
                                 <summary>Semua Placeholder dan Panduan Penulisan</summary>
                                 <div class="tte-preset-inline-guide-body">
                                     <p class="small muted">Ketuk placeholder untuk memasukkannya langsung ke preset ini. NIK pada pesan tetap tersamarkan.</p>
-                                    <div class="token-list">
-                                        @foreach (\App\Models\WaMessageTemplate::VARIABLE_DESCRIPTIONS as $token => $desc)
-                                            <div class="token-row">
-                                                <button
-                                                    type="button"
-                                                    class="token-insert"
-                                                    data-insert-token="{{ $token }}"
-                                                    title="Masukkan ke preset ini">
-                                                    {{ $token }}
-                                                </button>
-                                                <span class="small muted">{{ $desc }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
+                                    <a href="#tte-token-guide">Lihat daftar placeholder</a>
                                     <p class="small muted mt">Wajib: {nama_pemohon}, {nomor_tiket}, serta salah satu dari {nama_verifikator} atau {inisial_verifikator}. Gunakan {survey_url} untuk notifikasi Selesai.</p>
                                 </div>
                             </details>
@@ -134,7 +121,7 @@
                 </details>
             @endforeach
         </section>
-        <aside class="stack">
+        <aside class="stack" id="tte-token-guide">
             <section class="card sticky-guide">
                 <div class="eyebrow">PANDUAN PENULISAN</div>
                 <h2>Placeholder Dinamis</h2>

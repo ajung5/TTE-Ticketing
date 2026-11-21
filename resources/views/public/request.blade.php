@@ -1,16 +1,24 @@
 @extends ('layouts.app')
 @section ('title', 'Permohonan Layanan TTE')
+@push ('page-styles')
+    <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-request.css') }}" />
+@endpush
 @section ('content')
     <div class="public-request-wrap public-request-v5">
         <header class="public-header" aria-label="Identitas instansi">
             <div class="official-letterhead">
                 <div class="official-letterhead__logo">
-                    <img
-                        src="{{ asset('images/lambang-kabupaten-subang.png') }}"
-                        alt="Lambang Kabupaten Subang"
-                        width="92"
-                        height="108"
-                        fetchpriority="high" />
+                    <picture>
+                        <source
+                            type="image/webp"
+                            srcset="{{ \App\Support\VersionedAsset::url('images/lambang-kabupaten-subang.webp') }}" />
+                        <img
+                            src="{{ asset('images/lambang-kabupaten-subang.png') }}"
+                            alt="Lambang Kabupaten Subang"
+                            width="92"
+                            height="108"
+                            fetchpriority="high" />
+                    </picture>
                 </div>
                 <div class="official-letterhead__text">
                     <div class="official-letterhead__government">
@@ -309,6 +317,5 @@
             </div>
         </div>
     </div>
-    <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-request.css') }}" />
     <script src="{{ \App\Support\VersionedAsset::url('js/tte-request.js') }}" defer></script>
 @endsection

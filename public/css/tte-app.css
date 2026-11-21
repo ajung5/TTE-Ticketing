@@ -1839,6 +1839,8 @@ td strong {
 }
 
 .signature-evidence {
+    aspect-ratio: 620 / 185;
+    object-fit: contain;
     display: block;
     max-width: 100%;
     width: 480px;
@@ -3475,13 +3477,13 @@ a.tte-page-item:focus-visible {
     color: #3b5f77;
     margin: 0;
 }
-/* Mobile-only, unobtrusive action when scrolled near the bottom of a long page. */
+/* Floating action stays outside the document flow. */
 .tte-back-to-top {
     display: none;
 }
 @media (max-width: 1000px) {
     /* Per-preset inline help remains available when the sidebar would fall below the editors. */
-    .tte-internal .template-columns > aside.stack {
+    .tte-internal .template-columns > aside.stack:not(:target) {
         display: none;
     }
 }
@@ -3492,6 +3494,9 @@ a.tte-page-item:focus-visible {
     .tte-internal .tte-ams-requested-service .tte-ams-requested-name {
         font-size: 19px;
     }
+}
+@media (max-width: 680px),
+    (pointer: coarse) and (hover: none) and (orientation: landscape) and (max-height: 600px) {
     .tte-back-to-top:not([hidden]) {
         position: fixed;
         right: 15px;

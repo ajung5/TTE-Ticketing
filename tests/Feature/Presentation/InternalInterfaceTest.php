@@ -271,10 +271,13 @@ it(
             ->assertSee('data-tte-back-top', false)
             ->assertSee('Kembali ke atas')
             ->assertSee('tte-app.js');
+        $this->app['auth']->logout();
+        $this->get(route('public.form'))->assertOk()->assertSee('data-tte-back-top', false);
         $js = file_get_contents(public_path('js/tte-app.js'));
         expect($js)
             ->toContain('max-width: 680px')
-            ->toContain('nearBottom')
+            ->not->toContain('nearBottom')
+            ->toContain('window.scrollY')
             ->toContain('scrollTo({ top: 0')
             ->toContain('prefers-reduced-motion: reduce');
     },

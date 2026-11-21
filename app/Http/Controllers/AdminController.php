@@ -16,16 +16,13 @@ class AdminController extends Controller {
 
     public function dashboard(Request $request) {
         $this->check($request);
-        $stats = [
-            'total' => Ticket::count(),
-            'new' => Ticket::where('status', 'Open')->count(),
-            'active' => Ticket::where('status', 'In Progress')->count(),
-            'done' => Ticket::where('status', 'Done')->count(),
-            'returned' => Ticket::where('status', 'Returned')->count(),
-        ];
         $ams = Ticket::query()
             ->selectRaw(
                 "COUNT(*) as total,
+            COUNT(CASE WHEN status = 'Open' THEN 1 END) as open_count,
+            COUNT(CASE WHEN status = 'In Progress' THEN 1 END) as active_count,
+            COUNT(CASE WHEN status = 'Done' THEN 1 END) as done_count,
+            COUNT(CASE WHEN status = 'Returned' THEN 1 END) as returned_count,
             SUM(CASE WHEN activation_status = 'activated' THEN 1 ELSE 0 END) as activated,
             SUM(CASE WHEN activation_status = 'not_activated' THEN 1 ELSE 0 END) as not_activated,
             SUM(CASE WHEN activation_status = 'activated' AND wa_verification_status = 'unverified' THEN 1 ELSE 0 END) as wa_unverified,
@@ -36,6 +33,13 @@ class AdminController extends Controller {
             SUM(CASE WHEN certificate_issuance_status = 'issued' AND certificate_validity_status = 'revoked' THEN 1 ELSE 0 END) as cert_revoked",
             )
             ->first();
+        $stats = [
+            'total' => (int) $ams->total,
+            'new' => (int) $ams->open_count,
+            'active' => (int) $ams->active_count,
+            'done' => (int) $ams->done_count,
+            'returned' => (int) $ams->returned_count,
+        ];
         $services = Ticket::select('layanan')
             ->selectRaw('COUNT(*) as total')
             ->groupBy('layanan')

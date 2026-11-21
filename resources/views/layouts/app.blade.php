@@ -30,48 +30,49 @@
         sizes="180x180" />
     <link rel="manifest" href="{{ \App\Support\VersionedAsset::url('site.webmanifest') }}" />
     <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-app.css') }}" />
+    @stack ('page-styles')
     <script src="{{ \App\Support\VersionedAsset::url('js/tte-app.js') }}" defer></script>
 </head>
 
 <body>
-    {{-- Ikon SVG lokal. Tidak memerlukan CDN / webfont. --}}
-    <svg class="tte-icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
-        <symbol id="tte-ico-stats" viewBox="0 0 24 24">
-            <rect x="3" y="3" width="18" height="18" rx="3" />
-            <path d="M7 17v-5M12 17V7M17 17v-7" />
-        </symbol>
-        <symbol id="tte-ico-users" viewBox="0 0 24 24">
-            <path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M22 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-        </symbol>
-        <symbol id="tte-ico-report" viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
-            <path d="M14 2v6h6M8 13h8M8 17h8" />
-        </symbol>
-        <symbol id="tte-ico-survey" viewBox="0 0 24 24">
-            <rect x="4" y="3" width="16" height="18" rx="2" />
-            <path d="m8 9 1.5 1.5L12 8M14 9h3M8 16h9" />
-        </symbol>
-        <symbol id="tte-ico-message" viewBox="0 0 24 24">
-            <path
-                d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.95L3 21l1.95-5.5A9 9 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3a8.5 8.5 0 0 1 8.5 8.5Z" />
-            <path d="M8 11.5h9M8 15h6" />
-        </symbol>
-        <symbol id="tte-ico-ticket" viewBox="0 0 24 24">
-            <path d="M4 5h16v5a2 2 0 0 0 0 4v5H4v-5a2 2 0 0 0 0-4V5Z" />
-            <path d="M12 5v2M12 10v4M12 17v2" />
-        </symbol>
-        <symbol id="tte-ico-external" viewBox="0 0 24 24">
-            <path d="M14 4h6v6M20 4l-9 9" />
-            <path d="M20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5" />
-        </symbol>
-        <symbol id="tte-ico-profile" viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
-        </symbol>
-    </svg>
     @auth
+        {{-- Ikon SVG lokal. Tidak memerlukan CDN / webfont. --}}
+        <svg class="tte-icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+            <symbol id="tte-ico-stats" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="3" />
+                <path d="M7 17v-5M12 17V7M17 17v-7" />
+            </symbol>
+            <symbol id="tte-ico-users" viewBox="0 0 24 24">
+                <path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+            </symbol>
+            <symbol id="tte-ico-report" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                <path d="M14 2v6h6M8 13h8M8 17h8" />
+            </symbol>
+            <symbol id="tte-ico-survey" viewBox="0 0 24 24">
+                <rect x="4" y="3" width="16" height="18" rx="2" />
+                <path d="m8 9 1.5 1.5L12 8M14 9h3M8 16h9" />
+            </symbol>
+            <symbol id="tte-ico-message" viewBox="0 0 24 24">
+                <path
+                    d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.95L3 21l1.95-5.5A9 9 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3a8.5 8.5 0 0 1 8.5 8.5Z" />
+                <path d="M8 11.5h9M8 15h6" />
+            </symbol>
+            <symbol id="tte-ico-ticket" viewBox="0 0 24 24">
+                <path d="M4 5h16v5a2 2 0 0 0 0 4v5H4v-5a2 2 0 0 0 0-4V5Z" />
+                <path d="M12 5v2M12 10v4M12 17v2" />
+            </symbol>
+            <symbol id="tte-ico-external" viewBox="0 0 24 24">
+                <path d="M14 4h6v6M20 4l-9 9" />
+                <path d="M20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5" />
+            </symbol>
+            <symbol id="tte-ico-profile" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+            </symbol>
+        </svg>
         <div class="shell tte-internal">
             <aside class="sidebar">
                 <div class="tte-sidebar-head">
@@ -224,15 +225,6 @@
                     @yield ('content')
                     @include ('layouts.footer')
                 </div>
-                <button
-                    type="button"
-                    class="tte-back-to-top"
-                    data-tte-back-top
-                    aria-label="Kembali ke atas"
-                    title="Kembali ke atas"
-                    hidden>
-                    <span aria-hidden="true">↑</span> Ke Atas
-                </button>
             </main>
         </div>
     @else
@@ -253,6 +245,15 @@
             @include ('layouts.footer')
         </main>
     @endauth
+    <button
+        type="button"
+        class="tte-back-to-top"
+        data-tte-back-top
+        aria-label="Kembali ke atas"
+        title="Kembali ke atas"
+        hidden>
+        <span aria-hidden="true">↑</span> Ke Atas
+    </button>
     <div id="clipboard-status" class="clipboard-status" role="status" aria-live="polite"></div>
 </body>
 </html>

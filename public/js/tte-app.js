@@ -53,6 +53,21 @@
     }
 
     // Only one preset editor should be expanded, including browsers without details[name] grouping.
+    const tokens = root.querySelector('#tte-token-guide .token-list');
+    if (tokens) {
+        for (const guide of root.querySelectorAll('.tte-preset-inline-guide')) {
+            const showTokens = () => {
+                if (!guide.open) return;
+                guide
+                    .querySelector('a[href="#tte-token-guide"]')
+                    ?.replaceWith(tokens.cloneNode(true));
+                guide.removeEventListener('toggle', showTokens);
+            };
+            guide.addEventListener('toggle', showTokens);
+            showTokens();
+        }
+    }
+
     const presets = [...root.querySelectorAll('.tte-preset-detail')];
     for (const preset of presets) {
         preset.addEventListener('toggle', () => {
@@ -105,39 +120,30 @@
 /* ===== END public/js/tte-internal-refresh.js ===== */
 
 /* ===== BEGIN public/js/tte-back-to-top.js ===== */
-/* TTE v59: small-screen return-to-top action, only near page end.
- * Passive scroll listening; no impact on desktop or workflow state.
- */
 (() => {
     'use strict';
     const button = document.querySelector('[data-tte-back-top]');
     if (!button) return;
-    const mobileQuery = window.matchMedia('(max-width: 680px)');
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let scheduled = false;
-    const update = () => {
-        scheduled = false;
-        const root = document.documentElement;
-        const documentHeight = Math.max(root.scrollHeight, document.body.scrollHeight);
-        const scrollPosition = window.scrollY || root.scrollTop || 0;
-        const nearBottom = documentHeight - (scrollPosition + window.innerHeight) <= 180;
-        button.hidden = !(mobileQuery.matches && scrollPosition > 280 && nearBottom);
-    };
-    const queueUpdate = () => {
-        if (scheduled) return;
-        scheduled = true;
-        window.requestAnimationFrame(update);
-    };
+    const mobile = window.matchMedia(
+        '(max-width: 680px), (pointer: coarse) and (hover: none) and (orientation: landscape) and (max-height: 600px)',
+    );
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    function update() {
+        const hidden = !mobile.matches || window.scrollY <= 0;
+        if (button.hidden !== hidden) button.hidden = hidden;
+    }
+    function watchScroll() {
+        if (mobile.matches) window.addEventListener('scroll', update, { passive: true });
+        else window.removeEventListener('scroll', update);
+        update();
+    }
     button.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
-        button.hidden = true;
+        window.scrollTo({ top: 0, behavior: motion.matches ? 'instant' : 'smooth' });
     });
-    window.addEventListener('scroll', queueUpdate, { passive: true });
-    window.addEventListener('resize', queueUpdate, { passive: true });
-    window.addEventListener('pageshow', queueUpdate);
-    if (mobileQuery.addEventListener) mobileQuery.addEventListener('change', queueUpdate);
-    else mobileQuery.addListener(queueUpdate);
-    update();
+    if (mobile.addEventListener) mobile.addEventListener('change', watchScroll);
+    else mobile.addListener(watchScroll);
+    window.addEventListener('pageshow', update);
+    watchScroll();
 })();
 /* ===== END public/js/tte-back-to-top.js ===== */
 
@@ -198,6 +204,7 @@
         const start = textarea.selectionStart,
             end = textarea.selectionEnd;
         textarea.setRangeText(token, start, end, 'end');
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
         textarea.focus();
         toast('Variabel ' + token + ' dimasukkan ke editor.');
     });
@@ -291,7 +298,7 @@
         details.addEventListener('toggle', () => {
             if (details.open) update();
         });
-        update();
+        if (details.open) update();
     });
 })();
 /* ===== END public/js/tte-preset-preview.js ===== */
