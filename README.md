@@ -544,9 +544,9 @@ Prinsipnya:
 1. Backup database **dan** `storage/app/private`, `.env` serta `APP_KEY` terlebih dahulu. Simpan backup di lokasi aman terpisah.
 2. Catat commit terakhir yang sudah berjalan dan periksa perubahan source yang akan dipasang.
 3. Jalankan `php artisan migrate:status` dan cocokkan dengan skema aktual; jangan berasumsi migration gabungan yang berubah otomatis memperbaiki tabel lama.
-4. Perbarui kode dengan metode deployment yang Anda gunakan dan pasang dependency sesuai `composer.lock`.
+4. Perbarui kode sesuai commit yang akan dirilis lalu jalankan `composer install --no-dev --optimize-autoloader --no-interaction`. Pertahankan konfigurasi dan penyimpanan production, termasuk file SQLite beserta jurnalnya jika dipakai. Perintah `composer setup` diperuntukkan bagi lingkungan baru karena memanggil `key:generate`.
 5. Jalankan `php artisan optimize:clear`, kemudian `php artisan migrate --force` **setelah** memeriksa migration pending.
-6. Untuk memasang preset WhatsApp baru pada instalasi yang sudah memiliki akun, jalankan `php artisan db:seed --class=WaTemplatePresetsSeeder --force`. Seeder hanya menambahkan preset yang belum ada.
+6. Untuk memasang preset WhatsApp baru pada instalasi yang sudah memiliki akun, jalankan `php artisan db:seed --class=WaTemplatePresetsSeeder --force`. Seeder mengisi preset yang belum ada. Khusus `activation_link`, `renewal_link`, dan `wa_verify_link`, teks bawaan lama diperbarui hanya jika isinya masih persis sama dan `updated_by` bernilai `NULL`. Suntingan admin dan pesan yang sudah dicatat pada tiket tetap utuh.
 7. Periksa proses bisnis pada staging sebelum menerapkan ke pengguna nyata.
 
 **JANGAN jalankan** pada database existing:
