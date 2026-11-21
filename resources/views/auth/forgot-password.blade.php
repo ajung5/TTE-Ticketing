@@ -23,6 +23,9 @@
             <button class="btn btn-primary full" type="submit">Kirim Tautan Reset Password</button>
         </form>
         <p class="small muted center mt">Periksa Inbox dan folder Spam. Tautan hanya berlaku selama 60 menit.</p>
-        <div class="center mt"><a href="{{ route('login') }}">Kembali ke Login</a></div>
+        <div class="center mt">
+            <a href="{{ route('login') }}" class="btn btn-outline"
+                ><span aria-hidden="true">←</span> Kembali ke Login</a>
+        </div>
     </div>
 @endsection

@@ -3,8 +3,9 @@
 @section ('content')
     <div class="page-heading">
         <div>
-            <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link"
-                >← Kembali ke dashboard</a>
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline heading-back">
+                <span aria-hidden="true">←</span> Kembali ke dashboard
+            </a>
             <h1>Pengalihan Tiket Aktif</h1>
             <p class="muted">Pilih tiket yang sedang diproses untuk mengalihkan penanganannya ke verifikator lain.</p>
         </div>

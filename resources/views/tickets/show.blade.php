@@ -8,8 +8,9 @@
         <div>
             <a
                 href="{{ route('tickets.index', $queueContext) }}#ticket-{{ $ticket->id }}"
-                class="breadcrumb-link"
-                >← Kembali ke antrean</a>
+                class="btn btn-outline heading-back">
+                <span aria-hidden="true">←</span> Kembali ke antrean
+            </a>
             <div class="eyebrow mt">DETAIL PERMOHONAN</div>
             <h1>
                 {{

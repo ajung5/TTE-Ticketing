@@ -6,7 +6,7 @@
 @section ('content')
     <div class="page-heading">
         <div>
-            <div class="eyebrow">ADMIN / EVALUASI LAYANAN</div>
+            @include ('admin.evaluation-breadcrumb', ['currentPage' => 'Hasil Survei'])
             <h1>Survei Kepuasan Layanan TTE</h1>
             <p class="muted">Ringkasan masukan pemohon yang mengisi survei setelah penanganan tiket.</p>
         </div>

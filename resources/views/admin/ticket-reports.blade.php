@@ -311,7 +311,7 @@
     <div class="report-page">
         <div class="page-heading report-heading">
             <div>
-                <div class="eyebrow">ADMIN / EVALUASI LAYANAN</div>
+                @include ('admin.evaluation-breadcrumb', ['currentPage' => 'Laporan Tiket'])
                 <h1>Laporan Tiket TTE</h1>
                 <p class="muted">Rekap permohonan layanan berdasarkan bulan atau periode yang ditentukan.</p>
             </div>
