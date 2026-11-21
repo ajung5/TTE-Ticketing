@@ -108,3 +108,96 @@ it('displays only overdue tickets of the selected kind on the admin dashboard', 
         ->get(route('admin.dashboard', ['attention' => 'waiting']))
         ->assertForbidden();
 });
+
+it('opens only the requested row in the filtered transfer table', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    [$owner, $target] = User::factory()
+        ->count(2)
+        ->create(['role' => 'verifier']);
+    $first = workspaceTicket($owner);
+    $second = workspaceTicket($owner);
+    $outside = workspaceTicket($target);
+    $filters = ['q' => 'Pemohon', 'owner' => $owner->id];
+    $list = $this->actingAs($admin)
+        ->get(route('admin.transfers.index', $filters))
+        ->assertOk()
+        ->assertSee('data-copy-target="nomor-tiket-' . $first->id . '"', false)
+        ->assertSee('data-copy-target="nomor-tiket-' . $second->id . '"', false)
+        ->assertDontSee('name="expected_owner"', false)
+        ->assertDontSee($outside->ticket_number);
+    $document = new DOMDocument();
+    $document->loadHTML($list->getContent(), LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NONET);
+    $xpath = new DOMXPath($document);
+    expect(
+        $xpath->evaluate(
+            'count(//table[thead/tr/th[@scope="col" and normalize-space()="Aksi"]]/tbody/tr)',
+        ),
+    )->toBe(2.0);
+    $edit = route('admin.transfers.index', $filters + ['alih' => $second->id]);
+    $list->assertSee($edit . '#form-pengalihan');
+    $this->get($edit)
+        ->assertOk()
+        ->assertSee(route('admin.transfers.store', ['ticket' => $second] + $filters))
+        ->assertDontSee(route('admin.transfers.store', ['ticket' => $first] + $filters))
+        ->assertSee(route('admin.transfers.index', $filters) . '#tiket-' . $second->id);
+    $this->get(route('admin.transfers.index', $filters + ['alih' => $outside->id]))
+        ->assertOk()
+        ->assertDontSee('name="expected_owner"', false)
+        ->assertDontSee($outside->ticket_number);
+});
+
+it('keeps transfer filters and success feedback when the final row leaves its page', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    [$owner, $target] = User::factory()
+        ->count(2)
+        ->create(['role' => 'verifier']);
+    for ($i = 0; $i < 16; $i++) {
+        workspaceTicket($owner);
+    }
+    $filters = ['q' => 'Pemohon', 'owner' => $owner->id, 'page' => 2];
+    $url = route('admin.transfers.index', $filters);
+    $page = $this->actingAs($admin)->get($url)->assertOk();
+    $ticket = $page->viewData('tickets')->sole();
+    $this->post(route('admin.transfers.store', ['ticket' => $ticket] + $filters), [
+        'expected_owner' => $owner->id,
+        'verifier_id' => $target->id,
+        'reason' => 'Pergantian jadwal petugas',
+    ])->assertRedirect($url);
+    $redirect = $this->get($url)->assertRedirect();
+    $location = $redirect->headers->get('Location');
+    parse_str(parse_url($location, PHP_URL_QUERY), $query);
+    expect((int) $query['page'])
+        ->toBe(1)
+        ->and((int) $query['owner'])
+        ->toBe($owner->id)
+        ->and($query['q'])
+        ->toBe('Pemohon');
+    $this->get($location)
+        ->assertOk()
+        ->assertSee('Tiket berhasil dialihkan')
+        ->assertDontSee($ticket->ticket_number);
+});
+
+it(
+    'shows an empty table or unavailable destination without offering an invalid transfer',
+    function () {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $owner = User::factory()->create(['role' => 'verifier']);
+        $removed = User::factory()->create(['role' => 'verifier']);
+        $removed->delete();
+        $ticket = workspaceTicket($owner);
+        $this->actingAs($admin)
+            ->get(route('admin.transfers.index'))
+            ->assertOk()
+            ->assertSee('Belum ada verifikator pengganti')
+            ->assertDontSee('aria-label="Alihkan tiket', false);
+        $this->get(route('admin.transfers.index', ['alih' => $ticket->id]))
+            ->assertOk()
+            ->assertSee('Belum ada verifikator lain yang aktif')
+            ->assertDontSee('Simpan pengalihan');
+        $this->get(route('admin.transfers.index', ['q' => 'nomor-tidak-ditemukan']))
+            ->assertOk()
+            ->assertSee('colspan="6"', false)
+            ->assertSee('Tidak ada tiket aktif yang sesuai pencarian.');
+    },
+);

@@ -3535,3 +3535,49 @@ a.tte-page-item:focus-visible {
     color: #7a4912;
     font-weight: 700;
 }
+
+.transfer-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 12px;
+}
+
+.transfer-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.transfer-table td:first-child {
+    white-space: nowrap;
+}
+.transfer-table .transfer-action-cell {
+    width: 1%;
+}
+.transfer-table .transfer-actions {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .transfer-filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .transfer-table .transfer-action-cell {
+        position: sticky;
+        right: 0;
+        background: white;
+        box-shadow: -1px 0 #dbe4eb;
+    }
+    .transfer-table .transfer-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+@media (scripting: none) {
+    .transfer-table [data-copy-target] {
+        display: none;
+    }
+}

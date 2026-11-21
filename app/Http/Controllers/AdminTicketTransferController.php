@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\TicketActivity;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -21,6 +22,7 @@ class AdminTicketTransferController extends Controller {
             'q' => ['nullable', 'string', 'max:100'],
             'owner' => ['nullable', 'integer', 'min:1'],
         ]);
+        $filters = Arr::only($data, ['q', 'owner']);
         $q = trim((string) ($data['q'] ?? ''));
         $tickets = Ticket::query()
             ->with('claimant')
@@ -38,8 +40,22 @@ class AdminTicketTransferController extends Controller {
                 });
             })
             ->latest('updated_at')
+            ->orderByDesc('id')
             ->paginate(15)
-            ->withQueryString();
+            ->appends($filters);
+        if ($tickets->currentPage() > $tickets->lastPage()) {
+            $request->session()->reflash();
+            return redirect()->route(
+                'admin.transfers.index',
+                $filters + ['page' => $tickets->lastPage()],
+            );
+        }
+        $listQuery = $filters;
+        if ($tickets->currentPage() > 1) {
+            $listQuery['page'] = $tickets->currentPage();
+        }
+        $selectedId = (int) old('transfer_ticket', $request->integer('alih'));
+        $selected = $tickets->getCollection()->find($selectedId);
         $verifiers = User::query()->where('role', 'verifier')->orderBy('name')->get();
         $loads = Ticket::where('status', 'In Progress')
             ->whereNotNull('claimed_by')
@@ -47,7 +63,18 @@ class AdminTicketTransferController extends Controller {
             ->groupBy('claimed_by')
             ->pluck('total', 'claimed_by');
         return response()
-            ->view('admin.ticket-transfers', compact('tickets', 'verifiers', 'q', 'loads'))
+            ->view(
+                'admin.ticket-transfers',
+                compact(
+                    'tickets',
+                    'verifiers',
+                    'q',
+                    'loads',
+                    'listQuery',
+                    'selected',
+                    'selectedId',
+                ),
+            )
             ->header('Cache-Control', 'private, no-store');
     }
 
@@ -55,6 +82,9 @@ class AdminTicketTransferController extends Controller {
         $this->admin($request);
         $request->merge(['transfer_ticket' => $ticket->id]);
         $data = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'owner' => ['nullable', 'integer', 'min:1'],
+            'page' => ['nullable', 'integer', 'min:1'],
             'expected_owner' => ['sometimes', 'required', 'integer'],
             'verifier_id' => [
                 'required',
@@ -133,7 +163,7 @@ class AdminTicketTransferController extends Controller {
             ]);
         });
         return redirect()
-            ->route('admin.transfers.index')
+            ->route('admin.transfers.index', Arr::only($data, ['q', 'owner', 'page']))
             ->with('success', 'Tiket berhasil dialihkan. Nomor dan riwayat penanganan tetap sama.');
     }
 }
