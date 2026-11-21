@@ -797,7 +797,7 @@
                                 @endforeach
                             </div>
                         </fieldset>
-                        <p class="small muted">Email dinas: {{ $ticket->email ?: 'Belum tersedia' }} · WhatsApp: {{ $ticket->no_wa ?: 'Belum tersedia' }}</p>
+                        <p class="small muted">BSrE mengirim tautan verifikasi nomor langsung melalui chat WhatsApp ke <strong>{{ $ticket->no_wa ?: '(nomor belum tersedia)' }}</strong>. Tautan aktivasi, pembaruan, dan reset passphrase dikirim ke email dinas <strong>{{ $ticket->email ?: '(email belum tersedia)' }}</strong>.</p>
                         <div class="ams-choices">
                             <label class="ams-choice">
                                 <input type="checkbox" name="ams_confirmed" value="1" required />

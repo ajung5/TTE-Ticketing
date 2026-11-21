@@ -258,6 +258,13 @@ it('accepts only resends and confirms the notice independently for each link typ
         ->toBeNull()
         ->and($first->wa_confirmed_at)
         ->toBeNull();
+    if ($type === 'wa_verify_link') {
+        expect($first->message)->toContain('chat WhatsApp dari BSrE', $ticket->no_wa);
+        expect(strtolower($first->message))->not->toContain('email', 'inbox', 'spam');
+    } else {
+        expect($first->message)->toContain('email dinas', $ticket->email);
+        expect($first->message)->not->toContain('chat WhatsApp dari BSrE');
+    }
     $this->get($show)->assertOk()->assertSee($first->message)->assertSee('Tautan belum diterima');
     $confirm = route('tickets.ams-links.confirm', [$ticket, $first]);
     $this->post($confirm)->assertStatus(409);
@@ -507,5 +514,67 @@ it(
             ->toBe(1)
             ->and($ticket->fresh()->status)
             ->toBe('Done');
+    },
+);
+
+it('renders the BSrE WhatsApp instructions without email or a stored preset', function () {
+    $owner = User::factory()->create(['role' => 'verifier']);
+    $ticket = newResendTicket($owner, 'In Progress', ['email' => null]);
+    WaMessageTemplate::where('event_type', 'wa_verify_link')->delete();
+    $this->actingAs($owner)
+        ->post(route('tickets.ams-links.store', $ticket), [
+            'link_type' => 'wa_verify_link',
+            'reason' => 'expired',
+            'ams_confirmed' => 1,
+        ])
+        ->assertRedirect(route('tickets.show', $ticket))
+        ->assertSessionHasNoErrors();
+    $message = $ticket->resetResends()->sole()->message;
+    expect($message)->toContain('chat WhatsApp dari BSrE', $ticket->no_wa, $ticket->ticket_number);
+    expect(strtolower($message))->not->toContain('{nomor_wa}', 'email', 'inbox', 'spam');
+});
+
+it(
+    'upgrades the shipped WA resend preset once and preserves customized text and recorded notices',
+    function () {
+        $event = 'wa_verify_link';
+        $preset = WaMessageTemplate::where('event_type', $event)->sole();
+        $old =
+            "Yth. Bapak/Ibu {nama_pemohon},\n\nPetugas telah melakukan pengiriman tautan Verifikasi nomor WhatsApp melalui AMS BSrE. Ikuti petunjuk BSrE untuk memverifikasi nomor WhatsApp Anda. Jika tautan belum diterima, hubungi petugas dengan menyebut nomor tiket {nomor_tiket}.\n\nPetugas: {nama_verifikator}\nJangan membagikan tautan pribadi, OTP, password, atau passphrase.";
+        $preset->update(['body' => $old]);
+        $owner = User::factory()->create(['role' => 'verifier']);
+        $ticket = newResendTicket($owner);
+        $this->actingAs($owner)
+            ->post(route('tickets.ams-links.store', $ticket), [
+                'link_type' => $event,
+                'reason' => 'cannot_open',
+                'ams_confirmed' => 1,
+            ])
+            ->assertSessionHasNoErrors();
+        $attempt = $ticket->resetResends()->sole();
+        expect($attempt->message)->toContain('Ikuti petunjuk BSrE untuk memverifikasi');
+        $this->seed(\Database\Seeders\WaTemplatePresetsSeeder::class);
+        $preset->refresh();
+        expect($preset->body)
+            ->toBe(WaMessageTemplate::defaultLinkNotices()[$event])
+            ->and($attempt->fresh()->message)
+            ->toBe($attempt->message);
+        $timestamp = $preset->getRawOriginal('updated_at');
+        $this->travel(3)->minutes();
+        $this->seed(\Database\Seeders\WaTemplatePresetsSeeder::class);
+        expect($preset->fresh()->getRawOriginal('updated_at'))->toBe($timestamp);
+        // Both an unmarked custom body and a template explicitly saved by an admin must survive.
+        $custom = 'Pesan khusus untuk {nama_pemohon} pada tiket {nomor_tiket}.';
+        $preset->update(['body' => $custom]);
+        $this->seed(\Database\Seeders\WaTemplatePresetsSeeder::class);
+        expect($preset->fresh()->body)->toBe($custom);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $preset->update(['body' => $old, 'updated_by' => $admin->id]);
+        $this->seed(\Database\Seeders\WaTemplatePresetsSeeder::class);
+        expect($preset->fresh()->body)->toBe($old);
+        $this->actingAs($admin)
+            ->get(route('admin.templates.index'))
+            ->assertOk()
+            ->assertSee('Arahkan pemohon ke chat WhatsApp dari BSrE');
     },
 );

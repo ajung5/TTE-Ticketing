@@ -154,8 +154,8 @@ Alur di atas juga berlaku saat event yang dipilih adalah `registration` pada tik
 Jika tautan perlu dikirim ulang, verifikator pemilik tiket dapat menggunakan panel **Kirim Ulang Tautan AMS BSrE** pada tiket **Diproses** atau **Selesai** dengan sumber selain simulasi.
 
 1. Kirim ulang tautan resmi melalui AMS BSrE. Pilih jenis tautannya di tiket: **Aktivasi akun**, **Pembaruan sertifikat**, **Verifikasi nomor WhatsApp**, atau **Reset Passphrase**.
-2. Pilih satu alasan: **Tautan belum diterima**, **Tautan kedaluwarsa**, atau **Tautan tidak dapat dibuka**. Centang konfirmasi tindakan di AMS dan klik **Catat Kirim Ulang & Siapkan Notifikasi WA**. Verifikasi WhatsApp memerlukan nomor WA yang valid. Tiga jenis lainnya memerlukan email dinas yang valid.
-3. Dari riwayat, buka WhatsApp, kirim pemberitahuan, lalu pilih **Saya Sudah Mengirim Pesan**. Konfirmasi ini berlaku untuk upaya kirim ulang tersebut.
+2. Pilih satu alasan: **Tautan belum diterima**, **Tautan kedaluwarsa**, atau **Tautan tidak dapat dibuka**. Centang konfirmasi tindakan di AMS dan klik **Catat Kirim Ulang & Siapkan Notifikasi WA**. Untuk verifikasi nomor, BSrE mengirim tautan langsung melalui chat WhatsApp ke nomor pemohon. Untuk aktivasi, pembaruan sertifikat, dan reset passphrase, BSrE mengirim tautan ke email dinas pemohon.
+3. Dari riwayat, buka WhatsApp, kirim pemberitahuan, lalu pilih **Saya Sudah Mengirim Pesan**. Konfirmasi ini mencatat pemberitahuan dari petugas. Pemohon membuka tautan dari BSrE di kanal yang sesuai.
 
 Batasnya **5 pengiriman ulang per tiket dalam 24 jam**, dengan jeda minimal **2 menit** antara dua pengiriman ulang untuk seluruh jenis tautan. Catatan pengiriman pertama dari versi sebelumnya tampil sebagai arsip baca-saja dan dikecualikan dari kedua batas. Setelah pengalihan, petugas baru mencatat tindakannya sendiri.
 
@@ -185,7 +185,7 @@ Aplikasi mengenali 15 jenis notifikasi WhatsApp. Pesan mengikuti hasil AMS atau 
 | `service_mismatch` | Perbaikan Jenis Permohonan |
 | `issuance_required` | Penyesuaian ke Penerbitan SE (Belum Pernah Terbit) |
 
-Administrator dapat menyunting pesan pada **`/admin/wa-templates`**. Preset bawaan hanya dimasukkan jika belum tersedia; seeder ulang tidak menimpa pesan yang sudah diedit.
+Administrator dapat menyunting pesan pada **`/admin/wa-templates`**. Untuk menerapkan petunjuk kanal pada instalasi lama, jalankan `php artisan db:seed --class=WaTemplatePresetsSeeder` (tambahkan `--force` di production). Seeder melengkapi preset yang belum ada dan memperbarui tiga preset kirim ulang yang masih persis sama dengan teks bawaan lama serta belum ditandai sebagai suntingan admin. Jika preset verifikasi nomor WA sudah dikustomisasi, periksa instruksinya di **Pengiriman Ulang Tautan Verifikasi Nomor WhatsApp**. Pesan yang sudah tersimpan dalam riwayat tiket tetap mengikuti teks saat pencatatan.
 
 ### Perbedaan status tiket dan hasil aktual
 

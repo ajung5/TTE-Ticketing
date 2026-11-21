@@ -6,6 +6,10 @@ tidak dengan sendirinya menjadi rilis production.
 
 ## [Unreleased]
 
+### Perbaikan 21 November 2026
+
+- **FIX-20261121-002 — Kanal tautan kirim ulang.** Preset verifikasi nomor WA mengarahkan pemohon ke chat WhatsApp dari BSrE. Preset aktivasi dan pembaruan menyebut email dinas, seperti preset reset passphrase. Seeder memperbarui teks bawaan lama dan mempertahankan suntingan admin.
+
 ### Pengembangan 20 November 2026
 - **FIX-20261121-001 — Kirim ulang tautan AMS.** Pengiriman pertama mengikuti Pemeriksaan AMS dan Notifikasi Sesuai AMS. Panel kirim ulang menerima tiga alasan: tautan belum diterima, kedaluwarsa, atau tidak dapat dibuka. Catatan pengiriman pertama yang sudah tersimpan tetap dapat dibaca sebagai arsip.
 - **FEAT-20261120-003 — Pengiriman tautan AMS.** Fitur awal mencakup pencatatan pengiriman pertama dan pengiriman ulang tautan aktivasi akun, pembaruan sertifikat, verifikasi nomor WhatsApp, serta reset passphrase. Riwayat lama dan preset reset kustom tetap tersedia.

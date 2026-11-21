@@ -58,8 +58,8 @@ Jangan membagikan passphrase, OTP, atau password.',
         }
 
         // Seeder ini juga bisa dipanggil langsung, bukan hanya dari baseline.
-        // Transaction + insertOrIgnore = atomik, idempoten, tidak menimpa template kustom.
         DB::transaction(function () use ($messages): void {
+            $this->refreshOriginalLinkNotices($messages);
             foreach (WaMessageTemplate::TEMPLATE_SERVICE_CODES as $event => $serviceCode) {
                 DB::table('wa_message_templates')->insertOrIgnore([
                     'service_code' => $serviceCode,
@@ -70,5 +70,34 @@ Jangan membagikan passphrase, OTP, atau password.',
                 ]);
             }
         });
+    }
+
+    private function refreshOriginalLinkNotices(array $messages): void {
+        // Match the shipped text byte for byte, including on case-insensitive databases.
+        $oldInstructions = [
+            'activation_link' =>
+                'Aktivasi akun melalui AMS BSrE. Ikuti petunjuk BSrE untuk mengaktifkan akun Anda.',
+            'renewal_link' =>
+                'Pembaruan sertifikat melalui AMS BSrE. Ikuti petunjuk BSrE untuk melanjutkan pembaruan Sertifikat Elektronik Anda.',
+            'wa_verify_link' =>
+                'Verifikasi nomor WhatsApp melalui AMS BSrE. Ikuti petunjuk BSrE untuk memverifikasi nomor WhatsApp Anda.',
+        ];
+        $rows = DB::table('wa_message_templates')
+            ->where('service_code', '*')
+            ->whereIn('event_type', array_keys($oldInstructions))
+            ->whereNull('updated_by')
+            ->lockForUpdate()
+            ->get(['id', 'event_type', 'body']);
+        foreach ($rows as $row) {
+            $oldBody = "Yth. Bapak/Ibu {nama_pemohon},\n\nPetugas telah melakukan pengiriman tautan {$oldInstructions[$row->event_type]} Jika tautan belum diterima, hubungi petugas dengan menyebut nomor tiket {nomor_tiket}.\n\nPetugas: {nama_verifikator}\nJangan membagikan tautan pribadi, OTP, password, atau passphrase.";
+            if ($row->body === $oldBody) {
+                DB::table('wa_message_templates')
+                    ->where('id', $row->id)
+                    ->update([
+                        'body' => $messages[$row->event_type],
+                        'updated_at' => now(),
+                    ]);
+            }
+        }
     }
 }

@@ -46,6 +46,9 @@
                             class="stack">
                             @csrf
                             @method ('PUT')
+                            @if ($eventCode === 'wa_verify_link')
+                                <p class="small muted">Arahkan pemohon ke chat WhatsApp dari BSrE yang berisi tautan verifikasi nomor. Pesan dari petugas hanya memberi tahu pemohon bahwa kirim ulang sudah diminta.</p>
+                            @endif
                             <label for="body-{{ $eventCode }}">Isi pesan WhatsApp</label>
                             <textarea
                                 id="body-{{ $eventCode }}"
