@@ -4,20 +4,20 @@
 
 Aplikasi **Laravel 13** ini menyediakan formulir permohonan tanpa login, direktori email dinas dari Google Sheets, antrean **self-claim**, pemeriksaan manual AMS BSrE, komunikasi WhatsApp Web (desktop) / aplikasi WhatsApp native (mobile), email pemberitahuan tiket baru ke satu inbox operasional, laporan, dan survei kepuasan layanan. Tampilan admin/verifikator menggunakan panel **Tindakan Berikutnya**, dashboard kesehatan sistem *read-only*, serta footer copyright dan versi aplikasi yang konsisten.
 
-> **Acuan dokumentasi** · 20 November 2026, branch `main`, [commit dasar `8777aee`](https://github.com/ajung5/TTE-Ticketing/commit/8777aee469d31d9fcca7142b3b95af1e87db3a04).
+> Dokumentasi ini mencakup fitur di `main` hingga 21 November 2026. [Commit dasar `5ca710b`](https://github.com/ajung5/TTE-Ticketing/commit/5ca710bc583e7b1c6b80f2c93e9a1047ed0eaa1a)
 >
 > **Perhatian production:** pencarian NIK/NIP pada versi ini **tidak menggunakan OTP/verifikasi email** dan masih dapat menampilkan profil pegawai berdasarkan NIK/NIP yang cocok. Rate limit telah tersedia, tetapi **bukan pembuktian kepemilikan identitas**. Sebelum akses dibuka luas, pastikan pengelola layanan menerima risikonya dan menerapkan pembatasan jaringan/WAF/anti-enumerasi yang memadai.
 
 ## Versi rilis, perubahan fitur, dan perbaikan bug
 
-Versi aplikasi yang tercatat adalah **v1.2.0**. Footer membaca [`VERSION`](VERSION). Perubahan fitur berikutnya dicatat di bagian `Unreleased` pada changelog sampai pengelola menetapkan rilis baru.
+Versi aplikasi adalah **v1.4.0**. Footer menampilkan versi dari [file `VERSION`](VERSION).
 
-| Perubahan sejak v1.1.0 | Cara menggunakannya |
+| Perubahan sejak v1.3.0 | Cara menggunakan |
 | --- | --- |
-| Pemeriksaan AMS bertahap | Pilih satu hasil per pertanyaan. Form menampilkan tahap yang relevan dan ringkasan tindak lanjut sebelum disimpan. |
-| Kirim ulang tautan AMS | Verifikator mencatat pengiriman ulang untuk aktivasi akun, pembaruan sertifikat, verifikasi nomor WhatsApp, dan reset passphrase. |
-| Pengalihan tiket aktif | Admin memilih tiket yang sedang diproses, verifikator pengganti, dan alasan pengalihan. Nomor tiket dan riwayat tetap dapat ditelusuri. |
-| Antrean dan laporan | Verifikator dapat kembali ke antrean dengan filter sebelumnya. Admin dapat memakai filter rincian yang sama untuk ekspor CSV. |
+| Pengalihan tiket aktif | Di halaman admin, klik **Alihkan** atau **Salin nomor** pada baris tiket. Setelah pengalihan, daftar mempertahankan pencarian, filter verifikator, dan halaman yang masih tersedia. |
+| Verifikasi data pemohon | Di detail tiket pada HP, kartu **Informasi Pemohon** tampil sebelum **Tindakan Berikutnya** dan **Ringkasan Pemeriksaan AMS**. Ketuk ikon salin di samping NIK, email dinas yang digunakan pada tiket, atau nomor WhatsApp. NIK lengkap hanya bisa disalin oleh verifikator pemegang tiket. |
+| Navigasi admin dan verifikator | Pada **Laporan Tiket** dan **Hasil Survei**, klik **Admin** di breadcrumb untuk kembali ke dashboard. Di detail tiket, **Kembali ke antrean** membawa verifikator ke baris tiket dengan filter sebelumnya. |
+| Menu akun pada HP | Buka **Menu Navigasi** untuk mengakses **Pengaturan Profil** dan **Keluar Sistem**. Kedua aksi berada di bawah nama pengguna. Pada layar mendatar yang pendek, gulir untuk mencapai tombol keluar. |
 
 Label paket Python seperti `v6.20.1` mengidentifikasi paket pemasangan. Untuk riwayat fitur dan prosedur penetapan versi, lihat [catatan perubahan](CHANGELOG.md) dan [kebijakan rilis](docs/VERSIONING.md).
 
