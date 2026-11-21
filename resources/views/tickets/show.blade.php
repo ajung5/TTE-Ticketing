@@ -74,298 +74,256 @@
             pesan.
         </div>
     @endif
-    <section class="tte-next-action" aria-label="Tindakan berikutnya">
-        <div class="tte-next-eyebrow">
-            Tindakan Berikutnya · Tahap {{ $nextAction['step'] }} dari 4
-        </div>
-        <ol class="tte-next-progress" aria-label="Progres penanganan">
-            @for ($step = 1; $step <= 4; $step++)
-                <li
-                    @class ([
-                        'is-complete' => $step < $nextAction['step'],
-                        'is-current' => $step === $nextAction['step']
-                    ])
-                    aria-label="Tahap {{ $step }}{{ $step < $nextAction['step'] ? ' selesai' : ($step === $nextAction['step'] ? ' saat ini' : ' berikutnya') }}"></li>
-            @endfor
-        </ol>
-        <h2>{{ $nextAction['title'] }}</h2>
-        <p>{{ $nextAction['description'] }}</p>
-        @if ($nextAction['target'])
-            <a class="btn btn-primary" href="{{ $nextAction['target'] }}"
-                >{{ $nextAction['button'] }} →</a>
-        @endif
-    </section>
-    @if ($ticket->status === 'In Progress')
-        <section class="tte-ux-ticket-ams" aria-labelledby="tte-ux-ams-heading">
-            <h2 id="tte-ux-ams-heading">Ringkasan Pemeriksaan AMS</h2>
-            <p class="small muted">Ringkasan hasil pemeriksaan terakhir, bukan pembacaan real-time AMS BSrE.</p>
-            <div class="tte-ux-ams-grid">
-                <div class="tte-ux-ams-item">
-                    <span>Aktivasi akun</span><strong>{{ $ticket->activation_label }}</strong>
-                </div>
-                <div class="tte-ux-ams-item">
-                    <span>Verifikasi WhatsApp</span><strong>{{ $ticket->wa_verification_label }}</strong>
-                </div>
-                <div class="tte-ux-ams-item">
-                    <span>Penerbitan dan status SE</span><strong>{{ $ticket->certificate_status_label }}</strong>
-                </div>
-                <div class="tte-ux-ams-item">
-                    <span>Status tiket</span><strong>{{ $ticket->status_label }}</strong>
-                </div>
-            </div>
-            @if (!$completionReady)
-                <p class="tte-ux-ams-note">Ikuti <strong>Tindakan Berikutnya</strong> dan periksa hasil AMS serta konfirmasi WhatsApp sesuai proses yang berlaku sebelum menutup tiket.</p>
-            @endif
-        </section>
-    @endif
     <div class="columns detail-columns">
-        <div class="stack">
-            <section class="card">
-                <div class="section-heading">
-                    <div>
-                        <div class="eyebrow">INFORMASI PEMOHON</div>
-                        <h2>Detail Permohonan</h2>
-                    </div>
-                    <span class="pill pill-neutral">{{ strtoupper($ticket->source) }}</span>
+        <section class="card ticket-applicant" aria-labelledby="applicant-heading">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow">INFORMASI PEMOHON</div>
+                    <h2 id="applicant-heading">Detail Permohonan</h2>
                 </div>
-                <div class="detail-grid">
-                    <div>
-                        <div class="field-name">Nama Pemohon</div>
-                        <div class="field-value">{{ $ticket->nama_user }}</div>
-                    </div>
-                    <div>
-                        <div class="field-name">Nomor WhatsApp</div>
-                        <div class="field-value">{{ $ticket->no_wa }}</div>
-                    </div>
-                    <div>
-                        <div class="field-name">NIK</div>
-                        @if ($ticket->claimed_by !== null && $ticket->claimed_by === auth()->id())
-                            <div class="field-value">{{ $ticket->nik ?: '-' }}</div>
-                        @else
-                            <div class="field-value">{{ $ticket->masked_nik }}</div>
-                            @if ($ticket->status === 'Open' && $ticket->nik)
-                                <div class="small muted">
-                                    Ambil tiket untuk melihat NIK lengkap.
-                                </div>
-                            @endif
+                <span class="pill pill-neutral">{{ strtoupper($ticket->source) }}</span>
+            </div>
+            <div class="detail-grid">
+                <div>
+                    <div class="field-name">Nama Pemohon</div>
+                    <div class="field-value">{{ $ticket->nama_user }}</div>
+                </div>
+                <div>
+                    <div class="field-name">Nomor WhatsApp</div>
+                    @include ('tickets.copy-field',
+                        [
+                            'fieldId' => 'applicant-phone',
+                            'label' => 'nomor WhatsApp',
+                            'value' => $ticket->no_wa
+                        ])
+                </div>
+                <div>
+                    <div class="field-name">NIK</div>
+                    @if ($ticket->claimed_by !== null && $ticket->claimed_by === auth()->id())
+                        @include ('tickets.copy-field',
+                            ['fieldId' => 'applicant-nik', 'label' => 'NIK', 'value' => $ticket->nik])
+                    @else
+                        <div class="field-value">{{ $ticket->masked_nik }}</div>
+                        @if ($ticket->status === 'Open' && $ticket->nik)
+                            <div class="small muted">Ambil tiket untuk melihat NIK lengkap.</div>
                         @endif
-                    </div>
+                    @endif
+                </div>
+                <div>
+                    <div class="field-name">NIP</div>
+                    <div class="field-value">{{ $ticket->nip ?: '-' }}</div>
+                </div>
+                <div>
+                    <div class="field-name">Unit Kerja / OPD</div>
+                    <div class="field-value">{{ $ticket->opd ?: '-' }}</div>
+                </div>
+                @if ($applicantUptd !== '')
                     <div>
-                        <div class="field-name">NIP</div>
-                        <div class="field-value">{{ $ticket->nip ?: '-' }}</div>
+                        <div class="field-name">UPTD</div>
+                        <div class="field-value">{{ $applicantUptd }}</div>
                     </div>
-                    <div>
-                        <div class="field-name">Unit Kerja / OPD</div>
-                        <div class="field-value">{{ $ticket->opd ?: '-' }}</div>
-                    </div>
-                    @if ($applicantUptd !== '')
-                        <div>
-                            <div class="field-name">UPTD</div>
-                            <div class="field-value">{{ $applicantUptd }}</div>
+                @endif
+                <div>
+                    <div class="field-name">Jabatan</div>
+                    <div class="field-value">{{ $ticket->jabatan ?: '-' }}</div>
+                </div>
+                <div>
+                    <div class="field-name">Email Dinas (digunakan pada tiket)</div>
+                    @include ('tickets.copy-field',
+                        [
+                            'fieldId' => 'applicant-email',
+                            'label' => 'email dinas',
+                            'value' => $ticket->email
+                        ])
+                    @if ($ticket->source === 'direct' && $ticket->directory_email)
+                        <div class="small muted">
+                            Sesuai direktori saat pengajuan: {{ $ticket->directory_email }}
                         </div>
                     @endif
-                    <div>
-                        <div class="field-name">Jabatan</div>
-                        <div class="field-value">{{ $ticket->jabatan ?: '-' }}</div>
-                    </div>
-                    <div>
-                        <div class="field-name">Email Dinas (digunakan pada tiket)</div>
-                        <div class="field-value">{{ $ticket->email ?: '-' }}</div>
-                        @if ($ticket->source === 'direct' && $ticket->directory_email)
-                            <div class="small muted">
-                                Sesuai direktori saat pengajuan: {{ $ticket->directory_email }}
-                            </div>
-                        @endif
-                        @if ($ticket->email_corrected_at)
-                            <div class="small muted">
-                                Dikoreksi berdasarkan AMS: {{
-                                    $ticket->email_corrected_at
-                                        ->timezone('Asia/Jakarta')
-                                        ->format('d M Y H:i')
-                                }}
-                            </div>
-                        @endif
-                    </div>
-                    <div>
-                        <div class="field-name">Tanggal Masuk</div>
-                        <div class="field-value">
-                            {{
-                                $ticket->created_at
+                    @if ($ticket->email_corrected_at)
+                        <div class="small muted">
+                            Dikoreksi berdasarkan AMS: {{
+                                $ticket->email_corrected_at
                                     ->timezone('Asia/Jakarta')
-                                    ->format('d M Y, H:i')
+                                    ->format('d M Y H:i')
                             }}
                         </div>
+                    @endif
+                </div>
+                <div>
+                    <div class="field-name">Tanggal Masuk</div>
+                    <div class="field-value">
+                        {{
+                            $ticket->created_at
+                                ->timezone('Asia/Jakarta')
+                                ->format('d M Y, H:i')
+                        }}
+                    </div>
+                </div>
+                <div>
+                    <div class="field-name">Penanggung Jawab</div>
+                    <div class="field-value">
+                        {{
+                            $ticket->claimant?->name ??
+                                'Belum diambil'
+                        }}
+                    </div>
+                </div>
+            </div>
+            @if ($ticket->status === 'In Progress' &&
+                $ticket->claimed_by === auth()->id() &&
+                $ticket->source !== 'simulated')
+                <details class="note-box mt">
+                    <summary><strong>Koreksi Email berdasarkan AMS BSrE</strong></summary>
+                    <p class="small muted">Gunakan hanya apabila email pada tiket berbeda dengan email yang telah Anda periksa di AMS. Perubahan ini tidak mengubah direktori Email Gov.</p>
+                    <form
+                        method="post"
+                        action="{{ route('tickets.email.update', $ticket) }}"
+                        class="stack mt">
+                        @csrf
+                        @method ('PATCH')
+                        <label>Email yang terdaftar di AMS BSrE
+                            <input
+                                type="email"
+                                name="email"
+                                maxlength="180"
+                                required
+                                value="{{ old('email', $ticket->email) }}"
+                                autocomplete="off"
+                                placeholder="nama@subang.go.id" />
+                        </label>
+                        @error ('email')
+                            <p class="small" role="alert">{{ $message }}</p>
+                        @enderror
+                        <label>Alasan koreksi
+                            <textarea
+                                name="reason"
+                                rows="2"
+                                minlength="10"
+                                maxlength="500"
+                                required
+                                placeholder="Jelaskan ketidaksesuaian yang ditemukan"
+                                >{{ old('reason') }}</textarea
+                            >
+                        </label>
+                        @error ('reason')
+                            <p class="small" role="alert">{{ $message }}</p>
+                        @enderror
+                        <label><input type="checkbox" name="ams_confirmed" value="1" required /> Saya
+                            telah memeriksa alamat email ini langsung di AMS BSrE.</label>
+                        @error ('ams_confirmed')
+                            <p class="small" role="alert">{{ $message }}</p>
+                        @enderror
+                        <button class="btn btn-outline" type="submit">Simpan Koreksi Email</button>
+                    </form>
+                </details>
+            @endif
+            <div class="note-box mt">
+                <strong>Pemeriksaan dan Hasil Pelayanan</strong>
+                <div class="detail-grid mt">
+                    <div>
+                        <div class="field-name">Layanan Diajukan</div>
+                        <div class="field-value">{{ $ticket->service_label }}</div>
                     </div>
                     <div>
-                        <div class="field-name">Penanggung Jawab</div>
+                        <div class="field-name">Kesesuaian</div>
+                        <div class="field-value">{{ $ticket->service_alignment_label }}</div>
+                    </div>
+                    <div>
+                        <div class="field-name">Proses Aktual</div>
+                        <div class="field-value">{{ $ticket->actual_process_label }}</div>
+                    </div>
+                    <div>
+                        <div class="field-name">Hasil Akhir</div>
                         <div class="field-value">
                             {{
-                                $ticket->claimant?->name ??
-                                    'Belum diambil'
+                                $ticket->status === 'Done'
+                                    ? $ticket->service_outcome_label
+                                    : 'Belum selesai'
                             }}
                         </div>
                     </div>
                 </div>
-                @if ($ticket->status === 'In Progress' &&
-                    $ticket->claimed_by === auth()->id() &&
-                    $ticket->source !== 'simulated')
-                    <details class="note-box mt">
-                        <summary><strong>Koreksi Email berdasarkan AMS BSrE</strong></summary>
-                        <p class="small muted">Gunakan hanya apabila email pada tiket berbeda dengan email yang telah Anda periksa di AMS. Perubahan ini tidak mengubah direktori Email Gov.</p>
-                        <form
-                            method="post"
-                            action="{{ route('tickets.email.update', $ticket) }}"
-                            class="stack mt">
-                            @csrf
-                            @method ('PATCH')
-                            <label>Email yang terdaftar di AMS BSrE
-                                <input
-                                    type="email"
-                                    name="email"
-                                    maxlength="180"
-                                    required
-                                    value="{{ old('email', $ticket->email) }}"
-                                    autocomplete="off"
-                                    placeholder="nama@subang.go.id" />
-                            </label>
-                            @error ('email')
-                                <p class="small" role="alert">{{ $message }}</p>
-                            @enderror
-                            <label>Alasan koreksi
-                                <textarea
-                                    name="reason"
-                                    rows="2"
-                                    minlength="10"
-                                    maxlength="500"
-                                    required
-                                    placeholder="Jelaskan ketidaksesuaian yang ditemukan"
-                                    >{{ old('reason') }}</textarea
-                                >
-                            </label>
-                            @error ('reason')
-                                <p class="small" role="alert">{{ $message }}</p>
-                            @enderror
-                            <label><input type="checkbox" name="ams_confirmed" value="1" required />
-                                Saya telah memeriksa alamat email ini langsung di AMS BSrE.</label>
-                            @error ('ams_confirmed')
-                                <p class="small" role="alert">{{ $message }}</p>
-                            @enderror
-                            <button class="btn btn-outline" type="submit">
-                                Simpan Koreksi Email
-                            </button>
-                        </form>
-                    </details>
-                @endif
+                <p class="small muted mt">Layanan awal tidak ditimpa. Proses dan hasil sebenarnya dicatat terpisah demi ketepatan notifikasi serta laporan.</p>
+            </div>
+            @if ($ticket->signature_path && $ticket->claimed_by === auth()->id())
                 <div class="note-box mt">
-                    <strong>Pemeriksaan dan Hasil Pelayanan</strong>
-                    <div class="detail-grid mt">
-                        <div>
-                            <div class="field-name">Layanan Diajukan</div>
-                            <div class="field-value">{{ $ticket->service_label }}</div>
-                        </div>
-                        <div>
-                            <div class="field-name">Kesesuaian</div>
-                            <div class="field-value">{{ $ticket->service_alignment_label }}</div>
-                        </div>
-                        <div>
-                            <div class="field-name">Proses Aktual</div>
-                            <div class="field-value">{{ $ticket->actual_process_label }}</div>
-                        </div>
-                        <div>
-                            <div class="field-name">Hasil Akhir</div>
-                            <div class="field-value">
-                                {{
-                                    $ticket->status === 'Done'
-                                        ? $ticket->service_outcome_label
-                                        : 'Belum selesai'
-                                }}
-                            </div>
-                        </div>
+                    <div class="field-name">Tanda tangan persetujuan pemohon</div>
+                    <div class="small muted">
+                        Persetujuan tercatat: {{
+                            $ticket->consent_accepted_at
+                                ?->timezone('Asia/Jakarta')
+                                ->format('d M Y, H:i') ?? '-'
+                        }}
                     </div>
-                    <p class="small muted mt">Layanan awal tidak ditimpa. Proses dan hasil sebenarnya dicatat terpisah demi ketepatan notifikasi serta laporan.</p>
+                    <img
+                        src="{{ route('tickets.signature', $ticket) }}"
+                        alt="Tanda tangan persetujuan formulir pemohon"
+                        class="signature-evidence"
+                        width="620"
+                        height="185"
+                        decoding="async"
+                        loading="lazy" />
+                    <div class="small muted">
+                        Tanda tangan persetujuan bukan TTE tersertifikasi BSrE dan tidak membuktikan
+                        identitas secara mandiri.
+                    </div>
                 </div>
-                @if ($ticket->signature_path && $ticket->claimed_by === auth()->id())
-                    <div class="note-box mt">
-                        <div class="field-name">Tanda tangan persetujuan pemohon</div>
-                        <div class="small muted">
-                            Persetujuan tercatat: {{
-                                $ticket->consent_accepted_at
-                                    ?->timezone('Asia/Jakarta')
-                                    ->format('d M Y, H:i') ?? '-'
-                            }}
-                        </div>
-                        <img
-                            src="{{ route('tickets.signature', $ticket) }}"
-                            alt="Tanda tangan persetujuan formulir pemohon"
-                            class="signature-evidence"
-                            width="620"
-                            height="185"
-                            decoding="async"
-                            loading="lazy" />
-                        <div class="small muted">
-                            Tanda tangan persetujuan bukan TTE tersertifikasi BSrE dan tidak
-                            membuktikan identitas secara mandiri.
-                        </div>
-                    </div>
-                @endif
-                @if ($ticket->keterangan)
-                    <div class="note-box">
-                        <div class="field-name">Keterangan pemohon</div>
-                        <div class="pre-wrap">{{ $ticket->keterangan }}</div>
-                    </div>
+            @endif
+            @if ($ticket->keterangan)
+                <div class="note-box">
+                    <div class="field-name">Keterangan pemohon</div>
+                    <div class="pre-wrap">{{ $ticket->keterangan }}</div>
+                </div>
+            @endif
+        </section>
+        <div class="ticket-overview">
+            <section class="tte-next-action" aria-label="Tindakan berikutnya">
+                <div class="tte-next-eyebrow">
+                    Tindakan Berikutnya · Tahap {{ $nextAction['step'] }} dari 4
+                </div>
+                <ol class="tte-next-progress" aria-label="Progres penanganan">
+                    @for ($step = 1; $step <= 4; $step++)
+                        <li
+                            @class ([
+                                'is-complete' => $step < $nextAction['step'],
+                                'is-current' => $step === $nextAction['step']
+                            ])
+                            aria-label="Tahap {{ $step }}{{ $step < $nextAction['step'] ? ' selesai' : ($step === $nextAction['step'] ? ' saat ini' : ' berikutnya') }}"></li>
+                    @endfor
+                </ol>
+                <h2>{{ $nextAction['title'] }}</h2>
+                <p>{{ $nextAction['description'] }}</p>
+                @if ($nextAction['target'])
+                    <a class="btn btn-primary" href="{{ $nextAction['target'] }}"
+                        >{{ $nextAction['button'] }} →</a>
                 @endif
             </section>
-            <details class="card tte-history-details">
-                <summary class="section-heading tte-disclosure-heading">
-                    <div>
-                        <div class="eyebrow">JEJAK AKTIVITAS</div>
-                        <h2>Riwayat Penanganan</h2>
-                    </div>
-                    <span
-                        class="pill pill-neutral">{{ $ticket->activities->count() }} aktivitas</span>
-                </summary>
-                <div class="timeline">
-                    @forelse ($ticket->activities as $entry)
-                        <div class="timeline-item">
-                            <div>
-                                <strong>{{
-                                    match ($entry->action) {
-                                        'claimed' => 'Tiket diambil',
-                                        'released' => 'Tiket dilepas',
-                                        'note' => 'Catatan tindak lanjut',
-                                        'completed' => 'Tiket diselesaikan',
-                                        'ams_checked' => 'Pemeriksaan akun, WA, penerbitan, dan status SE di AMS',
-                                        'duplicate_request_blocked' => 'Permohonan berulang ditahan',
-                                        'email_corrected_from_ams' => 'Koreksi email berdasarkan AMS',
-                                        'wa_service_confirmed' => 'Pengiriman notifikasi layanan dikonfirmasi',
-                                        'wa_confirmed' => 'Notifikasi selesai + survei dikonfirmasi',
-                                        'admin_reassigned' => 'Admin mengalihkan penanggung jawab tiket',
-                                        'ams_link_sent' => 'Pengiriman tautan AMS dicatat',
-                                        'ams_link_wa_confirmed' => 'Pemberitahuan pengiriman tautan dikonfirmasi',
-                                        'reset_link_resent' => 'Tautan Reset Passphrase dikirim ulang melalui AMS',
-                                        'reset_resend_wa_confirmed' => 'Notifikasi kirim ulang Reset Passphrase dikonfirmasi',
-                                        default => $entry->action,
-                                    }
-                                }}</strong>
-                                <div class="small muted">
-                                    {{ $entry->actor?->name ?? 'Sistem' }} · {{
-                                        $entry->created_at
-                                            ->timezone('Asia/Jakarta')
-                                            ->format('d M Y H:i')
-                                    }}
-                                </div>
-                            </div>
-                            @if ($entry->note)
-                                <p class="pre-wrap">{{ $entry->note }}</p>
-                            @endif
+            @if ($ticket->status === 'In Progress')
+                <section class="tte-ux-ticket-ams" aria-labelledby="tte-ux-ams-heading">
+                    <h2 id="tte-ux-ams-heading">Ringkasan Pemeriksaan AMS</h2>
+                    <p class="small muted">Ringkasan hasil pemeriksaan terakhir, bukan pembacaan real-time AMS BSrE.</p>
+                    <div class="tte-ux-ams-grid">
+                        <div class="tte-ux-ams-item">
+                            <span>Aktivasi akun</span><strong>{{ $ticket->activation_label }}</strong>
                         </div>
-                    @empty
-                        <p class="muted">Belum ada aktivitas.</p>
-                    @endforelse
-                </div>
-            </details>
+                        <div class="tte-ux-ams-item">
+                            <span>Verifikasi WhatsApp</span><strong>{{ $ticket->wa_verification_label }}</strong>
+                        </div>
+                        <div class="tte-ux-ams-item">
+                            <span>Penerbitan dan status SE</span><strong>{{ $ticket->certificate_status_label }}</strong>
+                        </div>
+                        <div class="tte-ux-ams-item">
+                            <span>Status tiket</span><strong>{{ $ticket->status_label }}</strong>
+                        </div>
+                    </div>
+                    @if (!$completionReady)
+                        <p class="tte-ux-ams-note">Ikuti <strong>Tindakan Berikutnya</strong> dan periksa hasil AMS serta konfirmasi WhatsApp sesuai proses yang berlaku sebelum menutup tiket.</p>
+                    @endif
+                </section>
+            @endif
         </div>
-        <div class="stack">
+        <div class="stack ticket-workflow">
             @if ($ticket->status === 'In Progress')
                 @php
                     $issuanceNoticeConfirmed = $ticket->activities
@@ -887,6 +845,54 @@
                 </section>
             @endif
         </div>
+        <details class="card tte-history-details">
+            <summary class="section-heading tte-disclosure-heading">
+                <div>
+                    <div class="eyebrow">JEJAK AKTIVITAS</div>
+                    <h2>Riwayat Penanganan</h2>
+                </div>
+                <span class="pill pill-neutral">{{ $ticket->activities->count() }} aktivitas</span>
+            </summary>
+            <div class="timeline">
+                @forelse ($ticket->activities as $entry)
+                    <div class="timeline-item">
+                        <div>
+                            <strong>{{
+                                match ($entry->action) {
+                                    'claimed' => 'Tiket diambil',
+                                    'released' => 'Tiket dilepas',
+                                    'note' => 'Catatan tindak lanjut',
+                                    'completed' => 'Tiket diselesaikan',
+                                    'ams_checked' => 'Pemeriksaan akun, WA, penerbitan, dan status SE di AMS',
+                                    'duplicate_request_blocked' => 'Permohonan berulang ditahan',
+                                    'email_corrected_from_ams' => 'Koreksi email berdasarkan AMS',
+                                    'wa_service_confirmed' => 'Pengiriman notifikasi layanan dikonfirmasi',
+                                    'wa_confirmed' => 'Notifikasi selesai + survei dikonfirmasi',
+                                    'admin_reassigned' => 'Admin mengalihkan penanggung jawab tiket',
+                                    'ams_link_sent' => 'Pengiriman tautan AMS dicatat',
+                                    'ams_link_wa_confirmed' => 'Pemberitahuan pengiriman tautan dikonfirmasi',
+                                    'reset_link_resent' => 'Tautan Reset Passphrase dikirim ulang melalui AMS',
+                                    'reset_resend_wa_confirmed' => 'Notifikasi kirim ulang Reset Passphrase dikonfirmasi',
+                                    default => $entry->action,
+                                }
+                            }}</strong>
+                            <div class="small muted">
+                                {{ $entry->actor?->name ?? 'Sistem' }} · {{
+                                    $entry->created_at
+                                        ->timezone('Asia/Jakarta')
+                                        ->format('d M Y H:i')
+                                }}
+                            </div>
+                        </div>
+                        @if ($entry->note)
+                            <p class="pre-wrap">{{ $entry->note }}</p>
+                        @endif
+                    </div>
+                @empty
+                    <p class="muted">Belum ada aktivitas.</p>
+                @endforelse
+            </div>
+        </details>
     </div>
     <script src="{{ \App\Support\VersionedAsset::url('js/tte-ticket.js') }}" defer></script>
 @endsection

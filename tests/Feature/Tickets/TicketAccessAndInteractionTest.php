@@ -51,6 +51,46 @@ it('hides another verifier claimed ticket details', function () {
     $this->actingAs($other)->get(route('tickets.show', $ticket))->assertForbidden();
 });
 
+it('only exposes the full NIK copy target to the assigned verifier', function () {
+    $verifier = User::factory()->create(['role' => 'verifier']);
+    $nik = '0000000000001234';
+    $ticket = rbReportingTicket('Open', [
+        'nik' => $nik,
+        'email' => 'aktif@example.test',
+        'directory_email' => 'direktori@example.test',
+    ]);
+    $url = route('tickets.show', $ticket);
+    $this->actingAs($verifier)
+        ->get($url)
+        ->assertOk()
+        ->assertSee($ticket->masked_nik)
+        ->assertDontSee($nik)
+        ->assertDontSee('data-copy-target="applicant-nik"', false)
+        ->assertSee('data-copy-target="applicant-email"', false)
+        ->assertSee('data-copy-target="applicant-phone"', false);
+    $this->post(route('tickets.claim', $ticket))->assertRedirect();
+    $this->get($url)
+        ->assertOk()
+        ->assertSee('id="applicant-nik">' . $nik . '</span>', false)
+        ->assertSee('data-copy-target="applicant-nik"', false)
+        ->assertSee('id="applicant-email">aktif@example.test</span>', false)
+        ->assertSee('id="applicant-phone">' . $ticket->no_wa . '</span>', false);
+});
+
+it('omits clipboard controls for missing applicant values on a claimed ticket', function () {
+    $verifier = User::factory()->create(['role' => 'verifier']);
+    $ticket = rbReportingTicket('In Progress', [
+        'claimed_by' => $verifier->id,
+        'no_wa' => '',
+        'email' => null,
+        'nik' => null,
+    ]);
+    $this->actingAs($verifier)
+        ->get(route('tickets.show', $ticket))
+        ->assertOk()
+        ->assertDontSee('data-copy-target="applicant-', false);
+});
+
 it('permits release only before any ticket follow-up has been recorded', function () {
     $owner = User::factory()->create(['role' => 'verifier']);
     $ticket = rbReportingTicket();

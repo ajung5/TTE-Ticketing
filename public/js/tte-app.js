@@ -174,10 +174,12 @@
         input.style.position = 'fixed';
         input.style.opacity = '0';
         document.body.appendChild(input);
-        input.select();
-        const copied = document.execCommand('copy');
-        input.remove();
-        if (!copied) throw new Error('Clipboard unavailable');
+        try {
+            input.select();
+            if (!document.execCommand('copy')) throw new Error('Clipboard unavailable');
+        } finally {
+            input.remove();
+        }
     }
 
     let focusedPresetEditor = null;
@@ -214,17 +216,18 @@
         if (!button) return;
         const target = document.getElementById(button.dataset.copyTarget);
         if (!target) return;
-        const original = button.textContent;
+        const original = Array.from(button.childNodes);
+        const label = button.dataset.copyLabel;
         button.disabled = true;
         try {
             await writeClipboard(target.textContent.trim());
-            button.textContent = '✓ Tersalin';
-            toast('Pesan WhatsApp disalin ke clipboard.');
+            button.replaceChildren(label ? '✓' : '✓ Tersalin');
+            toast(label ? 'Berhasil menyalin ' + label + '.' : 'Teks berhasil disalin.');
         } catch (_) {
-            toast('Browser memblokir clipboard. Salin pesan secara manual.', true);
+            toast('Browser memblokir clipboard. Pilih teks dan salin secara manual.', true);
         } finally {
             setTimeout(() => {
-                button.textContent = original;
+                button.replaceChildren(...original);
                 button.disabled = false;
             }, 1800);
         }

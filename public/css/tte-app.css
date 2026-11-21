@@ -1149,7 +1149,55 @@ td strong {
     margin-top: 4px;
 }
 .detail-columns {
+    overflow-wrap: anywhere;
     grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.92fr);
+    grid-template-areas:
+        'overview overview'
+        'applicant workflow'
+        'history workflow';
+    grid-template-rows: auto max-content 1fr;
+    align-items: start;
+}
+.detail-columns > * {
+    min-width: 0;
+}
+.detail-columns > .card {
+    margin-bottom: 0;
+}
+.ticket-applicant {
+    grid-area: applicant;
+}
+.ticket-overview {
+    grid-area: overview;
+}
+.ticket-overview > :last-child {
+    margin-bottom: 0;
+}
+.ticket-workflow {
+    grid-area: workflow;
+}
+.detail-columns > .tte-history-details {
+    grid-area: history;
+}
+.applicant-copy-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.applicant-copy-field > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.applicant-copy-button {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+}
+@media (scripting: none) {
+    .applicant-copy-button {
+        display: none;
+    }
 }
 .detail-grid {
     gap: 20px;
@@ -2583,6 +2631,7 @@ a.tte-page-item:focus-visible {
 .tte-ticket-context {
     display: flex;
     flex-wrap: wrap;
+    overflow-wrap: anywhere;
     gap: 9px 18px;
     border: 1px solid #d9e6e8;
     background: #f9fcfb;
@@ -2724,16 +2773,13 @@ a.tte-page-item:focus-visible {
     display: none;
 }
 @media (max-width: 860px) {
-    /* Put work steps before the lengthy person/history column on narrow screens. */
-    .tte-internal .detail-columns {
-        display: flex;
-        flex-direction: column;
-    }
-    .tte-internal .detail-columns > .stack:first-child {
-        order: 2;
-    }
-    .tte-internal .detail-columns > .stack:last-child {
-        order: 1;
+    .detail-columns {
+        grid-template-areas:
+            'applicant'
+            'overview'
+            'workflow'
+            'history';
+        grid-template-rows: auto;
     }
 }
 @media (max-width: 760px) {
