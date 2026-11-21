@@ -15,7 +15,7 @@ Versi aplikasi yang tercatat adalah **v1.2.0**. Footer membaca [`VERSION`](VERSI
 | Perubahan sejak v1.1.0 | Cara menggunakannya |
 | --- | --- |
 | Pemeriksaan AMS bertahap | Pilih satu hasil per pertanyaan. Form menampilkan tahap yang relevan dan ringkasan tindak lanjut sebelum disimpan. |
-| Pengiriman tautan AMS | Verifikator mencatat pengiriman pertama atau ulang untuk aktivasi akun, pembaruan sertifikat, verifikasi nomor WhatsApp, dan reset passphrase. |
+| Kirim ulang tautan AMS | Verifikator mencatat pengiriman ulang untuk aktivasi akun, pembaruan sertifikat, verifikasi nomor WhatsApp, dan reset passphrase. |
 | Pengalihan tiket aktif | Admin memilih tiket yang sedang diproses, verifikator pengganti, dan alasan pengalihan. Nomor tiket dan riwayat tetap dapat ditelusuri. |
 | Antrean dan laporan | Verifikator dapat kembali ke antrean dengan filter sebelumnya. Admin dapat memakai filter rincian yang sama untuk ekspor CSV. |
 
@@ -70,7 +70,7 @@ Perubahan profil dan inisial **tidak memerlukan migrasi database**. Uji pada lin
 | Mencari NIK 16 digit atau NIP 18 digit melalui direktori | Ya | — | — |
 | Mengambil tiket baru (*self-claim*) | — | Ya | **Tidak** |
 | Memeriksa AMS, mengirim pesan layanan, menyelesaikan atau mengembalikan tiket | — | Tiket miliknya | **Tidak** |
-| Mencatat pengiriman tautan AMS dan mengonfirmasi pemberitahuan WA | — | Tiket miliknya | — |
+| Mencatat pengiriman ulang tautan AMS dan mengonfirmasi pemberitahuan WA | — | Tiket miliknya | — |
 | Mengalihkan penanggung jawab tiket yang sedang diproses | — | — | Ya |
 | Melihat statistik tiket | — | Statistik pekerjaan sendiri | Statistik keseluruhan |
 | Mengelola akun verifikator | — | — | Ya |
@@ -147,15 +147,17 @@ Alur di atas juga berlaku saat event yang dipilih adalah `registration` pada tik
 - Untuk jalur penyelesaian melalui tombol **Tandai Selesai**, backend mensyaratkan akun `activated`, WA `verified`, SE `issued`, dan masa berlaku `active`. Hasil layanan aktual dicatat pada tiket.
 - Sistem mencatat apabila konfirmasi notifikasi antara belum ditemukan. Karena itu, prosedur operasional tetap mewajibkan petugas memastikan pesan sudah dikirim sebelum menutup penanganan.
 
-### Pengiriman tautan AMS BSrE
+### Kirim ulang tautan AMS BSrE
 
-Panel **Pengiriman Tautan AMS BSrE** tersedia pada tiket **Diproses** atau **Selesai** milik verifikator, selain tiket simulasi. Pilih jenis tautan sesuai tindakan aktual di AMS. Satu tiket dapat memerlukan lebih dari satu jenis selama penanganan.
+**Pengiriman pertama** mengikuti alur **Pemeriksaan AMS**. Simpan hasil pemeriksaan, lalu kirim dan konfirmasikan pemberitahuan WhatsApp pada **Notifikasi Sesuai AMS**. Konfirmasi WhatsApp dilakukan setelah pesan kepada pemohon dikirim.
 
-1. Lakukan pengiriman resmi di AMS BSrE. Di detail tiket, pilih **Aktivasi akun**, **Pembaruan sertifikat**, **Verifikasi nomor WhatsApp**, atau **Reset Passphrase**.
-2. Pilih **Pengiriman pertama** atau alasan pengiriman ulang. Centang konfirmasi tindakan di AMS, lalu klik **Catat Pengiriman & Siapkan Notifikasi WA**. Untuk verifikasi WhatsApp, aplikasi memeriksa nomor pada tiket. Tiga jenis lainnya memerlukan email dinas yang valid.
-3. Dari riwayat pengiriman, buka WhatsApp, kirim pemberitahuan, lalu pilih **Saya Sudah Mengirim Pesan**. Pemberitahuan ini terpisah dari pengiriman tautan oleh BSrE. Hasil verifikasi nomor dan status sertifikat tetap diperbarui melalui pemeriksaan AMS.
+Jika tautan perlu dikirim ulang, verifikator pemilik tiket dapat menggunakan panel **Kirim Ulang Tautan AMS BSrE** pada tiket **Diproses** atau **Selesai** dengan sumber selain simulasi.
 
-Pencatatan pertama hanya sekali per jenis tautan pada tiket yang sama. Jika pengiriman pertama sudah dilakukan sebelum fitur ini digunakan, petugas bisa langsung mencatat kirim ulang. Jeda minimal **2 menit** dan batas **5 catatan per tiket dalam 24 jam** mencakup seluruh jenis tautan. Riwayat lama tetap terbaca sebagai kirim ulang Reset Passphrase beserta pesan dan waktu konfirmasinya. Setelah pengalihan, petugas baru mencatat tindakannya sendiri.
+1. Kirim ulang tautan resmi melalui AMS BSrE. Pilih jenis tautannya di tiket: **Aktivasi akun**, **Pembaruan sertifikat**, **Verifikasi nomor WhatsApp**, atau **Reset Passphrase**.
+2. Pilih satu alasan: **Tautan belum diterima**, **Tautan kedaluwarsa**, atau **Tautan tidak dapat dibuka**. Centang konfirmasi tindakan di AMS dan klik **Catat Kirim Ulang & Siapkan Notifikasi WA**. Verifikasi WhatsApp memerlukan nomor WA yang valid. Tiga jenis lainnya memerlukan email dinas yang valid.
+3. Dari riwayat, buka WhatsApp, kirim pemberitahuan, lalu pilih **Saya Sudah Mengirim Pesan**. Konfirmasi ini berlaku untuk upaya kirim ulang tersebut.
+
+Batasnya **5 pengiriman ulang per tiket dalam 24 jam**, dengan jeda minimal **2 menit** antara dua pengiriman ulang untuk seluruh jenis tautan. Catatan pengiriman pertama dari versi sebelumnya tampil sebagai arsip baca-saja dan dikecualikan dari kedua batas. Setelah pengalihan, petugas baru mencatat tindakannya sendiri.
 
 ### Permohonan tidak sesuai
 
@@ -163,16 +165,15 @@ Jika hasil AMS dan klarifikasi menunjukkan jenis layanan perlu diajukan ulang, s
 
 ## 3. Notifikasi WhatsApp dan hasil pelayanan
 
-Aplikasi mengenali 16 jenis notifikasi WhatsApp. Pesan mengikuti hasil AMS atau tindakan yang sedang dilakukan pada tiket.
+Aplikasi mengenali 15 jenis notifikasi WhatsApp. Pesan mengikuti hasil AMS atau tindakan yang sedang dilakukan pada tiket.
 
 | Event | Judul notifikasi |
 | --- | --- |
 | `unverified` | Nomor WA Belum Terverifikasi |
 | `reset` | Reset Passphrase |
-| `activation_link` | Pengiriman Tautan Aktivasi Akun |
-| `renewal_link` | Pengiriman Tautan Pembaruan Sertifikat |
-| `wa_verify_link` | Pengiriman Tautan Verifikasi Nomor WhatsApp |
-| `reset_link` | Pengiriman Tautan Reset Passphrase (pertama) |
+| `activation_link` | Pengiriman Ulang Tautan Aktivasi Akun |
+| `renewal_link` | Pengiriman Ulang Tautan Pembaruan Sertifikat |
+| `wa_verify_link` | Pengiriman Ulang Tautan Verifikasi Nomor WhatsApp |
 | `reset_resend` | Pengiriman Ulang Link Reset Passphrase |
 | `renewal` | Pembaruan Sertifikat |
 | `registration` | **Pendaftaran Diproses (Notifikasi 4)** |
@@ -307,7 +308,7 @@ Jika role belum ada, `TteBaselineSeeder` akan meminta **akun admin** dan **akun 
 - Tidak ada password akun default, akun demo, atau variabel `TTE_BASELINE_*` yang perlu dimasukkan ke `.env`.
 - Seeder hanya menyimpan **hash password** dalam database.
 - Jika akun dengan role tersebut sudah tersedia, provisioning tidak diulang; password dan profil existing tidak diubah.
-- Seeder mengisi **16 preset WhatsApp** yang belum ada, tanpa menimpa template kustom.
+- Seeder mengisi **15 preset WhatsApp** yang belum ada, tanpa menimpa template kustom.
 - Seeder **tidak membuat tiket, survei, atau pegawai dummy**.
 - Fresh install tidak membuat tabel `webhook_events` (legacy Zoho); `tickets.source` default `direct`. Kolom `external_submission_id` tetap diperlukan untuk idempotensi form internal.
 - Audit migration/seeder dan prosedur instalasi bersih: [`docs/FRESH-INSTALL-DATABASE.md`](docs/FRESH-INSTALL-DATABASE.md).
@@ -665,7 +666,7 @@ php artisan schedule:list
 6. Uji koreksi layanan hingga status `Returned`; pastikan tidak dihitung sebagai `Done` atau dikirimi survei.
 7. Uji pembatasan akses: admin tidak dapat memproses tiket, verifikator kedua tidak bisa mengambil alih tiket milik petugas lain.
 8. Alihkan tiket **Diproses** ke verifikator lain. Pastikan pemilik lama kehilangan akses penanganan, pemilik baru dapat melanjutkan, dan alasan pengalihan tercatat.
-9. Uji keempat jenis tautan pada tiket contoh. Untuk masing-masing jenis, catat pengiriman, buka WhatsApp, lalu konfirmasi. Periksa bahwa percobaan langsung berikutnya ditolak sebelum dua menit.
+9. Uji keempat jenis tautan dengan tiga alasan kirim ulang. Pastikan pengiriman pertama hanya mengikuti alur Pemeriksaan AMS dan konfirmasi WA setiap kirim ulang dicatat tersendiri.
 10. Ubah hasil AMS dari **Sudah Terbit** menjadi **Belum Terbit**. Pastikan pilihan masa berlaku hilang dan status lama tidak tersimpan kembali.
 11. Bandingkan rincian admin dengan CSV untuk kombinasi filter yang sama, termasuk UPTD dan status **Perlu Pengajuan Ulang**.
 
@@ -742,7 +743,7 @@ tail -n 80 storage/logs/laravel.log
 | `/login` | Login petugas | Publik |
 | `/tickets` | Antrean dan filter tiket | Verifikator |
 | `/tickets/{ticket}` | Detail, pemeriksaan AMS, WhatsApp, workflow | Verifikator yang berhak |
-| `/tickets/{ticket}/ams-links` | Catat pengiriman tautan AMS (POST) | Verifikator pemilik tiket Diproses/Selesai |
+| `/tickets/{ticket}/ams-links` | Catat kirim ulang tautan AMS (POST) | Verifikator pemilik tiket Diproses/Selesai |
 | `/admin` | Statistik layanan | Admin |
 | `/admin/pengalihan-tiket` | Pilih tiket aktif dan verifikator pengganti | Admin |
 | `/admin/verifiers` | Manajemen verifikator | Admin |

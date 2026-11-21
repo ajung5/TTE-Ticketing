@@ -14,10 +14,9 @@ class TicketResetResend extends Model {
     ];
 
     public const REASONS = [
-        'initial' => 'Pengiriman pertama',
-        'not_received' => 'Kirim ulang — tautan belum diterima',
-        'expired' => 'Kirim ulang — tautan kedaluwarsa',
-        'cannot_open' => 'Kirim ulang — tautan tidak dapat dibuka',
+        'not_received' => 'Tautan belum diterima',
+        'expired' => 'Tautan kedaluwarsa',
+        'cannot_open' => 'Tautan tidak dapat dibuka',
     ];
 
     protected $fillable = [

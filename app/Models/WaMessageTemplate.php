@@ -18,7 +18,6 @@ class WaMessageTemplate extends Model {
         'renewal_link' =>
             'Ikuti petunjuk BSrE untuk melanjutkan pembaruan Sertifikat Elektronik Anda.',
         'wa_verify_link' => 'Ikuti petunjuk BSrE untuk memverifikasi nomor WhatsApp Anda.',
-        'reset_link' => 'Periksa email dinas Anda untuk melanjutkan reset passphrase.',
     ];
 
     public static function defaultLinkNotices(): array {
@@ -33,10 +32,9 @@ class WaMessageTemplate extends Model {
     }
 
     public const EVENTS = [
-        'activation_link' => 'Pengiriman Tautan Aktivasi Akun',
-        'renewal_link' => 'Pengiriman Tautan Pembaruan Sertifikat',
-        'wa_verify_link' => 'Pengiriman Tautan Verifikasi Nomor WhatsApp',
-        'reset_link' => 'Pengiriman Tautan Reset Passphrase',
+        'activation_link' => 'Pengiriman Ulang Tautan Aktivasi Akun',
+        'renewal_link' => 'Pengiriman Ulang Tautan Pembaruan Sertifikat',
+        'wa_verify_link' => 'Pengiriman Ulang Tautan Verifikasi Nomor WhatsApp',
         'unverified' => 'Nomor WA Belum Terverifikasi',
         'reset' => 'Reset Passphrase',
         'reset_resend' => 'Pengiriman Ulang Link Reset Passphrase',
@@ -55,7 +53,6 @@ class WaMessageTemplate extends Model {
         'activation_link' => '*',
         'renewal_link' => '*',
         'wa_verify_link' => '*',
-        'reset_link' => '*',
         'unverified' => '*',
         'reset' => 'Reset Passphrase',
         'reset_resend' => 'Reset Passphrase',

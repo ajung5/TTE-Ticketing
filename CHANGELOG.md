@@ -7,7 +7,8 @@ tidak dengan sendirinya menjadi rilis production.
 ## [Unreleased]
 
 ### Pengembangan 20 November 2026
-- **FEAT-20261120-003 — Pengiriman tautan AMS.** Verifikator dapat mencatat pengiriman pertama dan pengiriman ulang tautan aktivasi akun, pembaruan sertifikat, verifikasi nomor WhatsApp, serta reset passphrase. Riwayat lama dan preset reset kustom tetap tersedia.
+- **FIX-20261121-001 — Kirim ulang tautan AMS.** Pengiriman pertama mengikuti Pemeriksaan AMS dan Notifikasi Sesuai AMS. Panel kirim ulang menerima tiga alasan: tautan belum diterima, kedaluwarsa, atau tidak dapat dibuka. Catatan pengiriman pertama yang sudah tersimpan tetap dapat dibaca sebagai arsip.
+- **FEAT-20261120-003 — Pengiriman tautan AMS.** Fitur awal mencakup pencatatan pengiriman pertama dan pengiriman ulang tautan aktivasi akun, pembaruan sertifikat, verifikasi nomor WhatsApp, serta reset passphrase. Riwayat lama dan preset reset kustom tetap tersedia.
 
 - **FEAT-20261120-001 — Kirim ulang link Reset Passphrase.** Verifikator
   melakukan pengiriman ulang resmi melalui AMS BSrE, kemudian mencatat

@@ -359,125 +359,6 @@
             </details>
         </div>
         <div class="stack">
-            @if (in_array($ticket->status, ['In Progress', 'Done'], true) &&
-                $ticket->claimed_by === auth()->id() &&
-                $ticket->source !== 'simulated')
-                <section class="card" id="tte-ams-links">
-                    <div class="section-heading">
-                        <div>
-                            <h2>Pengiriman Tautan AMS BSrE</h2>
-                        </div>
-                    </div>
-                    <p class="small muted">Setelah mengirim tautan resmi melalui AMS BSrE, catat jenis pengirimannya di sini. Pemberitahuan WhatsApp dikonfirmasi terpisah.</p>
-                    <form
-                        method="post"
-                        action="{{ route('tickets.ams-links.store', $ticket) }}"
-                        class="stack mt">
-                        @csrf
-                        <fieldset class="ams-field">
-                            <legend>Jenis tautan yang dikirim</legend>
-                            <div class="ams-choices">
-                                @foreach (\App\Models\TicketResetResend::LINK_TYPES as $type => $label)
-                                    <label class="ams-choice">
-                                        <input
-                                            type="radio"
-                                            name="link_type"
-                                            value="{{ $type }}"
-                                            @checked (old('link_type') === $type)
-                                            required />
-                                        <span>{{ $label }}</span>
-                                    </label>
-                                @endforeach
-                            </div>
-                        </fieldset>
-                        <label for="tte-link-reason"
-                            >Pengiriman pertama atau alasan kirim ulang</label>
-                        <select id="tte-link-reason" name="reason" required>
-                            <option value="">Pilih keterangan pengiriman</option>
-                            @foreach (\App\Models\TicketResetResend::REASONS as $code => $description)
-                                <option value="{{ $code }}" @selected (old('reason') === $code)>
-                                    {{ $description }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <p class="small muted">Email dinas: {{ $ticket->email ?: 'Belum tersedia' }} · WhatsApp: {{ $ticket->no_wa ?: 'Belum tersedia' }}</p>
-                        <div class="ams-choices">
-                            <label class="ams-choice">
-                                <input type="checkbox" name="ams_confirmed" value="1" required />
-                                <span>Saya telah melakukan pengiriman tautan yang dipilih melalui AMS BSrE.</span>
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-primary full">
-                            Catat Pengiriman &amp; Siapkan Notifikasi WA
-                        </button>
-                    </form>
-                    <p class="small muted mt">Jeda antarcatatan minimal 2 menit. Batas 5 pengiriman dalam 24 jam berlaku untuk seluruh jenis tautan pada tiket ini.</p>
-                    @if ($ticket->resetResends->isNotEmpty())
-                        <hr />
-                        <h3>Riwayat Pengiriman Tautan</h3>
-                        @foreach ($ticket->resetResends->sortByDesc('id')->take(10) as $attempt)
-                            <details class="note-box mt" {{ $loop->first ? 'open' : '' }}>
-                                <summary>
-                                    {{
-                                        \App\Models\TicketResetResend::LINK_TYPES[
-                                            $attempt->link_type
-                                        ]
-                                    }} · #{{ $attempt->id }} · {{
-                                        $attempt->created_at
-                                            ->timezone('Asia/Jakarta')
-                                            ->format('d/m/Y H:i')
-                                    }} · {{
-                                        $attempt->wa_confirmed_at
-                                            ? 'WA dikonfirmasi'
-                                            : 'WA belum dikonfirmasi'
-                                    }}
-                                </summary>
-                                <p class="small muted">{{
-                                    \App\Models\TicketResetResend::REASONS[$attempt->reason] ??
-                                        $attempt->reason
-                                }}</p>
-                                <div class="message-preview">{{ $attempt->message }}</div>
-                                @if (!$attempt->wa_confirmed_at && $attempt->verifier_id === auth()->id())
-                                    <form
-                                        method="post"
-                                        target="tte_whatsapp_web"
-                                        data-wa-open="1"
-                                        data-wa-state="wa-state-resend-{{ $attempt->id }}"
-                                        action="{{ route('tickets.ams-links.whatsapp', [$ticket, $attempt]) }}"
-                                        class="mt">
-                                        @csrf
-                                        <button type="submit" class="btn btn-wa full">
-                                            Buka WhatsApp ↗
-                                        </button>
-                                    </form>
-                                    <div id="wa-state-resend-{{ $attempt->id }}" aria-live="polite">
-                                        @if ($attempt->wa_opened_at)
-                                            <form
-                                                method="post"
-                                                action="{{ route('tickets.ams-links.confirm', [$ticket, $attempt]) }}"
-                                                class="mt">
-                                                @csrf
-                                                <button type="submit" class="btn btn-outline full">
-                                                    Saya Sudah Mengirim Pesan
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-
-                                @elseif (!$attempt->wa_confirmed_at)
-                                    <p class="small muted mt">Permintaan ini dicatat petugas sebelumnya. Jika perlu, lakukan pengiriman ulang baru melalui AMS.</p>
-                                @else
-                                    <p class="small muted mt">Pemberitahuan WhatsApp dikonfirmasi {{
-                                        $attempt->wa_confirmed_at
-                                            ->timezone('Asia/Jakarta')
-                                            ->format('d/m/Y H:i')
-                                    }} oleh petugas.</p>
-                                @endif
-                            </details>
-                        @endforeach
-                    @endif
-                </section>
-            @endif
             @if ($ticket->status === 'In Progress')
                 @php
                     $issuanceNoticeConfirmed = $ticket->activities
@@ -866,6 +747,138 @@
                     </div>
                 @endif
             </section>
+            @if (in_array($ticket->status, ['In Progress', 'Done'], true) &&
+                $ticket->claimed_by === auth()->id() &&
+                $ticket->source !== 'simulated')
+                <section class="card" id="tte-ams-links">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Kirim Ulang Tautan AMS BSrE</h2>
+                        </div>
+                    </div>
+                    <p class="small muted">Gunakan bagian ini jika pemohon belum menerima tautan, masa berlaku tautan habis, atau tautan tidak dapat dibuka.</p>
+                    @if ($ticket->status === 'In Progress')
+                        <p class="small muted">Untuk pengiriman pertama, ikuti <a href="#tte-ams-check">Pemeriksaan AMS</a> dan konfirmasikan pesan pada langkah Notifikasi Sesuai AMS.</p>
+                    @endif
+                    <form
+                        method="post"
+                        action="{{ route('tickets.ams-links.store', $ticket) }}"
+                        class="stack mt">
+                        @csrf
+                        <fieldset class="ams-field">
+                            <legend>Jenis tautan yang dikirim ulang</legend>
+                            <div class="ams-choices">
+                                @foreach (\App\Models\TicketResetResend::LINK_TYPES as $type => $label)
+                                    <label class="ams-choice">
+                                        <input
+                                            type="radio"
+                                            name="link_type"
+                                            value="{{ $type }}"
+                                            @checked (old('link_type') === $type)
+                                            required />
+                                        <span>{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </fieldset>
+                        <fieldset class="ams-field">
+                            <legend>Alasan kirim ulang</legend>
+                            <div class="ams-choices">
+                                @foreach (\App\Models\TicketResetResend::REASONS as $code => $description)
+                                    <label class="ams-choice">
+                                        <input
+                                            type="radio"
+                                            name="reason"
+                                            value="{{ $code }}"
+                                            @checked (old('reason') === $code)
+                                            required />
+                                        <span>{{ $description }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </fieldset>
+                        <p class="small muted">Email dinas: {{ $ticket->email ?: 'Belum tersedia' }} · WhatsApp: {{ $ticket->no_wa ?: 'Belum tersedia' }}</p>
+                        <div class="ams-choices">
+                            <label class="ams-choice">
+                                <input type="checkbox" name="ams_confirmed" value="1" required />
+                                <span>Saya sudah mengirim ulang tautan ini melalui AMS BSrE.</span>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary full">
+                            Catat Kirim Ulang &amp; Siapkan Notifikasi WA
+                        </button>
+                    </form>
+                    <p class="small muted mt">Tunggu minimal 2 menit sebelum mencatat kirim ulang berikutnya. Maksimal 5 pengiriman ulang per tiket dalam 24 jam untuk seluruh jenis tautan.</p>
+                    @if ($ticket->resetResends->isNotEmpty())
+                        <hr />
+                        <h3>Riwayat Pengiriman Tautan</h3>
+                        @foreach ($ticket->resetResends->sortByDesc('id')->take(10) as $attempt)
+                            <details class="note-box mt" {{ $loop->first ? 'open' : '' }}>
+                                <summary>
+                                    {{
+                                        \App\Models\TicketResetResend::LINK_TYPES[
+                                            $attempt->link_type
+                                        ]
+                                    }} · #{{ $attempt->id }} · {{
+                                        $attempt->created_at
+                                            ->timezone('Asia/Jakarta')
+                                            ->format('d/m/Y H:i')
+                                    }} · {{
+                                        $attempt->wa_confirmed_at
+                                            ? 'WA dikonfirmasi'
+                                            : 'WA belum dikonfirmasi'
+                                    }}
+                                </summary>
+                                <p class="small muted">{{
+                                    \App\Models\TicketResetResend::REASONS[$attempt->reason] ??
+                                        ($attempt->reason === 'initial'
+                                            ? 'Pengiriman pertama (arsip)'
+                                            : $attempt->reason)
+                                }}</p>
+                                <div class="message-preview">{{ $attempt->message }}</div>
+                                @if (!isset(\App\Models\TicketResetResend::REASONS[$attempt->reason]) && !$attempt->wa_confirmed_at)
+                                    <p class="small muted mt">Catatan arsip. Konfirmasi WhatsApp belum tercatat.</p>
+                                @elseif (!$attempt->wa_confirmed_at && $attempt->verifier_id === auth()->id())
+                                    <form
+                                        method="post"
+                                        target="tte_whatsapp_web"
+                                        data-wa-open="1"
+                                        data-wa-state="wa-state-resend-{{ $attempt->id }}"
+                                        action="{{ route('tickets.ams-links.whatsapp', [$ticket, $attempt]) }}"
+                                        class="mt">
+                                        @csrf
+                                        <button type="submit" class="btn btn-wa full">
+                                            Buka WhatsApp ↗
+                                        </button>
+                                    </form>
+                                    <div id="wa-state-resend-{{ $attempt->id }}" aria-live="polite">
+                                        @if ($attempt->wa_opened_at)
+                                            <form
+                                                method="post"
+                                                action="{{ route('tickets.ams-links.confirm', [$ticket, $attempt]) }}"
+                                                class="mt">
+                                                @csrf
+                                                <button type="submit" class="btn btn-outline full">
+                                                    Saya Sudah Mengirim Pesan
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+
+                                @elseif (!$attempt->wa_confirmed_at)
+                                    <p class="small muted mt">Permintaan ini dicatat petugas sebelumnya. Jika perlu, lakukan pengiriman ulang baru melalui AMS.</p>
+                                @else
+                                    <p class="small muted mt">Pemberitahuan WhatsApp dikonfirmasi {{
+                                        $attempt->wa_confirmed_at
+                                            ->timezone('Asia/Jakarta')
+                                            ->format('d/m/Y H:i')
+                                    }} oleh petugas.</p>
+                                @endif
+                            </details>
+                        @endforeach
+                    @endif
+                </section>
+            @endif
         </div>
     </div>
     <link rel="stylesheet" href="{{ \App\Support\VersionedAsset::url('css/tte-ticket.css') }}" />

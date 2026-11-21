@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-/** Manual AMS link delivery evidence, not an API integration with BSrE. */
+/** Manual AMS link resend evidence, not an API integration with BSrE. */
 class TicketResetResendController extends Controller {
     private function owner(Request $request, Ticket $ticket): void {
         abort_unless($request->user()?->isVerifier(), 403);
@@ -34,6 +34,11 @@ class TicketResetResendController extends Controller {
             403,
             'Riwayat pengiriman ini milik petugas sebelumnya. Buat permintaan baru.',
         );
+        abort_unless(
+            isset(TicketResetResend::REASONS[$resend->reason]),
+            409,
+            'Catatan pengiriman pertama hanya tersedia sebagai arsip.',
+        );
     }
 
     public function store(Request $request, Ticket $ticket, WhatsAppMessage $whatsapp) {
@@ -47,14 +52,7 @@ class TicketResetResendController extends Controller {
                 'required',
                 Rule::in($legacy ? ['reset_link'] : array_keys(TicketResetResend::LINK_TYPES)),
             ],
-            'reason' => [
-                'required',
-                Rule::in(
-                    $legacy
-                        ? ['not_received', 'expired', 'cannot_open']
-                        : array_keys(TicketResetResend::REASONS),
-                ),
-            ],
+            'reason' => ['required', Rule::in(array_keys(TicketResetResend::REASONS))],
             'ams_confirmed' => ['required', 'accepted'],
         ]);
         DB::transaction(function () use ($ticket, $request, $data, $whatsapp) {
@@ -74,20 +72,13 @@ class TicketResetResendController extends Controller {
                     'link_type' => 'Periksa nomor WhatsApp pada tiket terlebih dahulu.',
                 ]);
             }
-            $history = $record->resetResends();
-            if (
-                $data['reason'] === 'initial' &&
-                (clone $history)->where('link_type', $type)->exists()
-            ) {
-                throw ValidationException::withMessages([
-                    'reason' =>
-                        'Pengiriman tautan ini sudah pernah dicatat. Pilih alasan kirim ulang.',
-                ]);
-            }
+            $history = $record
+                ->resetResends()
+                ->whereIn('reason', array_keys(TicketResetResend::REASONS));
             $last = (clone $history)->latest('id')->first();
             if ($last && $last->created_at->greaterThan(now()->subMinutes(2))) {
                 throw ValidationException::withMessages([
-                    'reason' => 'Pengiriman berikutnya dapat dicatat setelah 2 menit.',
+                    'reason' => 'Kirim ulang berikutnya dapat dicatat setelah 2 menit.',
                 ]);
             }
             if ($history->where('created_at', '>=', now()->subDay())->count() >= 5) {
@@ -97,7 +88,7 @@ class TicketResetResendController extends Controller {
                 ]);
             }
             $record->load('claimant');
-            $resetResend = $type === 'reset_link' && $data['reason'] !== 'initial';
+            $resetResend = $type === 'reset_link';
             $event = $resetResend ? 'reset_resend' : $type;
             $message = $whatsapp->forServiceTicket($record, $event);
             $attempt = TicketResetResend::create([
@@ -118,14 +109,14 @@ class TicketResetResendController extends Controller {
                     TicketResetResend::LINK_TYPES[$type] .
                     ' · ' .
                     TicketResetResend::REASONS[$data['reason']] .
-                    '. Pengiriman melalui AMS BSrE dicatat oleh verifikator.',
+                    '. Pengiriman ulang melalui AMS BSrE dicatat oleh verifikator.',
             ]);
         });
         return redirect()
             ->route('tickets.show', $ticket)
             ->with(
                 'success',
-                'Pengiriman tautan melalui AMS tercatat. Silakan buka WhatsApp dan konfirmasi setelah pesan dikirim.',
+                'Pengiriman ulang tautan melalui AMS tercatat. Silakan buka WhatsApp dan konfirmasi setelah pesan dikirim.',
             );
     }
 
@@ -165,7 +156,7 @@ class TicketResetResendController extends Controller {
                 'ticket_id' => $record->id,
                 'actor_id' => $request->user()->id,
                 'action' =>
-                    $attempt->link_type === 'reset_link' && $attempt->reason !== 'initial'
+                    $attempt->link_type === 'reset_link'
                         ? 'reset_resend_wa_confirmed'
                         : 'ams_link_wa_confirmed',
                 'note' =>
