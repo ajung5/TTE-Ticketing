@@ -51,7 +51,8 @@
     outline: 3px solid #217aa6;
     outline-offset: 2px;
 }
-.ams-choice input[type='radio'] {
+.ams-choice input[type='radio'],
+.ams-choice input[type='checkbox'] {
     appearance: auto;
     flex: none;
     width: 17px;

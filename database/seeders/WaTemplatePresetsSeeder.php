@@ -10,7 +10,7 @@ use RuntimeException;
 /** Preset yang dibutuhkan aplikasi, bukan data pemohon. Aman dijalankan ulang. */
 class WaTemplatePresetsSeeder extends Seeder {
     public function run(): void {
-        $messages = [
+        $messages = WaMessageTemplate::defaultLinkNotices() + [
             'unverified' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nNomor WhatsApp Anda belum terverifikasi pada AMS BSrE. Silakan lakukan verifikasi sebelum melanjutkan layanan.\nTiket: {nomor_tiket}\nPetugas: {nama_verifikator}",
             'reset' =>

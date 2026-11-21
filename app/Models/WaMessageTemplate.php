@@ -13,7 +13,30 @@ class WaMessageTemplate extends Model {
         'Pendaftaran' => 'Penerbitan Sertifikat Elektronik',
     ];
 
+    private const LINK_PROMPTS = [
+        'activation_link' => 'Ikuti petunjuk BSrE untuk mengaktifkan akun Anda.',
+        'renewal_link' =>
+            'Ikuti petunjuk BSrE untuk melanjutkan pembaruan Sertifikat Elektronik Anda.',
+        'wa_verify_link' => 'Ikuti petunjuk BSrE untuk memverifikasi nomor WhatsApp Anda.',
+        'reset_link' => 'Periksa email dinas Anda untuk melanjutkan reset passphrase.',
+    ];
+
+    public static function defaultLinkNotices(): array {
+        $messages = [];
+        foreach (self::LINK_PROMPTS as $type => $instruction) {
+            $label = TicketResetResend::LINK_TYPES[$type];
+            $messages[
+                $type
+            ] = "Yth. Bapak/Ibu {nama_pemohon},\n\nPetugas telah melakukan pengiriman tautan {$label} melalui AMS BSrE. {$instruction} Jika tautan belum diterima, hubungi petugas dengan menyebut nomor tiket {nomor_tiket}.\n\nPetugas: {nama_verifikator}\nJangan membagikan tautan pribadi, OTP, password, atau passphrase.";
+        }
+        return $messages;
+    }
+
     public const EVENTS = [
+        'activation_link' => 'Pengiriman Tautan Aktivasi Akun',
+        'renewal_link' => 'Pengiriman Tautan Pembaruan Sertifikat',
+        'wa_verify_link' => 'Pengiriman Tautan Verifikasi Nomor WhatsApp',
+        'reset_link' => 'Pengiriman Tautan Reset Passphrase',
         'unverified' => 'Nomor WA Belum Terverifikasi',
         'reset' => 'Reset Passphrase',
         'reset_resend' => 'Pengiriman Ulang Link Reset Passphrase',
@@ -29,6 +52,10 @@ class WaMessageTemplate extends Model {
     ];
 
     public const TEMPLATE_SERVICE_CODES = [
+        'activation_link' => '*',
+        'renewal_link' => '*',
+        'wa_verify_link' => '*',
+        'reset_link' => '*',
         'unverified' => '*',
         'reset' => 'Reset Passphrase',
         'reset_resend' => 'Reset Passphrase',

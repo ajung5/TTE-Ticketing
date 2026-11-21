@@ -211,3 +211,178 @@ it(
         ])->assertSessionHasErrors('reason');
     },
 );
+
+it(
+    'records the first and subsequent AMS delivery with the selected notice and an independent WA confirmation',
+    function (string $type, string $label, string $service) {
+        $owner = User::factory()->create(['role' => 'verifier']);
+        $ticket = newResendTicket($owner, 'In Progress', [
+            'layanan' => $service,
+            'wa_verification_status' => 'unverified',
+        ]);
+        $this->actingAs($owner);
+        $show = route('tickets.show', $ticket);
+        $store = route('tickets.ams-links.store', $ticket);
+        $this->get($show)
+            ->assertOk()
+            ->assertSee('Pengiriman Tautan AMS BSrE')
+            ->assertSee('value="' . $type . '"', false);
+        $data = ['link_type' => $type, 'ams_confirmed' => 1];
+        $this->post($store, $data + ['reason' => 'initial'])
+            ->assertRedirect($show)
+            ->assertSessionHasNoErrors();
+        $first = $ticket->resetResends()->sole();
+        expect($first->link_type)
+            ->toBe($type)
+            ->and($first->reason)
+            ->toBe('initial')
+            ->and($first->message)
+            ->toContain($label, $ticket->ticket_number)
+            ->and($first->wa_opened_at)
+            ->toBeNull()
+            ->and($first->wa_confirmed_at)
+            ->toBeNull();
+        $this->get($show)->assertOk()->assertSee($first->message)->assertSee('Pengiriman pertama');
+        $confirm = route('tickets.ams-links.confirm', [$ticket, $first]);
+        $this->post($confirm)->assertStatus(409);
+        $this->postJson(route('tickets.ams-links.whatsapp', [$ticket, $first]), [
+            'wa_client' => 'mobile',
+        ])
+            ->assertOk()
+            ->assertJsonPath(
+                'url',
+                'https://wa.me/' . $ticket->no_wa . '?text=' . rawurlencode($first->message),
+            );
+        $this->post($confirm)->assertRedirect($show);
+        $this->post($confirm)->assertStatus(409);
+        expect($ticket->fresh()->wa_verification_status)
+            ->toBe('unverified')
+            ->and($ticket->fresh()->status)
+            ->toBe('In Progress');
+        $this->travel(3)->minutes();
+        $this->post($store, $data + ['reason' => 'initial'])->assertSessionHasErrors('reason');
+        $this->post($store, $data + ['reason' => 'expired'])->assertSessionHasNoErrors();
+        $repeat = $ticket->resetResends()->latest('id')->firstOrFail();
+        expect($repeat->reason)
+            ->toBe('expired')
+            ->and($repeat->link_type)
+            ->toBe($type)
+            ->and($repeat->message)
+            ->toContain($label)
+            ->and($repeat->wa_confirmed_at)
+            ->toBeNull();
+        expect($first->fresh()->wa_confirmed_at)->not->toBeNull();
+    },
+)->with([
+    ['activation_link', 'Aktivasi akun', 'Pendaftaran'],
+    ['renewal_link', 'Pembaruan sertifikat', 'Pembaruan'],
+    ['wa_verify_link', 'Verifikasi nomor WhatsApp', 'Reset Passphrase'],
+    ['reset_link', 'Reset Passphrase', 'Reset Passphrase'],
+]);
+
+it('validates the new form and ticket-wide limits across different link types', function () {
+    $owner = User::factory()->create(['role' => 'verifier']);
+    $ticket = newResendTicket($owner, 'Done', ['layanan' => 'Pembaruan', 'email' => null]);
+    $this->actingAs($owner);
+    $url = route('tickets.ams-links.store', $ticket);
+    $base = ['reason' => 'initial', 'ams_confirmed' => 1];
+    $this->post($url, $base)->assertSessionHasErrors('link_type');
+    $this->post($url, $base + ['link_type' => 'unknown'])->assertSessionHasErrors('link_type');
+    $this->post($url, $base + ['link_type' => 'activation_link'])->assertSessionHasErrors('reason');
+    $this->post($url, $base + ['link_type' => 'wa_verify_link'])->assertSessionHasNoErrors();
+    $ticket->update(['email' => 'valid@example.test']);
+    $this->post($url, $base + ['link_type' => 'activation_link'])->assertSessionHasErrors('reason');
+    foreach (['activation_link', 'renewal_link', 'reset_link', 'renewal_link'] as $type) {
+        $this->travel(3)->minutes();
+        $this->post($url, [
+            'reason' => 'not_received',
+            'ams_confirmed' => 1,
+            'link_type' => $type,
+        ])->assertSessionHasNoErrors();
+    }
+    $this->travel(3)->minutes();
+    $this->post($url, [
+        'reason' => 'expired',
+        'ams_confirmed' => 1,
+        'link_type' => 'wa_verify_link',
+    ])->assertSessionHasErrors('reason');
+    expect($ticket->fresh()->status)
+        ->toBe('Done')
+        ->and($ticket->resetResends()->count())
+        ->toBe(5);
+});
+
+it(
+    'restricts captured link notices to the current verifier and the same eligible ticket',
+    function () {
+        $owner = User::factory()->create(['role' => 'verifier']);
+        $other = User::factory()->create(['role' => 'verifier']);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $ticket = newResendTicket($owner, 'In Progress', ['layanan' => 'Pendaftaran']);
+        $second = newResendTicket($owner);
+        $url = route('tickets.ams-links.store', $ticket);
+        $form = ['link_type' => 'activation_link', 'reason' => 'initial', 'ams_confirmed' => 1];
+        foreach ([$other, $admin] as $actor) {
+            $this->actingAs($actor)->post($url, $form)->assertForbidden();
+        }
+        $this->actingAs($owner)->post($url, $form)->assertSessionHasNoErrors();
+        $record = $ticket->resetResends()->sole();
+        $this->post(route('tickets.ams-links.whatsapp', [$second, $record]))->assertNotFound();
+        $ticket->update(['claimed_by' => $other->id]);
+        $this->post(route('tickets.ams-links.whatsapp', [$ticket, $record]))->assertForbidden();
+        $this->actingAs($other)
+            ->post(route('tickets.ams-links.confirm', [$ticket, $record]))
+            ->assertForbidden();
+        $ticket->update(['status' => 'Returned']);
+        $this->post($url, $form)->assertStatus(409);
+        $ticket->update(['status' => 'Open']);
+        $this->post($url, $form)->assertStatus(409);
+        $ticket->update(['status' => 'In Progress', 'source' => 'simulated']);
+        $this->post($url, $form)->assertForbidden();
+        expect($record->fresh()->wa_confirmed_at)->toBeNull();
+    },
+);
+
+it(
+    'renders old reset records and preserves the customized resend template alongside the new notices',
+    function () {
+        $owner = User::factory()->create(['role' => 'verifier']);
+        $ticket = newResendTicket($owner);
+        $ticket
+            ->resetResends()
+            ->create([
+                'verifier_id' => $owner->id,
+                'reason' => 'expired',
+                'message' => 'Pesan arsip sebelum pembaruan',
+                'wa_confirmed_at' => now(),
+            ]);
+        $this->actingAs($owner)
+            ->get(route('tickets.show', $ticket))
+            ->assertOk()
+            ->assertSee('Pesan arsip sebelum pembaruan')
+            ->assertSee('WA dikonfirmasi');
+        expect($ticket->resetResends()->sole()->link_type)->toBe('reset_link');
+        $this->seed(\Database\Seeders\WaTemplatePresetsSeeder::class);
+        $body =
+            'Yth. {nama_pemohon}, kirim ulang khusus untuk tiket {nomor_tiket}. Petugas: {nama_verifikator}';
+        \App\Models\WaMessageTemplate::where('event_type', 'reset_resend')->update([
+            'body' => $body,
+        ]);
+        $this->seed(\Database\Seeders\WaTemplatePresetsSeeder::class);
+        $this->travel(3)->minutes();
+        $this->post(route('tickets.ams-links.store', $ticket), [
+            'link_type' => 'reset_link',
+            'reason' => 'not_received',
+            'ams_confirmed' => 1,
+        ])->assertSessionHasNoErrors();
+        expect($ticket->resetResends()->latest('id')->firstOrFail()->message)->toContain(
+            'kirim ulang khusus',
+        );
+        $admin = User::factory()->create(['role' => 'admin']);
+        $page = $this->actingAs($admin)->get(route('admin.templates.index'))->assertOk();
+        foreach (array_keys(TicketResetResend::LINK_TYPES) as $type) {
+            $page->assertSee(\App\Models\WaMessageTemplate::EVENTS[$type]);
+            $this->assertDatabaseHas('wa_message_templates', ['event_type' => $type]);
+        }
+    },
+);

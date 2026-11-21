@@ -68,7 +68,9 @@ class WhatsAppMessage {
             'completed' =>
                 "Yth. Bapak/Ibu {nama_pemohon},\n\nPenanganan nomor tiket {nomor_tiket} telah selesai. Hasil pelayanan: {hasil_aktual}. Mohon mengisi survei kepuasan melalui {survey_url}.\nPetugas: {nama_verifikator}",
         ];
-        $templateBody = $template?->body ?? $fallback[$event];
+        $templateBody =
+            $template?->body ??
+            ($fallback[$event] ?? WaMessageTemplate::defaultLinkNotices()[$event]);
         if ($event === 'registration' && $ticket->activation_status === 'not_activated') {
             // Tahapan aktivasi disampaikan di dalam notifikasi Pendaftaran Diproses,
             // bukan mengganti jenis notifikasi ataupun mengklaim SE sudah terbit.

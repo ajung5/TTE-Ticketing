@@ -87,6 +87,20 @@ Route::middleware('auth')->group(function () {
         TicketController::class,
         'confirmServiceWhatsApp',
     ])->name('tickets.whatsapp.service.confirm');
+    Route::prefix('/tickets/{ticket}/ams-links')
+        ->name('tickets.ams-links.')
+        ->controller(TicketResetResendController::class)
+        ->group(function () {
+            Route::post('/', 'store')->middleware('throttle:10,1')->name('store');
+            Route::post('/{resend}/whatsapp', 'openWhatsApp')
+                ->middleware('throttle:20,1')
+                ->name('whatsapp');
+            Route::post('/{resend}/confirm', 'confirmWhatsApp')
+                ->middleware('throttle:20,1')
+                ->name('confirm');
+        });
+
+    // Keep previous forms and bookmarks working for reset-passphrase resends.
     Route::post('/tickets/{ticket}/reset-resends', [TicketResetResendController::class, 'store'])
         ->middleware('throttle:10,1')
         ->name('tickets.reset-resends.store');
