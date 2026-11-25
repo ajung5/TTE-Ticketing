@@ -46,7 +46,10 @@
                 @forelse ($attentionList as $item)
                     <li>
                         {{ $item->ticket_number ?: '#' . $item->id }} · {{ $item->service_label }} · {{
-                            ($attentionType === 'waiting' ? $item->created_at : $item->updated_at)
+                            ($attentionType === 'waiting'
+                                ? $item->created_at
+                                : $item->updated_at
+                            )
                                 ->timezone('Asia/Jakarta')
                                 ->format('d/m/Y H:i')
                         }} WIB

@@ -59,6 +59,50 @@
                         <label for="website">Biarkan kosong</label><input id="website" name="website" tabindex="-1" autocomplete="off" />
                     </div>
 
+                    @php
+                        $emailAdminContactUrl = config('email_directory.admin_contact_url');
+                        $emailAdminContactPhone = config('email_directory.admin_contact_phone');
+                        $hasEmailAdminWhatsApp = is_string($emailAdminContactUrl)
+                            && str_starts_with($emailAdminContactUrl, 'https://wa.me/');
+                    @endphp
+                    <section
+                        class="request-email-access-notice"
+                        id="email-access-notice"
+                        aria-labelledby="email-access-notice-title">
+                        <span class="request-email-access-notice__icon" aria-hidden="true">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.3 3.9 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                <path d="M12 9v4m0 4h.01" />
+                            </svg>
+                        </span>
+                        <div class="request-email-access-notice__body">
+                            <h2 id="email-access-notice-title">Pastikan Email Dinas Dapat Diakses</h2>
+                            <p>
+                                Sebelum mengajukan layanan <strong>Reset Passphrase, Pembaruan, atau Penerbitan Sertifikat Elektronik</strong>,
+                                pastikan Anda dapat login dan mengakses kotak masuk email kedinasan pribadi melalui
+                                <a href="https://mail.subang.go.id" target="_blank" rel="noopener noreferrer">mail.subang.go.id</a>.
+                            </p>
+                            <p>
+                                Apabila belum memiliki akun email dinas, lupa username, atau lupa password,
+                                silakan menghubungi Pengelola Email Dinas Kabupaten Subang melalui kontak berikut:
+                            </p>
+                            @if ($hasEmailAdminWhatsApp && is_string($emailAdminContactPhone) && $emailAdminContactPhone !== '')
+                                <p class="request-email-access-notice__phone">
+                                    <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.5a9 9 0 0 1-.9-4A8.5 8.5 0 0 1 12.5 3h.5a8.5 8.5 0 0 1 8 8v.5Z" />
+                                    </svg>
+                                    <span>WhatsApp: <a href="{{ $emailAdminContactUrl }}" target="_blank" rel="noopener noreferrer">{{ $emailAdminContactPhone }}</a></span>
+                                </p>
+                            @elseif ($hasEmailAdminWhatsApp)
+                                <p class="request-email-access-notice__phone">
+                                    <a href="{{ $emailAdminContactUrl }}" target="_blank" rel="noopener noreferrer">WhatsApp Pengelola Email Dinas</a>
+                                </p>
+                            @else
+                                <p class="request-email-access-notice__phone">Silakan hubungi helpdesk internal untuk informasi kontak pengelola email.</p>
+                            @endif
+                        </div>
+                    </section>
+
                     <section class="request-step request-entry">
                         <div class="request-step-title">
                             <span class="request-step-number">1</span>

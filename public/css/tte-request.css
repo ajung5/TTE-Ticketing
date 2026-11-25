@@ -970,3 +970,75 @@
     }
 }
 /* ===== END public/css/wa-phone-prefix.css ===== */
+
+/* Akses email dinas: prasyarat sebelum permohonan TTE. */
+.public-request-v5 .request-email-access-notice {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 13px;
+    padding: 18px 20px;
+    border: 1px solid #e9cd91;
+    border-left: 4px solid #b98527;
+    border-radius: 12px;
+    background: #fff9ec;
+    color: #593c14;
+}
+.public-request-v5 .request-email-access-notice__icon {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #f4dfb5;
+    color: #784d11;
+    font-size: 18px;
+    font-weight: 800;
+}
+.public-request-v5 .request-email-access-notice__body {
+    min-width: 0;
+}
+.public-request-v5 .request-email-access-notice h2 {
+    margin: 2px 0 8px;
+    color: #593c14;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+.public-request-v5 .request-email-access-notice p {
+    margin: 0 0 8px;
+    font-size: 13px;
+    line-height: 1.65;
+}
+.public-request-v5 .request-email-access-notice p a {
+    color: #12563e;
+    font-weight: 750;
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+}
+.public-request-v5 .request-email-access-notice .request-email-access-notice__phone {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    color: #075c3b;
+    font-weight: 600;
+}
+.public-request-v5 .request-email-access-notice__phone svg {
+    flex: none;
+}
+@media (max-width: 540px) {
+    .public-request-v5 .request-email-access-notice {
+        grid-template-columns: 26px minmax(0, 1fr);
+        gap: 10px;
+        padding: 15px 12px;
+    }
+    .public-request-v5 .request-email-access-notice__icon {
+        width: 26px;
+        height: 26px;
+        font-size: 15px;
+    }
+    .public-request-v5 .request-email-access-notice h2 {
+        font-size: 14px;
+    }
+}
