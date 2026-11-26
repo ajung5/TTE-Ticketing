@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Log;
 
 class LoginCaptcha {
     public function configured(): bool {
-        return filled(config('tte.turnstile.site_key'))
-            && filled(config('tte.turnstile.secret_key'))
-            && filled(config('tte.turnstile.hostname'));
+        return filled(config('tte.turnstile.site_key')) &&
+            filled(config('tte.turnstile.secret_key')) &&
+            filled(config('tte.turnstile.hostname'));
     }
 
     public function verify(string $token): bool {
@@ -27,16 +27,27 @@ class LoginCaptcha {
                     'secret' => config('tte.turnstile.secret_key'),
                     'response' => $token,
                 ]);
+
+            // Allow official Turnstile test keys only in local development.
+            if (
+                app()->environment('local') &&
+                config('tte.turnstile.site_key') === '1x00000000000000000000AA' &&
+                config('tte.turnstile.secret_key') === '1x0000000000000000000000000000000AA'
+            ) {
+                return ($result['success'] ?? false) === true;
+            }
+
             if (!$response->successful()) {
                 return false;
             }
             $result = $response->json();
 
-            return is_array($result)
-                && ($result['success'] ?? false) === true
-                && ($result['action'] ?? null) === 'tte_login'
-                && is_string($result['hostname'] ?? null)
-                && strtolower($result['hostname']) === strtolower((string) config('tte.turnstile.hostname'));
+            return is_array($result) &&
+                ($result['success'] ?? false) === true &&
+                ($result['action'] ?? null) === 'tte_login' &&
+                is_string($result['hostname'] ?? null) &&
+                strtolower($result['hostname']) ===
+                    strtolower((string) config('tte.turnstile.hostname'));
         } catch (\Throwable $exception) {
             // Never log the token, secret, email or request body.
             Log::warning('Validasi CAPTCHA login tidak tersedia.', [
