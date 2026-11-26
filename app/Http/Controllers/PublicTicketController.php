@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Services\ActiveTicketGuard;
+use App\Services\DailyTicketNumber;
 use App\Services\EmailDirectoryService;
 use App\Services\NewTicketEmailNotifier;
 use Illuminate\Database\QueryException;
@@ -198,7 +199,10 @@ class PublicTicketController extends Controller {
                     $path,
                     $fingerprints,
                 ) {
+                    // Reserve first, inside this transaction; roll back on any insert failure.
+                    $ticketNumber = app(DailyTicketNumber::class)->reserve();
                     $ticket = Ticket::create([
+                        'ticket_number' => $ticketNumber,
                         'external_submission_id' => $externalId,
                         'nama_user' => $data['nama_user'],
                         'nik' => $person->nik ?: null,
@@ -219,15 +223,8 @@ class PublicTicketController extends Controller {
                         'consent_accepted_at' => now(),
                         'signature_path' => $path,
                     ]);
-                    $ticket->update([
-                        'ticket_number' =>
-                            'TTE-' .
-                            now('Asia/Jakarta')->format('Ymd') .
-                            '-' .
-                            str_pad((string) $ticket->id, 6, '0', STR_PAD_LEFT),
-                    ]);
                     return $ticket;
-                });
+                }, 3);
             } catch (\Throwable $e) {
                 Storage::disk('local')->delete($path);
                 if (

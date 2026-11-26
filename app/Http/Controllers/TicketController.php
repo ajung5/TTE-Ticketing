@@ -61,14 +61,18 @@ class TicketController extends Controller {
                 fn($q) => $q->where('status', 'Open')->orWhere('claimed_by', $request->user()->id),
             );
         // UX-V613: focus filters preserve ownership/self-claim and never expose another verifier's tickets.
-        $focus = in_array($request->query('focus'), ['waiting', 'action'], true)
+        $focus = in_array($request->query('focus'), ['waiting', 'action', 'overdue'], true)
             ? $request->query('focus')
             : null;
         $status = $request->query('status');
         if (!in_array($status, ['Open', 'In Progress', 'Done', 'Returned', 'all'], true)) {
             $status = 'In Progress';
         }
-        if ($focus === 'waiting') {
+        $overdueCutoff = now()->subHours(24);
+        if ($focus === 'overdue') {
+            $query->whereIn('status', ['Open', 'In Progress'])
+                ->where('created_at', '<', $overdueCutoff);
+        } elseif ($focus === 'waiting') {
             $query
                 ->where('status', 'In Progress')
                 ->where('claimed_by', $request->user()->id)
@@ -112,7 +116,7 @@ class TicketController extends Controller {
                 ->orderBy('created_at', 'asc')
                 ->orderBy('id', 'asc');
         } else {
-            $oldestFirst = $status === 'Open' || $focus === 'waiting';
+            $oldestFirst = $status === 'Open' || in_array($focus, ['waiting', 'overdue'], true);
             $query
                 ->orderBy('created_at', $oldestFirst ? 'asc' : 'desc')
                 ->orderBy('id', $oldestFirst ? 'asc' : 'desc');
@@ -144,6 +148,17 @@ class TicketController extends Controller {
             'waiting' => (int) ($mine->get('In Progress')?->waiting ?? 0),
         ];
         $stats['actionable'] = $stats['new'] + $stats['mine'] - $stats['waiting'];
+        $overdue = Ticket::query()
+            ->where('created_at', '<', $overdueCutoff)
+            ->where(function ($query) use ($request) {
+                $query->where('status', 'Open')->orWhere(function ($owned) use ($request) {
+                    $owned->where('status', 'In Progress')->where('claimed_by', $request->user()->id);
+                });
+            })
+            ->select('status')->selectRaw('COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+        $stats['overdue_open'] = (int) ($overdue['Open'] ?? 0);
+        $stats['overdue_mine'] = (int) ($overdue['In Progress'] ?? 0);
+        $stats['overdue'] = $stats['overdue_open'] + $stats['overdue_mine'];
         $filters = $request->only(['q', 'layanan']);
         $scope = $focus ? ['focus' => $focus] : ['status' => $status];
         $queue = $scope + $filters + ['page' => $tickets->currentPage()];
@@ -386,7 +401,7 @@ class TicketController extends Controller {
                     'sometimes',
                     Rule::in(['Open', 'In Progress', 'Done', 'Returned', 'all']),
                 ],
-                'queue.focus' => ['sometimes', Rule::in(['action', 'waiting'])],
+                'queue.focus' => ['sometimes', Rule::in(['action', 'waiting', 'overdue'])],
                 'queue.q' => ['nullable', 'string', 'max:200'],
                 'queue.layanan' => [
                     'nullable',

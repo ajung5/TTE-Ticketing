@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\LoginCaptcha;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,27 +11,51 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller {
-    public function form() {
-        return view('auth.login');
+    public function form(LoginCaptcha $captcha) {
+        return response()
+            ->view('auth.login', ['captchaReady' => $captcha->configured()])
+            ->header('Cache-Control', 'no-store, private')
+            ->header('X-Robots-Tag', 'noindex, nofollow');
     }
 
-    public function login(Request $request) {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+    public function login(Request $request, LoginCaptcha $captcha) {
+        // Do not flash email, password or the single-use CAPTCHA token to the session.
+        $validator = Validator::make($request->all(), [
+            'email' => ['required', 'email', 'max:255'],
+            'password' => ['required', 'string', 'max:1024'],
+            'cf-turnstile-response' => ['required', 'string', 'max:2048'],
+        ], [
+            'cf-turnstile-response.required' => 'Selesaikan verifikasi CAPTCHA terlebih dahulu.',
         ]);
-        if (!Auth::attempt($credentials)) {
-            return back()
+        if ($validator->fails()) {
+            if ($request->expectsJson()) {
+                throw new \Illuminate\Validation\ValidationException($validator);
+            }
+            return redirect()->route('login')->withErrors($validator)
+                ->header('Cache-Control', 'no-store, private');
+        }
+        $data = $validator->validated();
+        if (!$captcha->verify($data['cf-turnstile-response'])) {
+            $message = 'Verifikasi CAPTCHA gagal atau tidak tersedia. Silakan coba kembali.';
+            if ($request->expectsJson()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['cf-turnstile-response' => $message]);
+            }
+            return redirect()->route('login')->withErrors(['cf-turnstile-response' => $message])
+                ->header('Cache-Control', 'no-store, private');
+        }
+        if (!Auth::attempt(['email' => $data['email'], 'password' => $data['password']], false)) {
+            return redirect()->route('login')
                 ->withErrors(['email' => 'Email atau password tidak sesuai.'])
-                ->onlyInput('email');
+                ->header('Cache-Control', 'no-store, private');
         }
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended(route('dashboard'))->header('Cache-Control', 'no-store, private');
     }
 
     public function logout(Request $request) {

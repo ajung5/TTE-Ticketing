@@ -15,6 +15,13 @@
         </div>
         <span class="pill pill-blue">● Self-Claim Aktif</span>
     </div>
+    @if (($stats['overdue'] ?? 0) > 0)
+        <div id="overdue-reminder" class="alert warn" role="status">
+            <strong>Perhatian: {{ $stats['overdue'] }} tiket belum selesai lebih dari 24 jam</strong>
+            <div>{{ $stats['overdue_mine'] }} tiket dalam penanganan Anda dan {{ $stats['overdue_open'] }} tiket belum diambil. Segera periksa dan tindak lanjuti status permohonan.</div>
+            <a class="btn btn-outline btn-small" href="{{ route('tickets.index', ['focus' => 'overdue']) }}">Lihat tiket lebih dari 24 jam →</a>
+        </div>
+    @endif
     <div class="stat-grid">
         <div class="stat-card">
             <div class="stat-top">
@@ -101,6 +108,12 @@
             @if ($focus === 'waiting') aria-current="page" @endif>
             Menunggu Pemohon <strong>{{ $stats['waiting'] }}</strong>
         </a>
+        <a
+            href="{{ route('tickets.index', $filters + ['focus' => 'overdue']) }}"
+            class="tte-ux-focus-link {{ $focus === 'overdue' ? 'is-active' : '' }}"
+            @if ($focus === 'overdue') aria-current="page" @endif>
+            Lebih dari 24 Jam <strong>{{ $stats['overdue'] }}</strong>
+        </a>
     </nav>
     <nav class="tte-queue-tabs" aria-label="Filter cepat status tiket">
         <a
@@ -151,9 +164,9 @@
             @if ($focus)
                 <input type="hidden" name="focus" value="{{ $focus }}" />
                 <strong>{{
-                    $focus === 'waiting'
-                        ? 'Menunggu Pemohon'
-                        : 'Perlu Tindakan'
+                    $focus === 'overdue'
+                        ? 'Lebih dari 24 Jam'
+                        : ($focus === 'waiting' ? 'Menunggu Pemohon' : 'Perlu Tindakan')
                 }}</strong>
             @else
                 <select name="status" aria-label="Filter status">
@@ -218,6 +231,9 @@
                                             ->format('d M Y · H:i')
                                     }}
                                 </div>
+                                @if ($ticket->status === 'In Progress' && $ticket->created_at && $ticket->created_at->lt(now()->subHours(24)))
+                                    <div class="small tte-age-alert">Belum selesai lebih dari 24 jam</div>
+                                @endif
                                 @if ($ticket->status === 'Open' && $ticket->created_at)
                                     <div
                                         @class ([ 'small', 'tte-age-alert' => $ticket->created_at->lt(now()->subHours($attentionHours)) ])>

@@ -3687,3 +3687,28 @@ a.tte-page-item:focus-visible {
         display: none;
     }
 }
+
+
+/* Daily queue and login CAPTCHA */
+.login-captcha {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+}
+#overdue-reminder {
+    display: grid;
+    gap: 8px;
+    margin: 0 0 16px;
+    line-height: 1.5;
+}
+#overdue-reminder .btn {
+    justify-self: start;
+    white-space: normal;
+    text-align: left;
+}
+@media (max-width: 540px) {
+    #overdue-reminder .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
